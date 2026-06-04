@@ -34,8 +34,8 @@ export default async function FeedPage({ searchParams }: Props) {
           <p className="text-neutral-400 font-sans">Aucun article dans cette catégorie.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+            {articles.map((article, i) => (
+              <ArticleCard key={article.id} article={article} priority={i === 0} />
             ))}
           </div>
         )}

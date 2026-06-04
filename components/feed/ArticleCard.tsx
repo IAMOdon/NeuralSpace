@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ArticleCard as ArticleCardType } from "@/types/article";
 
-export function ArticleCard({ article }: { article: ArticleCardType }) {
+export function ArticleCard({ article, priority = false }: { article: ArticleCardType; priority?: boolean }) {
   return (
     <Link href={`/${article.slug}`} className="group block rounded-2xl focus-visible:outline-2 focus-visible:outline-ns-blue focus-visible:outline-offset-2">
       <article className="h-full flex flex-col gap-4 p-3 rounded-2xl transition-shadow duration-200 hover:shadow-lg hover:shadow-black/5 bg-white border border-neutral-100">
@@ -15,6 +15,7 @@ export function ArticleCard({ article }: { article: ArticleCardType }) {
               fill
               className="object-cover transition-transform duration-200 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={priority}
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-ns-blue/10 to-ns-blue/5" />
