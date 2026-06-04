@@ -2,16 +2,31 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { ContentSchema, ArticleSourcesSchema } from "@/lib/content/validators";
+import type { ContentBlock } from "@/types/content";
+import type { ArticleSource, Category } from "@/types/article";
 import type { ArticleCard, ArticleWithRelations, Series } from "@/types/article";
 
 type RawSeriesJoin = { order: number; series: Series } | null;
 
-function parseContent(raw: unknown) {
-  return ContentSchema.parse(raw);
+// safeParse — malformed DB content returns empty array, never crashes the page.
+function parseContent(raw: unknown): ContentBlock[] {
+  const result = ContentSchema.safeParse(raw);
+  return result.success ? result.data : [];
 }
 
-function parseSources(raw: unknown) {
-  return ArticleSourcesSchema.parse(raw);
+function parseSources(raw: unknown): ArticleSource[] {
+  const result = ArticleSourcesSchema.safeParse(raw);
+  return result.success ? result.data : [];
+}
+
+// Supabase returns snake_case; our types use camelCase.
+function mapCategory(raw: { id: string; slug: string; name: string; color_hex: string | null }): Category {
+  return {
+    id: raw.id,
+    slug: raw.slug,
+    name: raw.name,
+    colorHex: raw.color_hex ?? undefined,
+  };
 }
 
 export async function getArticles({
@@ -29,7 +44,7 @@ export async function getArticles({
 } = {}): Promise<ArticleCard[]> {
   const client = await createClient();
 
-  // Use !inner only when filtering — avoids excluding articles without tags/category
+  // !inner only when filtering — avoids excluding articles without tags/category
   const categoryJoin = categorySlug
     ? "categories!inner(id, slug, name, color_hex)"
     : "categories(id, slug, name, color_hex)";
@@ -74,15 +89,13 @@ export async function getArticles({
     readingTimeMin: row.reading_time_min,
     viewCount: row.view_count,
     publishedAt: row.published_at ?? undefined,
-    category: row.categories as ArticleCard["category"],
+    category: mapCategory(row.categories as { id: string; slug: string; name: string; color_hex: string | null }),
     tags: (row.article_tags as { tags: ArticleCard["tags"][number] }[]).map(
       (at) => at.tags
     ),
   }));
 }
 
-// cache() deduplicates calls within a single request —
-// generateMetadata and the page component both call this without double-fetching.
 export const getArticleBySlug = cache(async function getArticleBySlug(
   slug: string
 ): Promise<ArticleWithRelations | null> {
@@ -130,7 +143,7 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
     createdAt: data.created_at ?? "",
     updatedAt: data.updated_at ?? "",
     createdBy: data.created_by ?? "",
-    category: data.categories as ArticleWithRelations["category"],
+    category: mapCategory(data.categories as { id: string; slug: string; name: string; color_hex: string | null }),
     authors: (
       data.article_authors as {
         order: number;
@@ -148,16 +161,16 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
   };
 });
 
-export async function getCategories() {
+export async function getCategories(): Promise<Category[]> {
   const client = await createClient();
   const { data } = await client
     .from("categories")
     .select("id, slug, name, color_hex")
     .order("name");
-  return data ?? [];
+  return (data ?? []).map(mapCategory);
 }
 
-// Uses adminClient — no cookies needed, safe for generateStaticParams at build time.
+// adminClient — no cookies, safe for generateStaticParams at build time.
 export async function getArticleSlugs(): Promise<string[]> {
   const { data } = await adminClient
     .from("articles")
