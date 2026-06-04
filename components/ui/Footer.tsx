@@ -1,18 +1,27 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/config";
+import { adminClient } from "@/lib/supabase/admin";
+import type { Category } from "@/types/article";
 import { ManageCookiesButton } from "./ManageCookiesButton";
+import { NewsletterForm } from "./NewsletterForm";
 
-const navigation = [
-  { label: "Articles", href: "/" },
-  { label: "NeuralLab", href: "/neurallab" },
-];
-
-const legal = [
-  { label: "Conditions générales", href: "/legal/cgu" },
-  { label: "Politique de confidentialité", href: "/legal/confidentialite" },
-  { label: "Politique de cookies", href: "/legal/cookies" },
-  { label: "Mentions légales", href: "/legal/mentions-legales" },
-];
+const getFooterCategories = unstable_cache(
+  async (): Promise<Category[]> => {
+    const { data } = await adminClient
+      .from("categories")
+      .select("id, slug, name, color_hex")
+      .order("name");
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      colorHex: r.color_hex ?? undefined,
+    }));
+  },
+  ["footer-categories"],
+  { revalidate: 3600 }
+);
 
 const socials = [
   {
@@ -52,28 +61,51 @@ const socials = [
   },
 ];
 
-export function Footer() {
+const legal = [
+  { label: "Conditions générales", href: "/legal/cgu" },
+  { label: "Politique de confidentialité", href: "/legal/confidentialite" },
+  { label: "Politique de cookies", href: "/legal/cookies" },
+  { label: "Mentions légales", href: "/legal/mentions-legales" },
+];
+
+export async function Footer() {
   const year = new Date().getFullYear();
+  const categories = await getFooterCategories();
 
   return (
     <footer className="bg-ns-blue text-white mt-auto" aria-label="Pied de page Neural Space">
+
+      {/* Newsletter strip */}
+      <div className="border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <p className="font-heading font-bold text-sm text-white">
+              La science dans votre boîte mail
+            </p>
+            <p className="text-xs text-white/60 font-sans">
+              Un article par semaine. Pas de spam, résiliation en un clic.
+            </p>
+          </div>
+          <NewsletterForm />
+        </div>
+      </div>
+
+      {/* Main grid */}
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
 
           {/* Brand */}
-          <div className="md:col-span-2 space-y-4">
+          <div className="col-span-2 md:col-span-1 space-y-4">
             <Link href="/" className="inline-flex items-center gap-1 group">
               <span className="font-heading font-black text-xl tracking-widest text-white uppercase">
                 Neural Space
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-white mb-3 group-hover:scale-125 transition-transform" />
             </Link>
-            <p className="text-sm leading-6 text-white/70 max-w-xs font-sans">
+            <p className="text-sm leading-6 text-white/70 font-sans">
               {SITE_DESCRIPTION}
             </p>
-
-            {/* Socials */}
-            <div className="flex items-center flex-wrap gap-3 pt-2">
+            <div className="flex items-center flex-wrap gap-2 pt-1">
               {socials.map((s) => (
                 <a
                   key={s.label}
@@ -90,22 +122,53 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Thématiques */}
           <div className="space-y-4">
             <p className="text-[10px] font-heading font-bold uppercase tracking-widest text-white/40">
-              Navigation
+              Thématiques
             </p>
             <ul className="space-y-3">
-              {navigation.map((link) => (
-                <li key={link.href}>
+              {categories.map((cat) => (
+                <li key={cat.id}>
                   <Link
-                    href={link.href}
+                    href={`/?category=${cat.slug}`}
                     className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200"
                   >
-                    {link.label}
+                    {cat.name}
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          {/* Navigation */}
+          <div className="space-y-4">
+            <p className="text-[10px] font-heading font-bold uppercase tracking-widest text-white/40">
+              Explorer
+            </p>
+            <ul className="space-y-3">
+              <li>
+                <Link href="/" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  Articles
+                </Link>
+              </li>
+              <li>
+                <Link href="/neurallab" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  NeuralLab
+                </Link>
+              </li>
+              {/* TODO: Audio — épisodes & podcasts scientifiques */}
+              {/* <li>
+                <Link href="/audio" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  Audio
+                </Link>
+              </li> */}
+              {/* TODO: Live — sessions en direct, Q&A, conférences */}
+              {/* <li>
+                <Link href="/live" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  Live
+                </Link>
+              </li> */}
             </ul>
           </div>
 
