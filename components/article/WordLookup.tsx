@@ -36,8 +36,9 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
       if (!selected) { hide(); return; }
 
       const { word, rect } = selected;
-      const x = rect.left + rect.width / 2 + window.scrollX;
-      const y = rect.top + window.scrollY;
+      // Fixed positioning is relative to the viewport — no scroll offset needed
+      const x = rect.left + rect.width / 2;
+      const y = rect.top;
 
       abortRef.current?.abort();
       const controller = new AbortController();
@@ -60,68 +61,77 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
       if (e.key === "Escape") hide();
     };
 
+    // Close on scroll — tooltip can't follow the word
+    const handleScroll = () => hide();
+
     document.addEventListener("mouseup", handleMouseUp);
     document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => {
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [hide]);
 
-  if (tooltip.status === "hidden") return <>{children}</>;
+  const visible = tooltip.status !== "hidden";
 
+  // Always render the same wrapper — no conditional mount/unmount of children
   return (
-    <div className="relative">
+    <div>
       {children}
-      <div
-        className="fixed z-50 pointer-events-none"
-        style={{
-          left: tooltip.x,
-          top: tooltip.y - 12,
-          transform: "translate(-50%, -100%)",
-        }}
-      >
-        <div className="bg-ns-black text-ns-white rounded-xl shadow-2xl max-w-sm w-max pointer-events-auto">
-          {tooltip.status === "loading" && (
-            <div className="px-4 py-3">
-              <p className="text-sm text-white/50">Recherche…</p>
-            </div>
-          )}
+      {visible && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y - 12,
+            transform: "translate(-50%, -100%)",
+          }}
+        >
+          <div className="bg-ns-black text-ns-white rounded-xl shadow-2xl max-w-sm w-max pointer-events-auto">
+            {tooltip.status === "loading" && (
+              <div className="px-4 py-3">
+                <p className="text-sm text-white/50">Recherche…</p>
+              </div>
+            )}
 
-          {tooltip.status === "not-found" && (
-            <div className="px-4 py-3">
-              <p className="text-sm text-white/50">Aucun résultat.</p>
-            </div>
-          )}
+            {tooltip.status === "not-found" && (
+              <div className="px-4 py-3">
+                <p className="text-sm text-white/50">Aucun résultat.</p>
+              </div>
+            )}
 
-          {tooltip.status === "found" && (
-            <div className="px-4 py-3 space-y-2 max-w-xs">
-              <p className="text-[10px] font-heading font-bold text-white tracking-widest uppercase">
-                {tooltip.word}
-              </p>
-
-              {tooltip.result.source === "wiktionary" && (
-                <ul className="space-y-1.5">
-                  {tooltip.result.definitions.map((def, i) => (
-                    <li key={i} className="flex gap-2 text-sm leading-5 text-white/85">
-                      <span className="text-ns-blue shrink-0 mt-0.5">·</span>
-                      <span>{def}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {tooltip.result.source === "wikipedia" && (
-                <p className="text-sm leading-5 text-white/85">
-                  {tooltip.result.extract}
+            {tooltip.status === "found" && (
+              <div className="px-4 py-3 space-y-2 max-w-xs">
+                <p className="text-[10px] font-heading font-bold text-white tracking-widest uppercase">
+                  {tooltip.word}
                 </p>
-              )}
-            </div>
-          )}
 
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-ns-black" />
+                {tooltip.result.source === "wiktionary" && (
+                  <ul className="space-y-1.5">
+                    {tooltip.result.definitions.map((def, i) => (
+                      <li key={i} className="flex gap-2 text-sm leading-5 text-white/85">
+                        <span className="text-ns-blue shrink-0 mt-0.5">·</span>
+                        <span>{def}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {tooltip.result.source === "wikipedia" && (
+                  <p className="text-sm leading-5 text-white/85">
+                    {tooltip.result.extract}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-ns-black" />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
