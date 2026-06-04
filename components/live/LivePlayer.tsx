@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  Play, Pause, Volume2, VolumeX, Maximize2, Radio, RotateCcw,
+  Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, Radio, RotateCcw,
 } from "lucide-react";
 
 type Mode = "live" | "replay";
@@ -51,38 +51,40 @@ export function LivePlayer({
   viewers = 847,
   duration = "38:24",
 }: Props) {
-  const [playing, setPlaying]     = useState(false);
-  const [muted, setMuted]         = useState(false);
-  const [volume, setVolume]       = useState(80);
-  const [showVol, setShowVol]     = useState(false);
-  const [progress, setProgress]   = useState(0); // 0–100, replay only
-  const [messages, setMessages]   = useState<ChatMessage[]>(INITIAL_MESSAGES);
-  const [chatInput, setChatInput] = useState("");
-  const chatRef = useRef<HTMLDivElement>(null);
-  const poolRef = useRef(5); // next index in CHAT_POOL
+  const [playing, setPlaying]       = useState(false);
+  const [muted, setMuted]           = useState(false);
+  const [volume, setVolume]         = useState(80);
+  const [progress, setProgress]     = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [messages, setMessages]     = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const [chatInput, setChatInput]   = useState("");
 
-  // Auto-scroll chat
+  const playerRef = useRef<HTMLDivElement>(null);
+  const chatRef   = useRef<HTMLDivElement>(null);
+  const poolRef   = useRef(5);
+
+  // Auto-scroll chat to bottom on new messages
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Simulated incoming chat messages
+  // Simulated incoming chat messages (live mode only)
   useEffect(() => {
     if (mode !== "live") return;
     const interval = setInterval(() => {
       const idx = poolRef.current % CHAT_POOL.length;
       poolRef.current += 1;
       setMessages((prev) => [
-        ...prev.slice(-40), // keep last 40
+        ...prev.slice(-40),
         { ...CHAT_POOL[idx]!, id: `auto-${Date.now()}` },
       ]);
     }, 2800);
     return () => clearInterval(interval);
   }, [mode]);
 
-  // Simulated progress for replay
+  // Simulated progress for replay mode
   useEffect(() => {
     if (mode !== "replay" || !playing) return;
     const interval = setInterval(() => {
@@ -90,6 +92,21 @@ export function LivePlayer({
     }, 100);
     return () => clearInterval(interval);
   }, [mode, playing]);
+
+  // Track fullscreen state changes
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      await playerRef.current?.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  }, []);
 
   const sendMessage = useCallback(() => {
     const text = chatInput.trim();
@@ -104,15 +121,15 @@ export function LivePlayer({
   const effectiveVolume = muted ? 0 : volume;
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-neutral-100 bg-ns-black flex flex-col lg:flex-row">
-
+    <div
+      ref={playerRef}
+      className="w-full rounded-2xl overflow-hidden border border-neutral-100 bg-ns-black flex flex-col lg:flex-row"
+    >
       {/* ── Video panel ── */}
       <div className="flex-1 min-w-0 flex flex-col">
 
         {/* Video area */}
         <div className="relative aspect-video bg-gradient-to-br from-neutral-900 to-neutral-800 flex items-center justify-center">
-
-          {/* Thumbnail placeholder */}
           <div className="absolute inset-0 bg-gradient-to-br from-ns-blue/20 via-transparent to-neutral-900/80" />
 
           {/* Play overlay when paused */}
@@ -131,23 +148,15 @@ export function LivePlayer({
             {mode === "live" ? (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-ns-black/70 backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-[11px] font-sans font-bold text-white uppercase tracking-widest">
-                  Live
-                </span>
-                <span className="text-[11px] font-sans text-white/60">
-                  {viewers.toLocaleString("fr-FR")} spectateurs
-                </span>
+                <span className="text-[11px] font-sans font-bold text-white uppercase tracking-widest">Live</span>
+                <span className="text-[11px] font-sans text-white/60">{viewers.toLocaleString("fr-FR")} spectateurs</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-ns-black/70 backdrop-blur-sm">
                 <RotateCcw className="w-3 h-3 text-white/70" />
-                <span className="text-[11px] font-sans font-bold text-white uppercase tracking-widest">
-                  Rediffusion
-                </span>
+                <span className="text-[11px] font-sans font-bold text-white uppercase tracking-widest">Rediffusion</span>
               </div>
             )}
-
-            {/* Radio icon top-right */}
             <div className="px-2 py-1.5 rounded-full bg-ns-black/50 backdrop-blur-sm">
               <Radio className="w-4 h-4 text-white/50" />
             </div>
@@ -168,7 +177,7 @@ export function LivePlayer({
           <button
             onClick={() => setPlaying((p) => !p)}
             aria-label={playing ? "Pause" : "Lecture"}
-            className="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200"
+            className="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200 shrink-0"
           >
             {playing
               ? <Pause className="w-5 h-5" />
@@ -177,12 +186,9 @@ export function LivePlayer({
 
           {/* Progress bar — replay only */}
           {mode === "replay" && (
-            <div className="flex items-center gap-2 flex-1">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               <input
-                type="range"
-                min={0}
-                max={100}
-                value={progress}
+                type="range" min={0} max={100} value={progress}
                 onChange={(e) => setProgress(Number(e.target.value))}
                 aria-label="Progression"
                 className="flex-1 h-1 accent-ns-blue cursor-pointer"
@@ -191,26 +197,10 @@ export function LivePlayer({
             </div>
           )}
 
-          {/* Live spacer */}
           {mode === "live" && <div className="flex-1" />}
 
-          {/* Volume */}
-          <div
-            className="relative flex items-center gap-2"
-            onMouseEnter={() => setShowVol(true)}
-            onMouseLeave={() => setShowVol(false)}
-          >
-            {showVol && (
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={effectiveVolume}
-                onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false); }}
-                aria-label="Volume"
-                className="w-20 h-1 accent-ns-blue cursor-pointer"
-              />
-            )}
+          {/* Volume — always visible */}
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setMuted((m) => !m)}
               aria-label={muted ? "Activer le son" : "Couper le son"}
@@ -220,35 +210,42 @@ export function LivePlayer({
                 ? <VolumeX className="w-5 h-5" />
                 : <Volume2 className="w-5 h-5" />}
             </button>
+            <input
+              type="range" min={0} max={100} value={effectiveVolume}
+              onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false); }}
+              aria-label="Volume"
+              className="w-16 md:w-20 h-1 accent-ns-blue cursor-pointer"
+            />
           </div>
 
           {/* Fullscreen */}
           <button
-            aria-label="Plein écran"
-            className="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200"
+            onClick={toggleFullscreen}
+            aria-label={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
+            className="w-8 h-8 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200 shrink-0"
           >
-            <Maximize2 className="w-4 h-4" />
+            {isFullscreen
+              ? <Minimize2 className="w-4 h-4" />
+              : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
       {/* ── Chat panel ── */}
-      <div className="w-full lg:w-72 xl:w-80 flex flex-col border-t lg:border-t-0 lg:border-l border-white/10 min-h-0">
+      <div className="w-full lg:w-72 xl:w-80 flex flex-col border-t lg:border-t-0 lg:border-l border-white/10 overflow-hidden">
 
         {/* Chat header */}
         <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between shrink-0">
           <p className="text-[11px] font-sans font-bold text-white/50 uppercase tracking-widest">
             Chat en direct
           </p>
-          <span className="text-[11px] font-sans text-white/30">
-            {messages.length} messages
-          </span>
+          <span className="text-[11px] font-sans text-white/30">{messages.length} messages</span>
         </div>
 
-        {/* Messages */}
+        {/* Messages — fixed height, scrollable */}
         <div
           ref={chatRef}
-          className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 max-h-64 lg:max-h-none lg:h-64 xl:h-80 scrollbar-none"
+          className="overflow-y-auto px-4 py-3 space-y-2.5 h-44 md:h-52 lg:h-64 xl:h-72 scrollbar-none"
         >
           {messages.map((msg) => (
             <div key={msg.id} className="flex gap-2 text-xs font-sans leading-4">

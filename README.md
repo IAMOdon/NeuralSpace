@@ -1,123 +1,161 @@
 # Neural Space
 
-Science media platform making complex science accessible — physics, biology, neuroscience, cosmology.
+Média scientifique grand public — la science rendue accessible.
+
+**Stack :** Next.js 15 App Router · TypeScript strict · Supabase (RLS) · Cloudinary · Tailwind CSS · Lucide
 
 ---
 
-## Stack
+## Routes
 
-| Layer | Tech |
+### Public `app/(public)/`
+
+| Route | Page | Statut |
+|---|---|---|
+| `/` | Feed — articles récents, filtre catégories, LiveHero, "Parce que vous avez lu" | ✅ Live |
+| `/[slug]` | Article — rich text, word lookup, ArticleTracker | ✅ Live |
+| `/audio` | Épisodes audio / podcasts | 🔜 Coming soon |
+| `/live` | Sessions en direct avec LivePlayer + chat | 🔜 Coming soon |
+| `/legal/cgu` | Conditions générales | ✅ Live |
+| `/legal/confidentialite` | Politique de confidentialité | ✅ Live |
+| `/legal/cookies` | Politique de cookies (RGPD complète) | ✅ Live |
+| `/legal/mentions-legales` | Mentions légales | ✅ Live |
+
+### Admin `app/(admin)/`
+
+| Route | Page | Statut |
+|---|---|---|
+| `/dashboard` | Dashboard admin | 🚧 Placeholder |
+| `/login` | Authentification Supabase | ✅ Live |
+
+### API `app/api/`
+
+| Route | Rôle |
 |---|---|
-| Framework | Next.js 16 (App Router, Server Components) |
-| Language | TypeScript strict |
-| Database | Supabase (PostgreSQL + RLS + pgvector) |
-| Storage | Cloudinary |
-| Styling | Tailwind CSS v4 (100% custom, no UI lib) |
-| Fonts | Orbitron (headings) · Space Grotesk (body) via `next/font` |
-| Syntax highlighting | Shiki (server-side, custom theme) |
-| Math rendering | KaTeX (server-side) |
-| Dictionary | Wiktionary + Wikipedia REST APIs (proxied) |
+| `/api/track` | Events `view` et `watch` depuis l'ArticleTracker |
+| `/api/similar` | Articles similaires par catégorie (BecauseYouRead) |
+| `/api/dictionary` | Lookup Wiktionnaire / Wikipedia (word lookup) |
 
 ---
 
-## Getting Started
+## Features implémentées
 
-```bash
-npm install
-npm run dev
-```
+### Contenu & Feed
+- Feed avec filtre par catégorie (URL-based), tri Récents / Populaire
+- ArticleCard : cover, catégorie colorée, tags, temps de lecture
+- Article complet : heading, paragraph, quote, bullet-list, key-takeaways, callout, LaTeX (KaTeX), code (Shiki), image (Cloudinary), vidéo (YouTube/Vimeo), divider
+- JSON-LD `Article` + `BreadcrumbList` sur chaque article
+- `generateMetadata()` dynamique (title, description, OG, Twitter Cards)
+- Sitemap XML + robots.txt auto-générés
 
-Open [http://localhost:3000](http://localhost:3000).
+### Word Lookup
+- Sélection d'un mot → tooltip (Wiktionnaire ou extrait Wikipedia)
+- AbortController par requête, cache module-level, listener scroll passive
 
-### Environment variables
+### Analytics & Personnalisation (RGPD)
+- **Sans consentement** : `article_views` (device, pays, heure, source — pas de session_id)
+- **Avec consentement** : `watch_events` (watch time actif, scroll depth, word lookups, source clicks)
+- `session_interests` : scores par catégorie accumulés en Supabase
+- `session_profiles` : portrait de lecture anonyme (articles lus, complétion, expertise signal)
+- `ns_interests` localStorage : scores locaux mis à jour à chaque fin de lecture
+- `ns_history` localStorage : 10 derniers articles lus
+- `BecauseYouRead` : section feed personnalisée via `/api/similar`
 
-Create `.env.local` at the root:
+### Cookies RGPD
+- Banner avec détail expandable (2 colonnes : avec / sans cookies)
+- `ns_consent` (1 an), `ns_session` (session), `ns_history` / `ns_interests` (localStorage)
+- `clearAllConsentData()` au refus ET à la révocation
+- "Gérer mes cookies" dans le footer (reset complet + reload)
+- Page légale exhaustive : tables, champs, base légale, procédure
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+### UI / Navigation
+- Nav fixe avec hamburger mobile
+- Footer async : thématiques Supabase (cache 1h), 7 réseaux sociaux, newsletter placeholder, légal
+- 4 pages légales complètes
 
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLOUDINARY_URL=
-```
-
-### Database
-
-Requires a Supabase project with `pgvector` extension. Apply migrations:
-
-```bash
-supabase link --project-ref <your-ref>
-supabase db push
-```
+### Live & Audio (Coming Soon)
+- `LivePlayer` : badge LIVE animé / Rediffusion, play/pause, volume, fullscreen API, chat simulé auto-alimenté, input utilisateur — responsive
+- `LiveHero` : card feed avec badge LIVE / À venir, CTA, spectateurs
+- `AudioCard` : lecture simulée avec barre de progression, catégorie, durée
+- Pages `/live` et `/audio` : design complet avec overlay "Bientôt disponible"
 
 ---
 
-## Project Structure
+## À faire
+
+### Court terme
+- [ ] **Admin panel** : CRUD articles, dashboard analytics
+- [ ] **Newsletter** : brancher `NewsletterForm` sur Resend ou Brevo
+- [ ] **Réseaux sociaux** : remplir les handles dans `Footer.tsx` (Instagram, TikTok, YouTube, LinkedIn, Twitch, Facebook)
+- [ ] **Cookie `Secure` flag** : activer sur domaine custom HTTPS (`lib/cookies.ts` — 2 TODOs)
+- [ ] **Cookies integration Live/Audio** : tracker les events dans `LivePlayer`, `AudioCard`, `LiveHero` (TODOs en place)
+
+### Moyen terme
+- [ ] **Section Audio** : table `episodes` Supabase, page `/audio` live, `AudioCard` dans le feed
+- [ ] **Section Live** : table `live_events`, `LiveHero` conditionnel (actif seulement si live en cours), `LivePlayer` avec vraie vidéo (YouTube Live embed ou Mux)
+- [ ] **Auteurs** : sidebar article — photo, bio, institution, articles liés
+- [ ] **Séries** : regroupement d'articles multi-parties
+- [ ] **pgvector** : recommandations par embedding plutôt que simple filtre catégorie
+- [ ] **Compte utilisateur** : migration profil anonyme → connecté, historique cross-device
+- [ ] **`content_analytics`** : job hebdo qui agrège `watch_events` → stats par article
+- [ ] **Admin dashboard** : vues/semaine, top articles, répartition pays/device
+
+### Long terme
+- [ ] **Audio** : enregistrements, transcriptions, chapitres liés aux articles
+- [ ] **Live** : intégration Twitch/YouTube Live, replay automatique post-stream
+- [ ] **Notifications** : email/push pour nouveaux articles et lives à venir
+
+---
+
+## Suggestions
+
+### SEO
+- `WebSite` + `SearchAction` JSON-LD dans le root layout (Google Sitelinks Searchbox)
+- `Organization` JSON-LD avec sameAs réseaux sociaux (boost EEAT)
+- ISR sur les pages article (`revalidate: 3600`) plutôt que full dynamic
+
+### Produit
+- **"À la une"** : épingler un article hero dans le feed (1 grand + grille)
+- **Tags navigation** : filtre par tag en plus des catégories
+- **Partage social** : Web Share API avec fallback par article
+- **Mode sombre** : palette en custom props Tailwind, à compléter
+- **Table des matières** : générée depuis les `subheading` blocks, sticky sidebar
+- **Temps de lecture restant** : "Il vous reste ~3 min" en cours de lecture
+
+### Architecture
+- `site_config` table Supabase pour activer/désactiver `LiveHero` sans redeploy
+- Rate limiting sur `/api/track` (Vercel KV ou middleware)
+- Extraire la logique footer dans `lib/footer.ts`
+
+---
+
+## Structure
 
 ```
 app/
-  (public)/           Public routes (feed, articles)
-  (admin)/            Protected admin routes
-  api/dictionary/     Dictionary proxy API route
-  robots.ts           Auto-generated robots.txt
-  sitemap.ts          Auto-generated sitemap.xml
+  (public)/          — Layout nav publique
+    page.tsx         — Feed
+    [slug]/page.tsx  — Article
+    audio/page.tsx   — Coming soon
+    live/page.tsx    — Coming soon
+    legal/           — 4 pages légales
+  (admin)/           — Layout protégé
+  api/               — Route Handlers (track, similar, dictionary)
 components/
-  ui/                 Nav, shared primitives
-  feed/               ArticleCard, CategoryFilter
-  article/            ArticleRenderer, TextRunRenderer, WordLookup
+  article/           — ArticleRenderer, ArticleTracker, WordLookup, SourceLink
+  feed/              — ArticleCard, CategoryFilter, BecauseYouRead, LiveHero, AudioCard
+  live/              — LivePlayer
+  ui/                — Nav, Footer, CookieBanner, ManageCookiesButton, NewsletterForm
 lib/
-  supabase/           server · browser · admin clients
-  cloudinary/         upload + URL transform helpers
-  content/            Zod validators, Shiki singleton
-  articles.ts         All article queries
-  dictionary.ts       Word lookup client
-  config.ts           Site-wide constants
-types/
-  content.ts          ContentBlock discriminated union (12 block types)
-  article.ts          Article, ArticleCard, ArticleWithRelations
-  author.ts           Author, AuthorSummary
-  supabase.ts         Auto-generated from DB schema
+  articles.ts        — Queries Supabase
+  cookies.ts         — Consent, session, history, interests
+  supabase/          — Clients server / browser / admin
+  content/           — Validators Zod blocs rich text
 docs/
-  SEO_PRACTICES.md
+  BEST_PRACTICES.md
   PERFORMANCE_PRACTICES.md
   SECURITY_PRACTICES.md
+  SEO_PRACTICES.md
+supabase/migrations/ — Schéma versionné
+types/               — article.ts, content.ts, supabase.ts (généré)
 ```
-
----
-
-## Content Blocks
-
-The article editor supports 12 block types stored as typed JSON:
-
-`heading` · `subheading` · `paragraph` · `quote` · `bullet-list` · `key-takeaways` · `callout` · `equation` (KaTeX) · `code` (Shiki) · `image` · `video` · `divider`
-
-Inline formatting: **bold** · *italic* · underline · ~~strikethrough~~ · links · citations `[n]` · inline LaTeX
-
----
-
-## Key Features
-
-- **Word lookup** — select any word → Wiktionary/Wikipedia definition tooltip
-- **Equation rendering** — LaTeX via KaTeX, server-side
-- **Code highlighting** — Shiki with `github-dark` theme, server-side
-- **Recommendations** — pgvector embeddings (OpenAI) for "read next"
-- **Category filter** — URL-based, server-rendered
-- **Full SEO** — JSON-LD Article + BreadcrumbList + Organization + WebSite, sitemap, robots
-
----
-
-## Documentation
-
-| File | Description |
-|---|---|
-| `NEURALSPACE_CONTEXT.md` | Product vision, roadmap, architecture decisions |
-| `BEST_PRACTICES.md` | TypeScript, Next.js, Supabase coding standards |
-| `DATABASE_SCHEMA.md` | Full DB schema, RLS policies, indexes, triggers |
-| `docs/SEO_PRACTICES.md` | SEO rules, JSON-LD schemas, Core Web Vitals |
-| `docs/PERFORMANCE_PRACTICES.md` | Lighthouse 100 checklist, image/font/animation rules |
-| `docs/SECURITY_PRACTICES.md` | RLS, headers, env vars, security boundaries |
