@@ -29,7 +29,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
 
     case "paragraph":
       return (
-        <p key={block.id} className="leading-8 text-[17px] text-neutral-800">
+        <p key={block.id} className="leading-7 text-[17px] text-neutral-700">
           <RichTextRenderer content={block.content} />
         </p>
       );

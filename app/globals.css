@@ -15,3 +15,10 @@ body {
   color: var(--color-ns-black);
   font-family: var(--font-sans);
 }
+
+/* Focus visible — keyboard accessibility (Apple HIG) */
+:focus-visible {
+  outline: 2px solid var(--color-ns-blue);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

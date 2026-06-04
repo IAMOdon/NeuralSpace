@@ -28,7 +28,7 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
           <button
             key={cat.id}
             onClick={() => select(cat.slug)}
-            className={`text-xs font-sans font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+            className={`text-xs font-sans font-semibold px-3 py-2 rounded-full transition-all duration-200 whitespace-nowrap ${
               isActive
                 ? "bg-ns-white text-ns-blue"
                 : "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
