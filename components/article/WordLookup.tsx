@@ -96,7 +96,7 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
 
           {tooltip.status === "found" && (
             <div className="px-4 py-3 space-y-2 max-w-xs">
-              <p className="text-[10px] font-heading text-white tracking-widest uppercase">
+              <p className="text-[10px] font-heading font-bold text-white tracking-widest uppercase">
                 {tooltip.word}
               </p>
 
