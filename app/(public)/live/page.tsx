@@ -56,7 +56,7 @@ const past = [
 
 export default function LivePage() {
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
 
       {/* ── Page content (blurred) ── */}
       <div className="blur-sm pointer-events-none select-none">

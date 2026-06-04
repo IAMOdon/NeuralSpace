@@ -69,7 +69,7 @@ const rest = episodes.slice(1);
 
 export default function AudioPage() {
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
 
       {/* ── Page content (blurred) ── */}
       <div className="blur-sm pointer-events-none select-none">
