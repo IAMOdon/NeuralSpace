@@ -4,6 +4,7 @@ import { getArticleBySlug, getArticleSlugs } from "@/lib/articles";
 import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
 import { ArticleRenderer } from "@/components/article/ArticleRenderer";
 import { WordLookup } from "@/components/article/WordLookup";
+import { ArticleTracker } from "@/components/article/ArticleTracker";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -108,6 +109,15 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ArticleJsonLd article={article} />
+      <ArticleTracker
+        articleId={article.id}
+        slug={article.slug}
+        title={article.title}
+        categoryId={article.categoryId}
+        categorySlug={article.category.slug}
+        tagIds={article.tags.map((t) => t.id)}
+        wordCount={article.wordCount ?? 0}
+      />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
         <article className="flex-1 min-w-0">
           <WordLookup>

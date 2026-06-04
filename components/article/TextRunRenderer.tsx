@@ -1,5 +1,6 @@
 import katex from "katex";
 import type { RichText, TextRun } from "@/types/content";
+import { SourceLink } from "./SourceLink";
 
 function TextRunRenderer({ run }: { run: TextRun }) {
   let node: React.ReactNode;
@@ -21,14 +22,9 @@ function TextRunRenderer({ run }: { run: TextRun }) {
 
   if (run.link) {
     return (
-      <a
-        href={run.link.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-ns-blue underline underline-offset-2 hover:opacity-70 transition-opacity"
-      >
+      <SourceLink href={run.link.href}>
         {run.link.label ? run.link.label : node}
-      </a>
+      </SourceLink>
     );
   }
 

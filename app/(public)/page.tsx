@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getArticles, getCategories } from "@/lib/articles";
 import { ArticleCard } from "@/components/feed/ArticleCard";
 import { CategoryFilter } from "@/components/feed/CategoryFilter";
+import { BecauseYouRead } from "@/components/feed/BecauseYouRead";
 
 type Props = {
   searchParams: Promise<{ category?: string }>;
@@ -39,15 +40,21 @@ export default async function FeedPage({ searchParams }: Props) {
       </div>
 
       {/* Feed */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-14">
+        <BecauseYouRead />
         {articles.length === 0 ? (
           <p className="text-neutral-400 font-sans">Aucun article dans cette catégorie.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-            {articles.map((article, i) => (
-              <ArticleCard key={article.id} article={article} priority={i === 0} />
-            ))}
-          </div>
+          <section className="space-y-5">
+            <h2 className="font-heading font-bold text-lg text-ns-black">
+              {category ? "Articles" : "Les plus récents"}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+              {articles.map((article, i) => (
+                <ArticleCard key={article.id} article={article} priority={i === 0} />
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </>

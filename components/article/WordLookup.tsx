@@ -51,11 +51,12 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
 
       if (controller.signal.aborted) return;
 
-      setTooltip(
-        result
-          ? { status: "found", word, result, x, y }
-          : { status: "not-found", x, y }
-      );
+      if (result) {
+        window.dispatchEvent(new Event("ns:word-lookup"));
+        setTooltip({ status: "found", word, result, x, y });
+      } else {
+        setTooltip({ status: "not-found", x, y });
+      }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -3,6 +3,7 @@ export type ConsentStatus = "accepted" | "declined" | null;
 export type ReadHistoryEntry = {
   slug: string;
   title: string;
+  categorySlug: string;
   readAt: string; // ISO date
 };
 
@@ -55,6 +56,17 @@ export function getReadHistory(): ReadHistoryEntry[] {
   }
 }
 
+// Returns the category slug that appears most in recent history
+export function getTopCategorySlug(): string | null {
+  const history = getReadHistory();
+  if (!history.length) return null;
+  const counts: Record<string, number> = {};
+  for (const e of history) {
+    if (e.categorySlug) counts[e.categorySlug] = (counts[e.categorySlug] ?? 0) + 1;
+  }
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
 export function addToReadHistory(entry: Omit<ReadHistoryEntry, "readAt">) {
   if (getConsent() !== "accepted") return;
   const history = getReadHistory().filter((e) => e.slug !== entry.slug);
@@ -67,4 +79,37 @@ export function addToReadHistory(entry: Omit<ReadHistoryEntry, "readAt">) {
 
 export function clearReadHistory() {
   localStorage.removeItem("ns_history");
+}
+
+// --- Interest scores by category slug (localStorage) ---
+
+type InterestMap = Record<string, number>; // categorySlug → score
+
+export function getInterests(): InterestMap {
+  if (typeof localStorage === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem("ns_interests") ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+// Adds points to a category. readCompleted = +2, partial = +1.
+export function updateInterest(categorySlug: string, readCompleted: boolean) {
+  if (getConsent() !== "accepted") return;
+  const interests = getInterests();
+  interests[categorySlug] = (interests[categorySlug] ?? 0) + (readCompleted ? 2 : 1);
+  localStorage.setItem("ns_interests", JSON.stringify(interests));
+}
+
+// Returns category slug with highest score, or null if no data.
+export function getTopInterestCategory(): string | null {
+  const interests = getInterests();
+  const entries = Object.entries(interests);
+  if (!entries.length) return null;
+  return entries.sort((a, b) => b[1] - a[1])[0]![0];
+}
+
+export function clearInterests() {
+  localStorage.removeItem("ns_interests");
 }

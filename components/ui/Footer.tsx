@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/config";
+import { ManageCookiesButton } from "./ManageCookiesButton";
 
 const navigation = [
   { label: "Articles", href: "/" },
@@ -119,6 +120,9 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <ManageCookiesButton />
+              </li>
             </ul>
           </div>
         </div>

@@ -135,6 +135,50 @@ export type Database = {
           },
         ]
       }
+      article_views: {
+        Row: {
+          article_id: string
+          country_code: string | null
+          created_at: string | null
+          day_of_week: number | null
+          device: string | null
+          hour_of_day: number | null
+          id: string
+          referrer_source: string | null
+          session_id: string | null
+        }
+        Insert: {
+          article_id: string
+          country_code?: string | null
+          created_at?: string | null
+          day_of_week?: number | null
+          device?: string | null
+          hour_of_day?: number | null
+          id?: string
+          referrer_source?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          country_code?: string | null
+          created_at?: string | null
+          day_of_week?: number | null
+          device?: string | null
+          hour_of_day?: number | null
+          id?: string
+          referrer_source?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_views_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           category_id: string | null
@@ -290,6 +334,59 @@ export type Database = {
         }
         Relationships: []
       }
+      content_analytics: {
+        Row: {
+          article_id: string
+          avg_completion_rate: number | null
+          avg_duration_sec: number | null
+          expert_reader_pct: number | null
+          id: string
+          mobile_pct: number | null
+          quality_reads: number | null
+          top_country: string | null
+          top_referrer: string | null
+          total_views: number | null
+          unique_sessions: number | null
+          week_start: string
+        }
+        Insert: {
+          article_id: string
+          avg_completion_rate?: number | null
+          avg_duration_sec?: number | null
+          expert_reader_pct?: number | null
+          id?: string
+          mobile_pct?: number | null
+          quality_reads?: number | null
+          top_country?: string | null
+          top_referrer?: string | null
+          total_views?: number | null
+          unique_sessions?: number | null
+          week_start: string
+        }
+        Update: {
+          article_id?: string
+          avg_completion_rate?: number | null
+          avg_duration_sec?: number | null
+          expert_reader_pct?: number | null
+          id?: string
+          mobile_pct?: number | null
+          quality_reads?: number | null
+          top_country?: string | null
+          top_referrer?: string | null
+          total_views?: number | null
+          unique_sessions?: number | null
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_analytics_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       series: {
         Row: {
           created_at: string | null
@@ -313,6 +410,86 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      session_interests: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          score: number
+          session_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          entity_id: string
+          entity_type: string
+          score?: number
+          session_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          score?: number
+          session_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      session_profiles: {
+        Row: {
+          articles_read: number | null
+          country_code: string | null
+          device: string | null
+          expertise_signal: number | null
+          first_seen: string | null
+          last_seen: string | null
+          preferred_format: string | null
+          quality_reads: number | null
+          session_id: string
+          source_clicks_total: number | null
+          top_category_id: string | null
+          total_duration_sec: number | null
+          word_lookups_total: number | null
+        }
+        Insert: {
+          articles_read?: number | null
+          country_code?: string | null
+          device?: string | null
+          expertise_signal?: number | null
+          first_seen?: string | null
+          last_seen?: string | null
+          preferred_format?: string | null
+          quality_reads?: number | null
+          session_id: string
+          source_clicks_total?: number | null
+          top_category_id?: string | null
+          total_duration_sec?: number | null
+          word_lookups_total?: number | null
+        }
+        Update: {
+          articles_read?: number | null
+          country_code?: string | null
+          device?: string | null
+          expertise_signal?: number | null
+          first_seen?: string | null
+          last_seen?: string | null
+          preferred_format?: string | null
+          quality_reads?: number | null
+          session_id?: string
+          source_clicks_total?: number | null
+          top_category_id?: string | null
+          total_duration_sec?: number | null
+          word_lookups_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_profiles_top_category_id_fkey"
+            columns: ["top_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
@@ -338,27 +515,54 @@ export type Database = {
       watch_events: {
         Row: {
           article_id: string
+          country_code: string | null
           created_at: string | null
+          day_of_week: number | null
+          device: string | null
           duration_sec: number
+          hour_of_day: number | null
           id: string
+          read_completed: boolean | null
+          referrer_source: string | null
           scroll_depth: number
           session_id: string
+          source_clicks: number | null
+          utm_params: Json | null
+          word_lookups: number | null
         }
         Insert: {
           article_id: string
+          country_code?: string | null
           created_at?: string | null
+          day_of_week?: number | null
+          device?: string | null
           duration_sec: number
+          hour_of_day?: number | null
           id?: string
+          read_completed?: boolean | null
+          referrer_source?: string | null
           scroll_depth: number
           session_id: string
+          source_clicks?: number | null
+          utm_params?: Json | null
+          word_lookups?: number | null
         }
         Update: {
           article_id?: string
+          country_code?: string | null
           created_at?: string | null
+          day_of_week?: number | null
+          device?: string | null
           duration_sec?: number
+          hour_of_day?: number | null
           id?: string
+          read_completed?: boolean | null
+          referrer_source?: string | null
           scroll_depth?: number
           session_id?: string
+          source_clicks?: number | null
+          utm_params?: Json | null
+          word_lookups?: number | null
         }
         Relationships: [
           {
@@ -375,8 +579,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_category_interest: {
+        Args: { p_category_id: string; p_score: number; p_session_id: string }
+        Returns: undefined
+      }
       increment_view_count: {
         Args: { p_article_id: string }
+        Returns: undefined
+      }
+      refresh_top_category: {
+        Args: { p_session_id: string }
+        Returns: undefined
+      }
+      upsert_session_profile: {
+        Args: {
+          p_country_code: string
+          p_device: string
+          p_duration_sec: number
+          p_format: string
+          p_read_completed: boolean
+          p_session_id: string
+          p_source_clicks: number
+          p_word_lookups: number
+        }
         Returns: undefined
       }
     }
