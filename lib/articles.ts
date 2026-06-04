@@ -148,6 +148,15 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
   };
 });
 
+export async function getCategories() {
+  const client = await createClient();
+  const { data } = await client
+    .from("categories")
+    .select("id, slug, name, color_hex")
+    .order("name");
+  return data ?? [];
+}
+
 // Uses adminClient — no cookies needed, safe for generateStaticParams at build time.
 export async function getArticleSlugs(): Promise<string[]> {
   const { data } = await adminClient
