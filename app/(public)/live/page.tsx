@@ -171,10 +171,10 @@ export default function LivePage() {
       {/* ── Coming soon overlay ── */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center space-y-3 px-6">
-          <p className="font-heading font-black text-3xl md:text-4xl text-ns-black">
+          <p className="font-heading font-black text-3xl md:text-4xl text-ns-blue">
             Bientôt disponible
           </p>
-          <p className="text-neutral-500 font-sans text-sm">
+          <p className="text-ns-blue/60 font-sans text-sm">
             Neural Space Live arrive prochainement.
           </p>
         </div>
