@@ -103,7 +103,6 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
 
   if (error || !data) return null;
 
-
   const rawSeries = data.article_series as RawSeriesJoin;
 
   return {

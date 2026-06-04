@@ -1,3 +1,4 @@
+import Image from "next/image";
 import katex from "katex";
 import { highlightCode } from "@/lib/content/shiki";
 import type { ContentBlock } from "@/types/content";
@@ -12,7 +13,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
         </h1>
       );
 
-    case "subheading":
+    case "subheading": {
       const Tag = block.level === 2 ? "h2" : "h3";
       const sizeClass = block.level === 2 ? "text-2xl" : "text-xl";
       return (
@@ -24,6 +25,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
           {block.content}
         </Tag>
       );
+    }
 
     case "paragraph":
       return (
@@ -142,12 +144,15 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
     case "image":
       return (
         <figure key={block.id} className="space-y-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={block.url}
-            alt={block.alt}
-            className="w-full rounded-xl object-cover"
-          />
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+            <Image
+              src={block.url}
+              alt={block.alt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 65vw"
+            />
+          </div>
           {block.caption && (
             <figcaption className="text-center text-sm text-neutral-500">
               {block.caption}
