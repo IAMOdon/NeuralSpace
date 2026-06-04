@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ContentSchema, ArticleSourcesSchema } from "@/lib/content/validators";
 import type { ArticleCard, ArticleWithRelations, Series } from "@/types/article";
@@ -79,7 +80,9 @@ export async function getArticles({
   }));
 }
 
-export async function getArticleBySlug(
+// cache() deduplicates calls within a single request —
+// generateMetadata and the page component both call this without double-fetching.
+export const getArticleBySlug = cache(async function getArticleBySlug(
   slug: string
 ): Promise<ArticleWithRelations | null> {
   const client = await createClient();
@@ -98,6 +101,7 @@ export async function getArticleBySlug(
     .single();
 
   if (error || !data) return null;
+
 
   const rawSeries = data.article_series as RawSeriesJoin;
 
@@ -142,4 +146,13 @@ export async function getArticleBySlug(
       ? { series: rawSeries.series, order: rawSeries.order }
       : undefined,
   };
+});
+
+export async function getArticleSlugs(): Promise<string[]> {
+  const client = await createClient();
+  const { data } = await client
+    .from("articles")
+    .select("slug")
+    .eq("status", "published");
+  return data?.map((r) => r.slug) ?? [];
 }
