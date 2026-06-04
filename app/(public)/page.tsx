@@ -3,6 +3,7 @@ import { getArticles, getCategories } from "@/lib/articles";
 import { ArticleCard } from "@/components/feed/ArticleCard";
 import { CategoryFilter } from "@/components/feed/CategoryFilter";
 import { BecauseYouRead } from "@/components/feed/BecauseYouRead";
+import { LiveHero } from "@/components/feed/LiveHero";
 
 type Props = {
   searchParams: Promise<{ category?: string }>;
@@ -41,6 +42,13 @@ export default async function FeedPage({ searchParams }: Props) {
 
       {/* Feed */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-14">
+        {/* TODO: remplacer par données réelles depuis la DB quand live_events table existe */}
+        <LiveHero
+          title="Q&A — La physique derrière les trous de ver"
+          description="Session en direct sur la relativité générale, les solutions de Lorentz et ce que la physique dit vraiment des voyages dans le temps."
+          viewers={847}
+          href="/live"
+        />
         <BecauseYouRead />
         {articles.length === 0 ? (
           <p className="text-neutral-400 font-sans">Aucun article dans cette catégorie.</p>

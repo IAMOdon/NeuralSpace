@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Radio, Calendar, Clock, Users } from "lucide-react";
+import { LivePlayer } from "@/components/live/LivePlayer";
 
 export const metadata: Metadata = {
   title: "Live — Neural Space",
@@ -84,6 +85,18 @@ export default function LivePage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-14 space-y-14">
+
+          {/* Live player */}
+          <section className="space-y-4">
+            <p className="text-[10px] font-heading font-bold uppercase tracking-widest text-neutral-400">
+              En ce moment
+            </p>
+            <LivePlayer
+              mode="live"
+              title="Q&A — La physique derrière les trous de ver"
+              viewers={847}
+            />
+          </section>
 
           {/* Upcoming */}
           <section className="space-y-5">
