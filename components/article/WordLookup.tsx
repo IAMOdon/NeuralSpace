@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { lookupWord, type Definition } from "@/lib/dictionary";
+import { lookupWord, type WikiSummary } from "@/lib/dictionary";
 
 type TooltipState =
   | { status: "hidden" }
   | { status: "loading"; word: string; x: number; y: number }
-  | { status: "found"; word: string; definitions: Definition[]; x: number; y: number }
-  | { status: "not-found"; word: string; x: number; y: number };
+  | { status: "found"; result: WikiSummary; x: number; y: number }
+  | { status: "not-found"; x: number; y: number };
 
 function getSelectedWord(): { word: string; rect: DOMRect } | null {
   const selection = window.getSelection();
   if (!selection || selection.isCollapsed) return null;
 
   const text = selection.toString().trim();
-  // Only single words — no spaces
   if (!text || /\s/.test(text) || text.length < 2 || text.length > 40) return null;
 
   const range = selection.getRangeAt(0);
@@ -24,7 +23,6 @@ function getSelectedWord(): { word: string; rect: DOMRect } | null {
 
 export function WordLookup({ children }: { children: React.ReactNode }) {
   const [tooltip, setTooltip] = useState<TooltipState>({ status: "hidden" });
-  const containerRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const hide = useCallback(() => {
@@ -47,14 +45,14 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
 
       setTooltip({ status: "loading", word, x, y });
 
-      const definitions = await lookupWord(word, controller.signal);
+      const result = await lookupWord(word, controller.signal);
 
       if (controller.signal.aborted) return;
 
       setTooltip(
-        definitions
-          ? { status: "found", word, definitions, x, y }
-          : { status: "not-found", word, x, y }
+        result
+          ? { status: "found", result, x, y }
+          : { status: "not-found", x, y }
       );
     };
 
@@ -70,10 +68,12 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
     };
   }, [hide]);
 
+  const visible = tooltip.status !== "hidden";
+
   return (
-    <div ref={containerRef} className="relative">
+    <div className="relative">
       {children}
-      {tooltip.status !== "hidden" && (
+      {visible && (
         <div
           className="fixed z-50 pointer-events-none"
           style={{
@@ -82,36 +82,40 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
             transform: "translate(-50%, -100%)",
           }}
         >
-          <div className="bg-ns-black text-ns-white rounded-xl px-4 py-3 shadow-2xl max-w-xs w-max pointer-events-auto">
+          <div className="bg-ns-black text-ns-white rounded-xl shadow-2xl max-w-sm w-max pointer-events-auto">
             {tooltip.status === "loading" && (
-              <p className="text-sm text-white/60 font-sans">Recherche…</p>
-            )}
-
-            {tooltip.status === "not-found" && (
-              <p className="text-sm text-white/60 font-sans">
-                Aucune définition trouvée.
-              </p>
-            )}
-
-            {tooltip.status === "found" && (
-              <div className="space-y-2">
-                <p className="text-xs font-heading text-ns-blue tracking-widest uppercase">
-                  {tooltip.word}
-                </p>
-                {tooltip.definitions.map((def, i) => (
-                  <div key={i} className="space-y-0.5">
-                    <p className="text-[10px] text-white/40 uppercase tracking-wider font-sans">
-                      {def.partOfSpeech}
-                    </p>
-                    <p className="text-sm leading-5 text-white/90 font-sans">
-                      {def.definition}
-                    </p>
-                  </div>
-                ))}
+              <div className="px-4 py-3">
+                <p className="text-sm text-white/50">Recherche…</p>
               </div>
             )}
 
-            {/* Arrow */}
+            {tooltip.status === "not-found" && (
+              <div className="px-4 py-3">
+                <p className="text-sm text-white/50">Aucun résultat.</p>
+              </div>
+            )}
+
+            {tooltip.status === "found" && (
+              <div className="px-4 py-3 space-y-2">
+                <p className="text-xs font-heading text-ns-blue tracking-widest uppercase">
+                  {tooltip.result.title}
+                </p>
+                <p className="text-sm leading-6 text-white/85 font-sans">
+                  {tooltip.result.extract}
+                </p>
+                {tooltip.result.wikiUrl && (
+                  <a
+                    href={tooltip.result.wikiUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-xs text-white/40 hover:text-white/70 transition-colors pt-1"
+                  >
+                    Lire sur Wikipédia →
+                  </a>
+                )}
+              </div>
+            )}
+
             <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-ns-black" />
           </div>
         </div>
