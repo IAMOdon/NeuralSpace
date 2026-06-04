@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // --- Inline ---
 
-const MarkTypeSchema = z.enum(["bold", "underline", "strikethrough"]);
+const MarkTypeSchema = z.enum(["bold", "italic", "underline", "strikethrough"]);
 
 const LinkMarkSchema = z.object({
   href: z.string().url(),

@@ -15,6 +15,7 @@ function TextRunRenderer({ run }: { run: TextRun }) {
   }
 
   if (run.marks?.includes("bold")) node = <strong className="font-semibold">{node}</strong>;
+  if (run.marks?.includes("italic")) node = <em>{node}</em>;
   if (run.marks?.includes("underline")) node = <span className="underline underline-offset-2">{node}</span>;
   if (run.marks?.includes("strikethrough")) node = <s>{node}</s>;
 

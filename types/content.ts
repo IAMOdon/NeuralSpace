@@ -1,6 +1,6 @@
 // --- Inline formatting ---
 
-export type MarkType = "bold" | "underline" | "strikethrough";
+export type MarkType = "bold" | "italic" | "underline" | "strikethrough";
 
 export type LinkMark = {
   href: string;
