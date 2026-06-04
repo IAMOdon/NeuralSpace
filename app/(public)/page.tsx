@@ -25,13 +25,15 @@ export default async function FeedPage({ searchParams }: Props) {
         </div>
       </div>
 
-      {/* Filter strip — white, scrollable edge-to-edge on mobile */}
+      {/* Filter strip */}
       <div className="w-full border-b border-neutral-100 bg-white sticky top-16 z-30">
-        <div className="overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-2 px-6 py-3 max-w-7xl mx-auto w-max min-w-full">
-            <Suspense>
-              <CategoryFilter categories={categories} />
-            </Suspense>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-2 py-3">
+              <Suspense>
+                <CategoryFilter categories={categories} />
+              </Suspense>
+            </div>
           </div>
         </div>
       </div>
