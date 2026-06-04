@@ -7,7 +7,7 @@
   --color-ns-black: #0a0a0a;
 
   --font-sans: var(--font-space-grotesk), system-ui, sans-serif;
-  --font-display: var(--font-orbitron), system-ui, sans-serif;
+  --font-heading: var(--font-orbitron), system-ui, sans-serif;
 }
 
 body {

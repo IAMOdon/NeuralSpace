@@ -8,7 +8,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
   switch (block.type) {
     case "heading":
       return (
-        <h1 key={block.id} className="font-display text-4xl font-bold tracking-tight text-ns-black">
+        <h1 key={block.id} className="font-heading text-4xl font-bold tracking-tight text-ns-black">
           {block.content}
         </h1>
       );
@@ -20,7 +20,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
         <Tag
           key={block.id}
           id={block.anchor}
-          className={`font-display ${sizeClass} font-semibold tracking-tight text-ns-black scroll-mt-24`}
+          className={`font-heading ${sizeClass} font-semibold tracking-tight text-ns-black scroll-mt-24`}
         >
           {block.content}
         </Tag>
