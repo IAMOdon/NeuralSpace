@@ -1,5 +1,5 @@
-import { codeToHtml } from "shiki";
 import katex from "katex";
+import { highlightCode } from "@/lib/content/shiki";
 import type { ContentBlock } from "@/types/content";
 import { RichTextRenderer } from "./TextRunRenderer";
 
@@ -123,10 +123,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
     }
 
     case "code": {
-      const highlighted = await codeToHtml(block.content, {
-        lang: block.language,
-        theme: "xcode",
-      });
+      const highlighted = await highlightCode(block.content, block.language);
       return (
         <div key={block.id} className="rounded-xl overflow-hidden text-sm">
           {block.filename && (
