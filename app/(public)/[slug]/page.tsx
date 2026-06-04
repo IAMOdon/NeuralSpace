@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getArticleBySlug, getArticleSlugs } from "@/lib/articles";
 import { SITE_URL, SITE_NAME } from "@/lib/config";
 import { ArticleRenderer } from "@/components/article/ArticleRenderer";
+import { WordLookup } from "@/components/article/WordLookup";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -88,7 +89,9 @@ export default async function ArticlePage({ params }: Props) {
       <div className="max-w-7xl mx-auto px-4 py-12 flex gap-12">
         {/* Content — 2/3 */}
         <article className="flex-1 min-w-0">
-          <ArticleRenderer blocks={article.content} />
+          <WordLookup>
+            <ArticleRenderer blocks={article.content} />
+          </WordLookup>
         </article>
 
         {/* Sidebar — 1/3 */}
