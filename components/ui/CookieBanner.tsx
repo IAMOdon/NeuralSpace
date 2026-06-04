@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getConsent, setConsent } from "@/lib/cookies";
+import { getConsent, setConsent, clearAllConsentData } from "@/lib/cookies";
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
@@ -19,6 +19,7 @@ export function CookieBanner() {
 
   function decline() {
     setConsent("declined");
+    clearAllConsentData();
     setVisible(false);
   }
 

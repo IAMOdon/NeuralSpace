@@ -1,10 +1,10 @@
 "use client";
 
-import { setConsent } from "@/lib/cookies";
+import { clearAllConsentData } from "@/lib/cookies";
 
 export function ManageCookiesButton() {
   function reset() {
-    // Clear consent so the banner reappears on reload
+    clearAllConsentData();
     document.cookie = "ns_consent=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.reload();
   }

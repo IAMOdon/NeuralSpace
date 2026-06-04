@@ -34,15 +34,25 @@ export function setConsent(status: "accepted" | "declined") {
   setCookie("ns_consent", status, 365);
 }
 
-// --- Anonymous session ID ---
+// --- Anonymous session ID (only created with consent) ---
 
 export function getOrCreateSession(): string {
   const existing = getCookie("ns_session");
   if (existing) return existing;
   const id = crypto.randomUUID();
-  // Session cookie — expires when browser closes
   document.cookie = `ns_session=${id}; path=/; SameSite=Lax`;
   return id;
+}
+
+function deleteSessionCookie() {
+  document.cookie = "ns_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}
+
+// Wipes all consent-dependent data — call on decline or revoke.
+export function clearAllConsentData() {
+  deleteSessionCookie();
+  localStorage.removeItem("ns_history");
+  localStorage.removeItem("ns_interests");
 }
 
 // --- Reading history (stored in localStorage — larger payload than cookies) ---

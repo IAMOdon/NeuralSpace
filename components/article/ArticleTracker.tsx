@@ -22,8 +22,9 @@ export function ArticleTracker({ articleId, slug, title, categoryId, categorySlu
   const sentRef = useRef(false);
 
   useEffect(() => {
-    const session = getOrCreateSession();
     const consent = getConsent();
+    // Session only created when user has accepted cookies
+    const session = consent === "accepted" ? getOrCreateSession() : null;
 
     // view event — no consent needed, no session_id (purely aggregate)
     fetch("/api/track", {
@@ -64,7 +65,7 @@ export function ArticleTracker({ articleId, slug, title, categoryId, categorySlu
     window.addEventListener("ns:source-click" as keyof WindowEventMap, onSourceClick);
 
     const sendWatch = () => {
-      if (sentRef.current || consent !== "accepted") return;
+      if (sentRef.current || consent !== "accepted" || !session) return;
       sentRef.current = true;
 
       if (lastActiveRef.current !== null) {
