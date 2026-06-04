@@ -16,6 +16,15 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Hide scrollbar visually but keep functionality */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Focus visible — keyboard accessibility (Apple HIG) */
 :focus-visible {
   outline: 2px solid var(--color-ns-blue);

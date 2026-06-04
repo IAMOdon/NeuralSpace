@@ -36,8 +36,9 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
       if (!selected) { hide(); return; }
 
       const { word, rect } = selected;
-      // Fixed positioning is relative to the viewport — no scroll offset needed
-      const x = rect.left + rect.width / 2;
+      // Clamp x to viewport to prevent overflow on mobile (16px margin each side)
+      const rawX = rect.left + rect.width / 2;
+      const x = Math.min(Math.max(rawX, 160), window.innerWidth - 160);
       const y = rect.top;
 
       abortRef.current?.abort();

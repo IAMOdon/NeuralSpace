@@ -108,13 +108,13 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ArticleJsonLd article={article} />
-      <div className="max-w-7xl mx-auto px-6 py-12 flex gap-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
         <article className="flex-1 min-w-0">
           <WordLookup>
             <ArticleRenderer blocks={article.content} />
           </WordLookup>
         </article>
-        <aside className="w-80 shrink-0">
+        <aside className="hidden lg:block w-80 shrink-0">
           {/* Author sidebar — placeholder */}
         </aside>
       </div>

@@ -21,7 +21,7 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
   const all = [{ id: "all", slug: "all", name: "Tout" }, ...categories];
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap">
       {all.map((cat) => {
         const isActive = cat.slug === active;
         return (
