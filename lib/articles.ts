@@ -1,18 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { ContentSchema, ArticleSourcesSchema } from "@/lib/content/validators";
-import type { ArticleCard, ArticleWithRelations } from "@/types/article";
+import type { ArticleCard, ArticleWithRelations, Series } from "@/types/article";
 
-// Parses JSONB fields that arrive as Json (loose) from Supabase.
-// Throws if the stored data doesn't match the expected schema.
-function parseArticleContent(raw: unknown) {
+type RawSeriesJoin = { order: number; series: Series } | null;
+
+function parseContent(raw: unknown) {
   return ContentSchema.parse(raw);
 }
 
-function parseArticleSources(raw: unknown) {
+function parseSources(raw: unknown) {
   return ArticleSourcesSchema.parse(raw);
 }
 
-// Feed — lightweight, no content blocks
 export async function getArticles({
   categorySlug,
   tagSlug,
@@ -28,14 +27,22 @@ export async function getArticles({
 } = {}): Promise<ArticleCard[]> {
   const client = await createClient();
 
+  // Use !inner only when filtering — avoids excluding articles without tags/category
+  const categoryJoin = categorySlug
+    ? "categories!inner(id, slug, name, color_hex)"
+    : "categories(id, slug, name, color_hex)";
+
+  const tagJoin = tagSlug
+    ? "article_tags!inner(tags!inner(id, slug, name))"
+    : "article_tags(tags(id, slug, name))";
+
   let query = client
     .from("articles")
     .select(
       `id, slug, type, title, summary,
        cover_image_url, cover_image_alt,
        reading_time_min, view_count, published_at,
-       categories(id, slug, name, color_hex),
-       article_tags(tags(id, slug, name))`
+       ${categoryJoin}, ${tagJoin}`
     )
     .eq("status", "published")
     .range(offset, offset + limit - 1);
@@ -46,9 +53,8 @@ export async function getArticles({
     query = query.order("published_at", { ascending: false });
   }
 
-  if (categorySlug) {
-    query = query.eq("categories.slug", categorySlug);
-  }
+  if (categorySlug) query = query.eq("categories.slug", categorySlug);
+  if (tagSlug) query = query.eq("article_tags.tags.slug", tagSlug);
 
   const { data, error } = await query;
 
@@ -73,7 +79,6 @@ export async function getArticles({
   }));
 }
 
-// Article page — full content with all relations
 export async function getArticleBySlug(
   slug: string
 ): Promise<ArticleWithRelations | null> {
@@ -94,8 +99,7 @@ export async function getArticleBySlug(
 
   if (error || !data) return null;
 
-  const content = parseArticleContent(data.content);
-  const sources = parseArticleSources(data.sources);
+  const rawSeries = data.article_series as RawSeriesJoin;
 
   return {
     id: data.id,
@@ -107,8 +111,8 @@ export async function getArticleBySlug(
     summary: data.summary,
     coverImageUrl: data.cover_image_url ?? undefined,
     coverImageAlt: data.cover_image_alt ?? undefined,
-    content,
-    sources,
+    content: parseContent(data.content),
+    sources: parseSources(data.sources),
     layoutPreset: data.layout_preset ?? undefined,
     wordCount: data.word_count,
     readingTimeMin: data.reading_time_min,
@@ -131,14 +135,11 @@ export async function getArticleBySlug(
     )
       .sort((a, b) => a.order - b.order)
       .map((aa) => aa.authors),
-    tags: (data.article_tags as { tags: ArticleWithRelations["tags"][number] }[]).map(
-      (at) => at.tags
-    ),
-    series: data.article_series
-      ? {
-          series: (data.article_series as { order: number; series: ArticleWithRelations["series"] extends { series: infer S } ? S : never }).series,
-          order: (data.article_series as { order: number }).order,
-        }
+    tags: (
+      data.article_tags as { tags: ArticleWithRelations["tags"][number] }[]
+    ).map((at) => at.tags),
+    series: rawSeries
+      ? { series: rawSeries.series, order: rawSeries.order }
       : undefined,
   };
 }
