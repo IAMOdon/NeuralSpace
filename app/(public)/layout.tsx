@@ -1,3 +1,5 @@
+import { Nav } from "@/components/ui/Nav";
+
 export default function PublicLayout({
   children,
 }: {
@@ -5,9 +7,8 @@ export default function PublicLayout({
 }) {
   return (
     <>
-      {/* Nav placeholder */}
+      <Nav />
       <main className="flex-1">{children}</main>
-      {/* Footer placeholder */}
     </>
   );
 }
