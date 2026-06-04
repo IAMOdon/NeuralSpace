@@ -197,12 +197,13 @@ export default function CookiesPage() {
         <section className="space-y-3">
           <h2 className="font-heading font-bold text-lg text-ns-black">Gérer vos préférences</h2>
           <p className="text-sm leading-6">
-            Vous pouvez modifier votre choix à tout moment en supprimant le cookie{" "}
-            <span className="font-mono text-xs text-ns-blue">ns_consent</span> depuis les paramètres
-            de votre navigateur — le bandeau de consentement réapparaîtra à votre prochaine visite.
-            Vous pouvez également effacer les données de stockage local (
+            Vous pouvez modifier votre choix à tout moment via le bouton{" "}
+            <strong>« Gérer mes cookies »</strong> situé en bas de chaque page — il efface
+            immédiatement toutes les données liées à votre consentement et fait réapparaître
+            le bandeau. Vous pouvez également supprimer manuellement le cookie{" "}
+            <span className="font-mono text-xs text-ns-blue">ns_consent</span> et les clés{" "}
             <span className="font-mono text-xs text-ns-blue">ns_history</span>,{" "}
-            <span className="font-mono text-xs text-ns-blue">ns_interests</span>) depuis les outils
+            <span className="font-mono text-xs text-ns-blue">ns_interests</span> depuis les outils
             développeur de votre navigateur.
           </p>
           <p className="text-sm leading-6">

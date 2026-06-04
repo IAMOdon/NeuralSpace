@@ -23,7 +23,9 @@ export function BecauseYouRead() {
   const [articles, setArticles] = useState<ArticleCardType[]>([]);
   const [lastTitle, setLastTitle] = useState<string | null>(null);
   // null = unknown (checking), false = no section, true = show
-  const [state, setState] = useState<"loading" | "empty" | "ready">("loading");
+  const [state, setState] = useState<"loading" | "empty" | "ready">(() =>
+    typeof window !== "undefined" && getConsent() !== "accepted" ? "empty" : "loading"
+  );
 
   useEffect(() => {
     if (getConsent() !== "accepted") { setState("empty"); return; }
