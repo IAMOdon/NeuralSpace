@@ -105,7 +105,7 @@ export function ArticleTracker({ articleId, slug, title, categoryId, categorySlu
       clearTimeout(timer);
       sendWatch();
     };
-  }, [articleId, slug, title, categoryId, tagIds, wordCount]);
+  }, [articleId, slug, title, categoryId, categorySlug, tagIds, wordCount]);
 
   return null;
 }

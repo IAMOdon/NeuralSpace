@@ -116,7 +116,10 @@ export default function CookiesPage() {
                   <td className="px-4 py-3">
                     Scores d&apos;intérêt par thématique scientifique (ex. physique, biologie, IA),
                     calculés à partir de votre comportement de lecture. Utilisé pour personnaliser
-                    l&apos;ordre du fil d&apos;actualité. Stocké dans votre navigateur.
+                    l&apos;ordre du fil d&apos;actualité. Stocké dans votre navigateur{" "}
+                    <strong>et transmis à nos serveurs</strong> (table{" "}
+                    <span className="font-mono text-xs text-ns-blue">session_interests</span>)
+                    liés à votre identifiant de session anonyme.
                   </td>
                   <td className="px-4 py-3 text-neutral-400">Persistant</td>
                 </tr>
