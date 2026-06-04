@@ -5,6 +5,18 @@ export const metadata: Metadata = {
   title: "Live — Neural Space",
   description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
   robots: { index: false },
+  openGraph: {
+    title: "Live — Neural Space",
+    description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
+    siteName: "Neural Space",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Live — Neural Space",
+    description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
+  },
 };
 
 const upcoming = [

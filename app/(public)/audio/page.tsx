@@ -5,6 +5,18 @@ export const metadata: Metadata = {
   title: "Audio — Neural Space",
   description: "Podcasts et épisodes audio pour explorer la science autrement.",
   robots: { index: false },
+  openGraph: {
+    title: "Audio — Neural Space",
+    description: "Podcasts et épisodes audio pour explorer la science autrement.",
+    siteName: "Neural Space",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Audio — Neural Space",
+    description: "Podcasts et épisodes audio pour explorer la science autrement.",
+  },
 };
 
 const episodes = [
