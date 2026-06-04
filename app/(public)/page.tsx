@@ -17,8 +17,8 @@ export default async function FeedPage({ searchParams }: Props) {
   return (
     <>
       {/* Hero banner */}
-      <div className="bg-ns-blue w-full px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
+      <div className="bg-ns-blue w-full py-5">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8">
           <h1 className="font-heading font-black text-xl text-ns-white tracking-tight shrink-0">
             La science, rendue accessible.
           </h1>
