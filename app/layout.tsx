@@ -4,6 +4,7 @@ import "./globals.css";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
+  weight: ["400", "700", "900"],
   variable: "--font-orbitron",
   display: "swap",
 });

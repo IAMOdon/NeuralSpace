@@ -5,7 +5,7 @@ export function Nav() {
     <header className="sticky top-0 z-40 w-full border-b border-neutral-100 bg-ns-white/90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-1 group">
-          <span className="font-heading font-bold text-lg tracking-widest text-ns-blue uppercase">
+          <span className="font-heading font-black text-lg tracking-widest text-ns-blue uppercase">
             Neural Space
           </span>
           <span className="w-1.5 h-1.5 rounded-full bg-ns-blue mb-3 group-hover:scale-125 transition-transform" />
