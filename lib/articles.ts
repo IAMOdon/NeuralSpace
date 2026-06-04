@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import { ContentSchema, ArticleSourcesSchema } from "@/lib/content/validators";
 import type { ArticleCard, ArticleWithRelations, Series } from "@/types/article";
 
@@ -148,9 +149,9 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
   };
 });
 
+// Uses adminClient — no cookies needed, safe for generateStaticParams at build time.
 export async function getArticleSlugs(): Promise<string[]> {
-  const client = await createClient();
-  const { data } = await client
+  const { data } = await adminClient
     .from("articles")
     .select("slug")
     .eq("status", "published");
