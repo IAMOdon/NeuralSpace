@@ -66,17 +66,6 @@ export function getReadHistory(): ReadHistoryEntry[] {
   }
 }
 
-// Returns the category slug that appears most in recent history
-export function getTopCategorySlug(): string | null {
-  const history = getReadHistory();
-  if (!history.length) return null;
-  const counts: Record<string, number> = {};
-  for (const e of history) {
-    if (e.categorySlug) counts[e.categorySlug] = (counts[e.categorySlug] ?? 0) + 1;
-  }
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-}
-
 export function addToReadHistory(entry: Omit<ReadHistoryEntry, "readAt">) {
   if (getConsent() !== "accepted") return;
   const history = getReadHistory().filter((e) => e.slug !== entry.slug);
@@ -85,10 +74,6 @@ export function addToReadHistory(entry: Omit<ReadHistoryEntry, "readAt">) {
     ...history,
   ].slice(0, MAX_HISTORY);
   localStorage.setItem("ns_history", JSON.stringify(updated));
-}
-
-export function clearReadHistory() {
-  localStorage.removeItem("ns_history");
 }
 
 // --- Interest scores by category slug (localStorage) ---
@@ -120,6 +105,3 @@ export function getTopInterestCategory(): string | null {
   return entries.sort((a, b) => b[1] - a[1])[0]![0];
 }
 
-export function clearInterests() {
-  localStorage.removeItem("ns_interests");
-}

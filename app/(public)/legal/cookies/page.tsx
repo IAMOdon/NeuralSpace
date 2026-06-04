@@ -169,11 +169,27 @@ export default function CookiesPage() {
             Données collectées sans consentement
           </h2>
           <p className="text-sm leading-6">
-            Même en cas de refus des cookies, une <strong>comptabilisation anonyme des vues</strong>{" "}
-            est effectuée sur chaque article. Cette mesure est strictement agrégée : elle ne stocke
-            aucun identifiant de session, ne permet aucun suivi individuel et est assimilable à un
-            compteur de visites. Elle est nécessaire au bon fonctionnement du tri « Populaire » et
-            à l&apos;analyse éditoriale minimale.
+            Même en cas de refus des cookies, les données suivantes sont enregistrées à chaque
+            ouverture d&apos;un article :
+          </p>
+          <ul className="space-y-2 text-sm leading-6">
+            {[
+              "Compteur de vues de l'article (entier, sans lien avec une session)",
+              "Source de visite déduite de l'en-tête HTTP Referer (ex. google_organic, direct)",
+              "Type d'appareil déduit du User-Agent (mobile, tablette, ordinateur)",
+              "Code pays déduit de l'en-tête réseau Vercel (ex. FR) — l'IP n'est jamais stockée",
+              "Heure UTC et jour de la semaine de la visite",
+            ].map((item) => (
+              <li key={item} className="flex gap-3">
+                <span className="mt-2 w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm leading-6">
+            Aucun identifiant de session n&apos;est associé à ces données. Elles ne permettent
+            aucun suivi individuel et sont utilisées uniquement pour le tri « Populaire » et
+            l&apos;analyse éditoriale agrégée.
           </p>
         </section>
 
