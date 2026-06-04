@@ -1,10 +1,8 @@
-export type WikiSummary = {
-  title: string;
-  extract: string;
-  wikiUrl?: string;
-};
+export type DictionaryResult =
+  | { source: "wiktionary"; definitions: string[] }
+  | { source: "wikipedia"; extract: string };
 
-const cache = new Map<string, WikiSummary | null>();
+const cache = new Map<string, DictionaryResult | null>();
 
 function normalize(word: string): string {
   return word.trim().replace(/[.,;:!?'"«»()]/g, "");
@@ -13,7 +11,7 @@ function normalize(word: string): string {
 export async function lookupWord(
   raw: string,
   signal?: AbortSignal
-): Promise<WikiSummary | null> {
+): Promise<DictionaryResult | null> {
   const word = normalize(raw);
   if (!word || word.length < 2) return null;
 
@@ -29,7 +27,7 @@ export async function lookupWord(
       return null;
     }
 
-    const data: WikiSummary | null = await res.json();
+    const data: DictionaryResult | null = await res.json();
     cache.set(word, data);
     return data;
   } catch {
