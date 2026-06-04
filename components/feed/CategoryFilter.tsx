@@ -21,7 +21,7 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
   const all = [{ id: "all", slug: "all", name: "Tout" }, ...categories];
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap">
+    <div className="flex items-center gap-2">
       {all.map((cat) => {
         const isActive = cat.slug === active;
         return (
@@ -30,8 +30,8 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
             onClick={() => select(cat.slug)}
             className={`text-xs font-sans font-semibold px-3 py-2 rounded-full transition-all duration-200 whitespace-nowrap ${
               isActive
-                ? "bg-ns-white text-ns-blue"
-                : "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
+                ? "bg-ns-blue text-white"
+                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-ns-black"
             }`}
           >
             {cat.name}
