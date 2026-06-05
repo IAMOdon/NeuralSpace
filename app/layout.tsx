@@ -47,7 +47,10 @@ const organizationJsonLd = {
   name: SITE_NAME,
   url: SITE_URL,
   description: SITE_DESCRIPTION,
-  sameAs: [],
+  sameAs: [
+    "https://x.com/NeuralSpace_",
+    // TODO: ajouter Instagram, TikTok, YouTube, LinkedIn, Twitch, Facebook quand handles confirmés
+  ],
 };
 
 const websiteJsonLd = {

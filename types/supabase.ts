@@ -195,6 +195,7 @@ export type Database = {
           published_at: string | null
           reading_time_min: number
           scheduled_at: string | null
+          search_vector: unknown
           seo_description: string | null
           seo_title: string | null
           slug: string
@@ -222,6 +223,7 @@ export type Database = {
           published_at?: string | null
           reading_time_min?: number
           scheduled_at?: string | null
+          search_vector?: unknown
           seo_description?: string | null
           seo_title?: string | null
           slug: string
@@ -249,6 +251,7 @@ export type Database = {
           published_at?: string | null
           reading_time_min?: number
           scheduled_at?: string | null
+          search_vector?: unknown
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
@@ -590,6 +593,19 @@ export type Database = {
       refresh_top_category: {
         Args: { p_session_id: string }
         Returns: undefined
+      }
+      search_articles: {
+        Args: { max_results?: number; query: string }
+        Returns: {
+          id: string
+          published_at: string
+          rank: number
+          slug: string
+          status: string
+          summary: string
+          title: string
+          view_count: number
+        }[]
       }
       upsert_session_profile: {
         Args: {
