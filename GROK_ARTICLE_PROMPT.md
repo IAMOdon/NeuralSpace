@@ -102,23 +102,22 @@ Distribue les images à des moments stratégiques du récit :
 2. **Au milieu de l'article** — après 2–3 sections, illustre un point clé ou un phénomène expliqué juste avant
 3. **Avant la conclusion** (pour les `long`) — image de synthèse ou de projection future
 
-### Sources d'images acceptées
+### Choix des images — philosophie
 
-Toute source HTTPS est acceptée. L'important est que `credit` soit renseigné correctement.
+**Priorité absolue : trouver l'image la plus belle, la plus précise et la plus représentative du sujet, directement depuis la source primaire.**
 
-| Source | Licence typique | Notes |
-|---|---|---|
-| **Wikimedia Commons** | CC BY / CC BY-SA / Domaine public | Préférée — grande bibliothèque, licences claires |
-| **NASA Image Gallery** | Domaine public | Espace, planètes, missions spatiales |
-| **ESA Image Archive** | CC BY-SA 3.0 IGO | Espace européen |
-| **NIH / NCI** | Domaine public | Biologie, médecine, imagerie médicale |
-| **CERN Image Gallery** | CC BY 4.0 | Physique des particules |
-| **Unsplash** | Licence Unsplash | Science générale, technologie |
-| **Nature / Science** | © éditeur — usage éditorial | Citer la source, ne pas republier à la volée |
-| **Université / labo** | Varie — demander autorisation | Utiliser si clairement libre ou CC |
-| **AP Photo, Getty** | ❌ — ne pas utiliser | Droits réservés, pas de réutilisation libre |
+Ne pas aller chercher sur Wikipedia/Wikimedia en premier — c'est un relais de médias, pas une source primaire. Va directement à l'institution, au laboratoire, à l'agence spatiale, au journal qui a produit l'image. Wikimedia est acceptable en dernier recours seulement, et seulement si l'image y est nettement meilleure que ce qui existe ailleurs.
 
-> ✅ L'URL peut être de n'importe quelle origine HTTPS. Le site autorise toutes les sources. L'essentiel est que `credit` soit complet et honnête.
+**Ordre de priorité pour trouver une image :**
+
+1. **Institution auteure** — le labo, l'université, l'agence (NASA, ESA, CERN, NIH, WHO, EHT, CNRS…) publie souvent ses images en haute résolution sur son propre site presse/médias
+2. **Revue ou journal scientifique** — Nature, Science, Cell, NEJM, Astrophysical Journal publient des figures HD dans leurs articles ouverts
+3. **Banque d'images officielle** — NASA Images (`images.nasa.gov`), ESA Media (`esa.int/ESA_Multimedia`), CERN Media (`cds.cern.ch`), NIH Image Gallery
+4. **Archives ouvertes** — arXiv figures, PubMed Central figures (souvent CC BY)
+5. **Unsplash** — pour des images d'ambiance ou de contexte, pas pour des résultats scientifiques
+6. **Wikimedia Commons** — dernier recours si aucune autre source de qualité n'est trouvée
+
+**Ce que tu cherches : l'image qui ferait la une d'un magazine scientifique.** Pas un schéma Wikipedia low-res. Pas un placeholder générique. La meilleure image disponible du sujet.
 
 ### Schéma `image`
 
@@ -126,14 +125,14 @@ Toute source HTTPS est acceptée. L'important est que `credit` soit renseigné c
 {
   "id": "b11",
   "type": "image",
-  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Black_hole_-_Messier_87_crop_max_res.jpg/1280px-Black_hole_-_Messier_87_crop_max_res.jpg",
-  "alt": "Première image directe du trou noir supermassif M87*, capturée par l'Event Horizon Telescope en avril 2019. L'anneau lumineux correspond à la matière en accrétion.",
-  "caption": "M87* — le premier trou noir jamais photographié directement. Crédit EHT Collaboration, 2019.",
+  "url": "https://www.nasa.gov/wp-content/uploads/2023/03/black-hole-m87.jpg",
+  "alt": "Première image directe du trou noir supermassif M87*, capturée par l'Event Horizon Telescope en avril 2019. L'anneau orangé est formé par la matière en accrétion, l'ombre centrale correspond à l'horizon des événements.",
+  "caption": "M87* — le premier trou noir jamais photographié directement. Event Horizon Telescope Collaboration, 2019.",
   "credit": {
     "author": "Event Horizon Telescope Collaboration",
-    "source": "Wikimedia Commons",
-    "url": "https://commons.wikimedia.org/wiki/File:Black_hole_-_Messier_87_crop_max_res.jpg",
-    "license": "CC BY 4.0"
+    "source": "NASA",
+    "url": "https://www.nasa.gov/universe/nasa-visualization-shows-a-black-hole-s-warped-world/",
+    "license": "Domaine public"
   }
 }
 ```
@@ -157,8 +156,10 @@ Toute source HTTPS est acceptée. L'important est que `credit` soit renseigné c
 **Règles absolues :**
 - ❌ Ne jamais inventer une URL d'image — utiliser uniquement des URLs que tu as de bonnes raisons de croire valides
 - ❌ Ne jamais utiliser Getty Images, Shutterstock, Reuters Photos sans licence explicite
-- ✅ Toujours renseigner `credit.url` (page originale, pas le fichier direct)
+- ❌ Ne pas aller sur Wikimedia en premier — cherche d'abord la source primaire
+- ✅ Toujours renseigner `credit.url` (page originale de la source, pas l'URL directe du fichier)
 - ✅ `caption` = description éditoriale lisible ; `alt` = description exhaustive pour accessibilité/SEO — **les deux sont distincts et complémentaires**
+- ✅ Privilégie les images hautes résolution depuis les sites institutionnels officiels
 
 ---
 
@@ -325,8 +326,8 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
   "category_slug": "physique",
   "seo_title": "Trous noirs et horizon des événements — NeuralSpace",
   "seo_description": "Qu'est-ce que l'horizon des événements d'un trou noir ? Comment la relativité générale et la mécanique quantique s'y affrontent-elles ? Tout comprendre en 8 minutes.",
-  "cover_image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Black_hole_-_Messier_87_crop_max_res.jpg/1280px-Black_hole_-_Messier_87_crop_max_res.jpg",
-  "cover_image_alt": "Première image directe du trou noir supermassif M87*, entouré de son anneau de matière lumineuse, capturée par l'Event Horizon Telescope en avril 2019",
+  "cover_image_url": "https://www.nasa.gov/wp-content/uploads/2023/03/black-hole-m87.jpg",
+  "cover_image_alt": "Première image directe du trou noir supermassif M87*, entouré de son anneau de matière en accrétion, capturée par l'Event Horizon Telescope en avril 2019",
   "sources": [
     {
       "label": "Penrose 1965 — Gravitational Collapse",
@@ -367,14 +368,14 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
     {
       "id": "b3",
       "type": "image",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Black_hole_-_Messier_87_crop_max_res.jpg/1280px-Black_hole_-_Messier_87_crop_max_res.jpg",
-      "alt": "Première image directe du trou noir supermassif M87* capturée par l'Event Horizon Telescope en 2019. L'anneau orangé est formé par la matière chaude en accrétion, l'ombre centrale est l'horizon des événements.",
-      "caption": "M87* — le premier trou noir jamais photographié. L'ombre centrale correspond à la sphère des photons.",
+      "url": "https://www.nasa.gov/wp-content/uploads/2023/03/black-hole-m87.jpg",
+      "alt": "Première image directe du trou noir supermassif M87* capturée par l'Event Horizon Telescope en avril 2019. L'anneau orangé est formé par la matière chaude en accrétion, l'ombre centrale correspond à l'horizon des événements.",
+      "caption": "M87* — le premier trou noir jamais photographié directement. EHT Collaboration, 2019.",
       "credit": {
         "author": "Event Horizon Telescope Collaboration",
-        "source": "Wikimedia Commons",
-        "url": "https://commons.wikimedia.org/wiki/File:Black_hole_-_Messier_87_crop_max_res.jpg",
-        "license": "CC BY 4.0"
+        "source": "NASA",
+        "url": "https://www.nasa.gov/universe/nasa-visualization-shows-a-black-hole-s-warped-world/",
+        "license": "Domaine public"
       }
     },
     {
@@ -446,14 +447,14 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
     {
       "id": "b12",
       "type": "image",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Hawkingradiation-a.svg/1280px-Hawkingradiation-a.svg.png",
-      "alt": "Schéma illustrant la radiation de Hawking : création de paires particule-antiparticule à l'horizon des événements d'un trou noir, l'une tombant à l'intérieur, l'autre s'échappant",
-      "caption": "Représentation schématique de la radiation de Hawking à l'horizon des événements.",
+      "url": "https://science.nasa.gov/wp-content/uploads/2023/09/hawking-radiation-illustration.jpg",
+      "alt": "Illustration de la radiation de Hawking : paires de particules virtuelles créées à l'horizon des événements d'un trou noir, dont l'une s'échappe sous forme de rayonnement thermique",
+      "caption": "La radiation de Hawking : comment un trou noir peut perdre de la masse par effets quantiques à son horizon.",
       "credit": {
-        "author": "Kjerish",
-        "source": "Wikimedia Commons",
-        "url": "https://commons.wikimedia.org/wiki/File:Hawkingradiation-a.svg",
-        "license": "CC BY-SA 4.0"
+        "author": "NASA/JPL-Caltech",
+        "source": "NASA Science",
+        "url": "https://science.nasa.gov/universe/black-holes/",
+        "license": "Domaine public"
       }
     },
     {
