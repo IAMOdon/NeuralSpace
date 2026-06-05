@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Orbitron, Space_Grotesk } from "next/font/google";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_LOCALE } from "@/lib/config";
 import { CookieBanner } from "@/components/ui/CookieBanner";
+import { MobileBanner } from "@/components/ui/MobileBanner";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -88,6 +89,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans">
         {children}
+        <MobileBanner />
         <CookieBanner />
       </body>
     </html>
