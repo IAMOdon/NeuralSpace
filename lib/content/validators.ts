@@ -82,12 +82,20 @@ const CodeBlockSchema = z.object({
   filename: z.string().optional(),
 });
 
+const ImageCreditSchema = z.object({
+  author:  z.string().optional(),
+  source:  z.string().optional(),
+  url:     z.string().url().optional(),
+  license: z.string().optional(),
+}).optional();
+
 const ImageBlockSchema = z.object({
-  id: z.string(),
-  type: z.literal("image"),
-  url: z.string().url(),
-  alt: z.string().min(1), // enforced — no empty alt
+  id:      z.string(),
+  type:    z.literal("image"),
+  url:     z.string().url(),
+  alt:     z.string().min(1), // enforced — no empty alt
   caption: z.string().optional(),
+  credit:  ImageCreditSchema,
 });
 
 const VideoBlockSchema = z.object({

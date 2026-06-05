@@ -88,12 +88,20 @@ export type CodeBlock = {
   filename?: string; // optional label shown above the block
 };
 
+export type ImageCredit = {
+  author?: string;  // photographer or creator name
+  source?: string;  // organization / website name, e.g. "NASA", "Wikimedia Commons"
+  url?: string;     // link to the original image page
+  license?: string; // e.g. "CC BY 4.0", "© AP Photo", "Domaine public"
+};
+
 export type ImageBlock = {
   id: string;
   type: "image";
-  url: string; // Cloudinary URL
+  url: string; // Cloudinary URL or external URL
   alt: string; // required — enforced at type level, not just validation
   caption?: string;
+  credit?: ImageCredit;
 };
 
 export type VideoBlock = {

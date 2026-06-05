@@ -283,6 +283,36 @@ function ImageEditor({ block, onChange }: { block: Extract<ContentBlock, { type:
         placeholder="Légende (optionnel)"
         className="w-full text-xs font-sans text-neutral-400 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 outline-none focus:border-ns-blue transition-colors"
       />
+      {/* Credit / attribution */}
+      <div className="border border-neutral-100 rounded-xl p-3 space-y-2 bg-neutral-50/50">
+        <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-neutral-400">Crédit image</p>
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            value={block.credit?.author ?? ""}
+            onChange={(e) => onChange({ credit: { ...block.credit, author: e.target.value || undefined } })}
+            placeholder="Auteur / photographe"
+            className="text-xs font-sans text-neutral-500 bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-ns-blue transition-colors"
+          />
+          <input
+            value={block.credit?.source ?? ""}
+            onChange={(e) => onChange({ credit: { ...block.credit, source: e.target.value || undefined } })}
+            placeholder="Source (ex: NASA, Getty)"
+            className="text-xs font-sans text-neutral-500 bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-ns-blue transition-colors"
+          />
+        </div>
+        <input
+          value={block.credit?.url ?? ""}
+          onChange={(e) => onChange({ credit: { ...block.credit, url: e.target.value || undefined } })}
+          placeholder="Lien vers la source originale (https://…)"
+          className="w-full text-xs font-mono text-neutral-400 bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-ns-blue transition-colors"
+        />
+        <input
+          value={block.credit?.license ?? ""}
+          onChange={(e) => onChange({ credit: { ...block.credit, license: e.target.value || undefined } })}
+          placeholder="Licence (ex: CC BY 4.0, © AP Photo, Domaine public)"
+          className="w-full text-xs font-sans text-neutral-400 bg-white border border-neutral-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-ns-blue transition-colors"
+        />
+      </div>
     </div>
   );
 }

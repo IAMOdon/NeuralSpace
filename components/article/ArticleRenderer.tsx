@@ -147,9 +147,14 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
       );
     }
 
-    case "image":
+    case "image": {
+      const credit = block.credit;
+      const creditLine = credit
+        ? [credit.author, credit.source].filter(Boolean).join(" / ")
+        : null;
+
       return (
-        <figure key={block.id} className="space-y-3">
+        <figure key={block.id} className="space-y-2">
           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
             <Image
               src={block.url}
@@ -159,13 +164,36 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
               sizes="(max-width: 768px) 100vw, 65vw"
             />
           </div>
-          {block.caption && (
-            <figcaption className="text-center text-sm text-neutral-500">
-              {block.caption}
+          {(block.caption || creditLine || credit?.license) && (
+            <figcaption className="space-y-0.5 px-1">
+              {block.caption && (
+                <p className="text-center text-sm text-neutral-500">{block.caption}</p>
+              )}
+              {(creditLine || credit?.license) && (
+                <p className="text-center text-[11px] text-neutral-400 font-sans">
+                  {creditLine && (
+                    credit?.url ? (
+                      <a
+                        href={credit.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-neutral-600 hover:underline transition-colors"
+                      >
+                        {creditLine}
+                      </a>
+                    ) : (
+                      <span>{creditLine}</span>
+                    )
+                  )}
+                  {creditLine && credit?.license && <span> — </span>}
+                  {credit?.license && <span>{credit.license}</span>}
+                </p>
+              )}
             </figcaption>
           )}
         </figure>
       );
+    }
 
     case "video": {
       const src =

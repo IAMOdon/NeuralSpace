@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { AuthorSummary } from "@/types/author";
 
 type Props = {
   title: string;
@@ -8,6 +9,7 @@ type Props = {
   category: { name: string; colorHex?: string | null };
   readingTimeMin: number | null;
   publishedAt: string | null;
+  authors?: AuthorSummary[];
 };
 
 function formatDate(dateStr: string): string {
@@ -18,9 +20,26 @@ function formatDate(dateStr: string): string {
   });
 }
 
+function AuthorAvatar({ a }: { a: AuthorSummary }) {
+  if (a.avatarUrl) {
+    return (
+      <div className="relative w-6 h-6 rounded-full overflow-hidden ring-1 ring-white shrink-0">
+        <Image src={a.avatarUrl} alt={a.name} fill className="object-cover" sizes="24px" />
+      </div>
+    );
+  }
+  return (
+    <div className="w-6 h-6 rounded-full bg-ns-blue/10 flex items-center justify-center ring-1 ring-white shrink-0">
+      <span className="text-[9px] font-sans font-bold text-ns-blue">
+        {a.name.charAt(0).toUpperCase()}
+      </span>
+    </div>
+  );
+}
+
 export function ArticleHeader({
   title, summary, coverImageUrl, coverImageAlt,
-  category, readingTimeMin, publishedAt,
+  category, readingTimeMin, publishedAt, authors = [],
 }: Props) {
   const hex = category.colorHex ?? "#2233f0";
 
@@ -74,6 +93,24 @@ export function ArticleHeader({
         <p className="text-base md:text-lg text-neutral-500 font-sans leading-relaxed">
           {summary}
         </p>
+      )}
+
+      {/* Authors byline — visible at all breakpoints */}
+      {authors.length > 0 && (
+        <div className="flex items-center gap-2 mt-5 flex-wrap">
+          <div className="flex -space-x-1.5">
+            {authors.map((a) => <AuthorAvatar key={a.id} a={a} />)}
+          </div>
+          <p className="text-xs text-neutral-500 font-sans">
+            {authors.map((a, i) => (
+              <span key={a.id}>
+                <span className="font-semibold text-ns-black">{a.name}</span>
+                {a.role && <span className="text-neutral-400"> · {a.role}</span>}
+                {i < authors.length - 1 && <span className="text-neutral-300">, </span>}
+              </span>
+            ))}
+          </p>
+        </div>
       )}
 
       {/* Divider */}

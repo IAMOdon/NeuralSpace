@@ -130,6 +130,7 @@ export default async function ArticlePage({ params }: Props) {
             category={{ name: article.category.name, colorHex: article.category.colorHex }}
             readingTimeMin={article.readingTimeMin}
             publishedAt={article.publishedAt ?? null}
+            authors={article.authors}
           />
           <WordLookup>
             <ArticleRenderer blocks={article.content.filter((b) => b.type !== "heading")} />
