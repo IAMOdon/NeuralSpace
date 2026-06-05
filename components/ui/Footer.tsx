@@ -114,7 +114,7 @@ export async function Footer() {
                   rel="noopener noreferrer"
                   aria-label={`${SITE_NAME} sur ${s.label}`}
                   title={s.label}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all duration-200"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors duration-200"
                 >
                   {s.icon}
                 </a>
@@ -158,17 +158,17 @@ export async function Footer() {
                 </Link>
               </li>
               {/* TODO: Audio — épisodes & podcasts scientifiques */}
-              {/* <li>
+              <li>
                 <Link href="/audio" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
                   Audio
                 </Link>
-              </li> */}
+              </li>
               {/* TODO: Live — sessions en direct, Q&A, conférences */}
-              {/* <li>
+              <li>
                 <Link href="/live" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
                   Live
                 </Link>
-              </li> */}
+              </li>
             </ul>
           </div>
 

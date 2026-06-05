@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Politique de cookies",
   description: "Politique de gestion des cookies de Neural Space.",
   robots: { index: false },
+  alternates: { canonical: `${SITE_URL}/legal/cookies` },
 };
 
 export default function CookiesPage() {

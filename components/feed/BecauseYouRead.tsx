@@ -36,6 +36,8 @@ export function BecauseYouRead() {
 
     setLastTitle(lastRead.title);
 
+    // Exception architecturale justifiée : la catégorie cible dépend de localStorage
+    // (ns_interests / ns_history), inaccessible côté serveur — fetch client-side inévitable.
     fetch(`/api/similar?categorySlug=${encodeURIComponent(topCategory)}&exclude=${encodeURIComponent(lastRead.slug)}`)
       .then((r) => r.json())
       .then((data: ArticleCardType[]) => {

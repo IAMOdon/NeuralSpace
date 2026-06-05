@@ -5,9 +5,11 @@ export const metadata: Metadata = {
   title: "Audio — Neural Space",
   description: "Podcasts et épisodes audio pour explorer la science autrement.",
   robots: { index: false },
+  alternates: { canonical: "https://neuralspace.io/audio" },
   openGraph: {
     title: "Audio — Neural Space",
     description: "Podcasts et épisodes audio pour explorer la science autrement.",
+    url: "https://neuralspace.io/audio",
     siteName: "Neural Space",
     locale: "fr_FR",
     type: "website",

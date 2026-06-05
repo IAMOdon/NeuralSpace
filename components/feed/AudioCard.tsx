@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Play, Pause, Clock, Headphones } from "lucide-react";
 
 type Props = {
@@ -26,6 +26,10 @@ export function AudioCard({
   const [playing, setPlaying]   = useState(false);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
   const togglePlay = useCallback(() => {
     setPlaying((p) => {
@@ -104,7 +108,7 @@ export function AudioCard({
         <div className="space-y-1">
           <div className="relative h-1 rounded-full bg-neutral-100 overflow-hidden">
             <div
-              className="absolute left-0 top-0 h-full rounded-full transition-all duration-100"
+              className="absolute left-0 top-0 h-full rounded-full transition-[width] duration-100"
               style={{ width: `${progress}%`, backgroundColor: categoryColor }}
             />
           </div>

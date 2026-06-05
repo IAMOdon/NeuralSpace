@@ -6,9 +6,11 @@ export const metadata: Metadata = {
   title: "Live — Neural Space",
   description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
   robots: { index: false },
+  alternates: { canonical: "https://neuralspace.io/live" },
   openGraph: {
     title: "Live — Neural Space",
     description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
+    url: "https://neuralspace.io/live",
     siteName: "Neural Space",
     locale: "fr_FR",
     type: "website",

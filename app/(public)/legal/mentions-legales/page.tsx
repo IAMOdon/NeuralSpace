@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Mentions légales",
   description: "Mentions légales de Neural Space.",
   robots: { index: false },
+  alternates: { canonical: `${SITE_URL}/legal/mentions-legales` },
 };
 
 export default function MentionsLegalesPage() {

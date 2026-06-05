@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
   description: "Conditions générales d'utilisation de Neural Space.",
   robots: { index: false },
+  alternates: { canonical: `${SITE_URL}/legal/cgu` },
 };
 
 export default function CGUPage() {
