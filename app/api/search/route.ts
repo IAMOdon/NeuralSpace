@@ -9,7 +9,7 @@ function buildTsQuery(input: string): string {
   const tokens = input
     .trim()
     .toLowerCase()
-    .replace(/[^\w\sàâäéèêëîïôùûüÿçœæ-]/gi, " ")
+    .replace(/[^\w\sàâäéèêëîïôùûüÿçœæ\-]/gi, " ")
     .split(/\s+/)
     .filter((t) => t.length >= 2);
 

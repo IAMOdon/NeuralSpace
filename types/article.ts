@@ -6,7 +6,7 @@ export type ArticleType = "short" | "long";
 
 export type ArticleSource = {
   label: string;
-  url: string;
+  url?: string;
   doi?: string;
 };
 
@@ -54,6 +54,7 @@ export type Article = {
   viewCount: number;
   seoTitle?: string;
   seoDescription?: string;
+  isSponsored: boolean;
   ogImageUrl?: string;
   lastUpdatedNote?: string;
   scheduledAt?: string;

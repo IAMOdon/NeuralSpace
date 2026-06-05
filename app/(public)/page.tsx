@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getArticles, getCategories } from "@/lib/articles";
+import { adminClient } from "@/lib/supabase/admin";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_LOCALE } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -25,27 +26,23 @@ import { HeroBlock, type HeroConfig } from "@/components/feed/HeroBlock";
 import { AudioCover } from "@/components/feed/AudioCover";
 
 type Props = {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 };
 
 export default async function FeedPage({ searchParams }: Props) {
-  const { category } = await searchParams;
-  const [articles, categories] = await Promise.all([
-    getArticles({ categorySlug: category, sort: "recent", limit: 20 }),
+  const { category, q } = await searchParams;
+  const [articles, categories, heroRow] = await Promise.all([
+    getArticles({ categorySlug: category, searchQuery: q, sort: "recent", limit: 20 }),
     getCategories(),
+    adminClient.from("hero_config").select("type, config").eq("id", "singleton").single(),
   ]);
 
-  const hero   = category ? articles : articles.slice(0, 3);
-  const rest   = category ? []       : articles.slice(3);
+  const hero = category ? articles : articles.slice(0, 3);
+  const rest = category ? []       : articles.slice(3);
 
-  // TODO: remplacer par fetch depuis hero_config table Supabase quand admin panel prêt
-  const heroConfig: HeroConfig = {
-    type: "live",
-    title: "Q&A — La physique derrière les trous de ver",
-    description: "Session en direct sur la relativité générale, les solutions de Lorentz et ce que la physique dit vraiment des voyages dans le temps.",
-    viewers: 847,
-    href: "/live",
-  };
+  const heroConfig: HeroConfig = heroRow.data
+    ? { type: heroRow.data.type, ...(heroRow.data.config as object) } as HeroConfig
+    : { type: "none" };
 
   return (
     <>
@@ -71,9 +68,11 @@ export default async function FeedPage({ searchParams }: Props) {
         </div>
       </div>
 
+      {/* HeroBlock — full-bleed, hors container */}
+      <HeroBlock config={heroConfig} />
+
       {/* Feed */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-14">
-        <HeroBlock config={heroConfig} />
         <BecauseYouRead />
         {articles.length === 0 ? (
           <p className="text-neutral-400 font-sans">Aucun article dans cette catégorie.</p>

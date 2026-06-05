@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { getArticleBySlug, getArticleSlugs } from "@/lib/articles";
 import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
 import { ArticleRenderer } from "@/components/article/ArticleRenderer";
+import { ArticleHeader } from "@/components/article/ArticleHeader";
+import { ContributorSidebar } from "@/components/article/ContributorSidebar";
 import { WordLookup } from "@/components/article/WordLookup";
 import { ArticleTracker } from "@/components/article/ArticleTracker";
 
@@ -120,12 +122,24 @@ export default async function ArticlePage({ params }: Props) {
       />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
         <article className="flex-1 min-w-0">
+          <ArticleHeader
+            title={article.title}
+            summary={article.summary}
+            coverImageUrl={article.coverImageUrl ?? null}
+            coverImageAlt={article.coverImageAlt ?? null}
+            category={{ name: article.category.name, colorHex: article.category.colorHex }}
+            readingTimeMin={article.readingTimeMin}
+            publishedAt={article.publishedAt ?? null}
+          />
           <WordLookup>
-            <ArticleRenderer blocks={article.content} />
+            <ArticleRenderer blocks={article.content.filter((b) => b.type !== "heading")} />
           </WordLookup>
         </article>
-        <aside className="hidden lg:block w-80 shrink-0">
-          {/* Author sidebar — placeholder */}
+        <aside className="hidden lg:block w-64 shrink-0 pt-2">
+          <ContributorSidebar
+            contributors={article.authors}
+            isSponsored={article.isSponsored}
+          />
         </aside>
       </div>
     </>

@@ -7,7 +7,7 @@ export function ArticleCard({ article, priority = false }: { article: ArticleCar
     <Link href={`/${article.slug}`} className="group block rounded-2xl focus-visible:outline-2 focus-visible:outline-ns-blue focus-visible:outline-offset-2">
       <article className="h-full flex flex-col gap-4 p-3 rounded-2xl transition-shadow duration-200 hover:shadow-lg hover:shadow-black/5 bg-white border border-neutral-100">
         {/* Cover */}
-        <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-neutral-100">
+        <div className="relative aspect-[3/2] rounded-xl overflow-hidden bg-neutral-100">
           {article.coverImageUrl ? (
             <Image
               src={article.coverImageUrl}

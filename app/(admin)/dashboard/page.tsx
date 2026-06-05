@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { adminClient } from "@/lib/supabase/admin";
 import {
   Eye, Users, BookOpen, Clock, TrendingUp, Globe, Monitor,
-  Smartphone, Tablet, FileText, Mail, Radio, Tv, ExternalLink,
+  Smartphone, Tablet, FileText, Mail, Radio, ExternalLink,
 } from "lucide-react";
 import { SearchBar } from "@/components/admin/SearchBar";
 
@@ -486,11 +486,6 @@ export default async function DashboardPage() {
             icon={Mail}
             label="Newsletter"
             description="Gérer les abonnés et envoyer des campagnes via Resend."
-          />
-          <MockupCard
-            icon={Tv}
-            label="Hero Config"
-            description="Changer le bloc hero du feed en temps réel : live, news, player."
           />
           <MockupCard
             icon={Radio}

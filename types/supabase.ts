@@ -183,6 +183,7 @@ export type Database = {
         Row: {
           category_id: string | null
           content: Json
+          is_sponsored: boolean
           cover_image_alt: string | null
           cover_image_url: string | null
           created_at: string | null
@@ -217,6 +218,7 @@ export type Database = {
           created_by?: string | null
           embedding?: string | null
           id?: string
+          is_sponsored?: boolean
           last_updated_note?: string | null
           layout_preset?: string | null
           og_image_url?: string | null
@@ -245,6 +247,7 @@ export type Database = {
           created_by?: string | null
           embedding?: string | null
           id?: string
+          is_sponsored?: boolean
           last_updated_note?: string | null
           layout_preset?: string | null
           og_image_url?: string | null
@@ -389,6 +392,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hero_config: {
+        Row: {
+          config: Json
+          id: string
+          type: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          id?: string
+          type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          id?: string
+          type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       series: {
         Row: {

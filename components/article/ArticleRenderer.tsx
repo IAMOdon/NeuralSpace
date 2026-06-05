@@ -125,7 +125,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
     }
 
     case "code": {
-      const highlighted = await highlightCode(block.content, block.language);
+      const highlighted = await highlightCode(block.content, block.language).catch(() => null);
       return (
         <div key={block.id} className="rounded-xl overflow-hidden text-sm">
           {block.filename && (
@@ -133,10 +133,16 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
               {block.filename}
             </div>
           )}
-          <div
-            className="[&>pre]:p-5 [&>pre]:overflow-x-auto [&>pre]:m-0"
-            dangerouslySetInnerHTML={{ __html: highlighted }}
-          />
+          {highlighted ? (
+            <div
+              className="[&>pre]:p-5 [&>pre]:overflow-x-auto [&>pre]:m-0"
+              dangerouslySetInnerHTML={{ __html: highlighted }}
+            />
+          ) : (
+            <pre className="bg-neutral-900 text-neutral-100 p-5 overflow-x-auto text-sm font-mono m-0">
+              {block.content}
+            </pre>
+          )}
         </div>
       );
     }

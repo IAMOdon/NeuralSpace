@@ -124,7 +124,7 @@ export const ContentSchema = z.array(ContentBlockSchema);
 
 export const ArticleSourceSchema = z.object({
   label: z.string().min(1),
-  url: z.string().url(),
+  url: z.string().url().optional(),
   doi: z.string().optional(),
 });
 

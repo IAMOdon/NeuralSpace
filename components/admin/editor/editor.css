@@ -1,0 +1,127 @@
+/* Tiptap editor prose styles — NeuralSpace admin */
+
+.prose-editor {
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #0f0f10;
+}
+
+/* Placeholder — scoped and unscoped (used by InlineEditor blocks) */
+.prose-editor p.is-editor-empty:first-child::before,
+p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #d4d4d8;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.prose-editor .is-editor-empty::before,
+.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: #d4d4d8;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Paragraphs */
+.prose-editor p {
+  margin: 0 0 1.4em;
+}
+
+/* Headings */
+.prose-editor h2 {
+  font-family: var(--font-heading, ui-sans-serif);
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1.25;
+  margin: 2em 0 0.6em;
+  color: #0f0f10;
+}
+
+.prose-editor h3 {
+  font-family: var(--font-heading, ui-sans-serif);
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.35;
+  margin: 1.6em 0 0.5em;
+  color: #0f0f10;
+}
+
+/* Lists */
+.prose-editor ul,
+.prose-editor ol {
+  padding-left: 1.5em;
+  margin: 0 0 1.4em;
+}
+
+.prose-editor ul { list-style-type: disc; }
+.prose-editor ol { list-style-type: decimal; }
+
+.prose-editor li {
+  margin-bottom: 0.35em;
+}
+
+/* Blockquote */
+.prose-editor blockquote {
+  border-left: 3px solid #2233f0;
+  padding-left: 1.25rem;
+  margin: 1.6em 0;
+  color: #5a5a6e;
+  font-style: italic;
+}
+
+/* Code inline */
+.prose-editor code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.875em;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: #2233f0;
+}
+
+/* Code block */
+.prose-editor pre {
+  background: #0f0f10;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.6em 0;
+  overflow-x: auto;
+}
+
+.prose-editor pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #e5e7eb;
+  font-size: 0.875rem;
+}
+
+/* Horizontal rule */
+.prose-editor hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2em 0;
+}
+
+/* Links */
+.prose-editor a {
+  color: #2233f0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Images */
+.prose-editor img {
+  border-radius: 12px;
+  margin: 1.6em 0;
+  max-width: 100%;
+}
+
+/* Strong / em */
+.prose-editor strong { font-weight: 700; }
+.prose-editor em     { font-style: italic; }

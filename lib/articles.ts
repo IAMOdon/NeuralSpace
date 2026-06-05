@@ -8,10 +8,103 @@ import type { ArticleCard, ArticleWithRelations, Series } from "@/types/article"
 
 type RawSeriesJoin = { order: number; series: Series } | null;
 
+// ── Tiptap ProseMirror → ContentBlock converter ───────────────────────────────
+
+type TiptapNode = {
+  type: string;
+  text?: string;
+  content?: TiptapNode[];
+  attrs?: Record<string, unknown>;
+  marks?: { type: string; attrs?: Record<string, unknown> }[];
+};
+
+function tiptapTextRuns(nodes: TiptapNode[] = []) {
+  return nodes.map((n) => {
+    if (n.type !== "text") return null;
+    const run: { text: string; marks?: string[]; link?: { href: string } } = { text: n.text ?? "" };
+    const activeMarks = (n.marks ?? []).map((m) => m.type);
+    const validMarks = activeMarks.filter((m): m is "bold" | "italic" | "underline" | "strikethrough" =>
+      ["bold", "italic", "underline", "strikethrough"].includes(m)
+    );
+    if (validMarks.length) run.marks = validMarks;
+    const linkMark = (n.marks ?? []).find((m) => m.type === "link");
+    if (linkMark?.attrs?.href) run.link = { href: String(linkMark.attrs.href) };
+    return run;
+  }).filter(Boolean) as { text: string }[];
+}
+
+function tiptapPlainText(nodes: TiptapNode[] = []): string {
+  return nodes.map((n) => n.text ?? tiptapPlainText(n.content)).join("");
+}
+
+function tiptapToContentBlocks(doc: TiptapNode): ContentBlock[] {
+  const blocks: ContentBlock[] = [];
+  let i = 0;
+  const id = () => `b${++i}`;
+
+  for (const node of doc.content ?? []) {
+    switch (node.type) {
+      case "paragraph": {
+        const runs = tiptapTextRuns(node.content);
+        if (runs.length) blocks.push({ id: id(), type: "paragraph", content: runs });
+        break;
+      }
+      case "heading": {
+        const level = Number(node.attrs?.level ?? 2);
+        const text  = tiptapPlainText(node.content);
+        if (!text) break;
+        if (level === 1) {
+          blocks.push({ id: id(), type: "heading", content: text });
+        } else {
+          blocks.push({
+            id: id(), type: "subheading",
+            level: level <= 2 ? 2 : 3,
+            content: text,
+            anchor: text.toLowerCase().normalize("NFD").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-"),
+          });
+        }
+        break;
+      }
+      case "blockquote": {
+        const inner = node.content?.[0];
+        const text  = tiptapPlainText(inner?.content);
+        if (text) blocks.push({ id: id(), type: "quote", content: text });
+        break;
+      }
+      case "bulletList":
+      case "orderedList": {
+        const items = (node.content ?? []).map((li) =>
+          tiptapTextRuns(li.content?.[0]?.content)
+        ).filter((r) => r.length > 0);
+        if (items.length) blocks.push({ id: id(), type: "bullet-list", items });
+        break;
+      }
+      case "codeBlock": {
+        const text = tiptapPlainText(node.content);
+        blocks.push({ id: id(), type: "code", language: String(node.attrs?.language ?? "text"), content: text });
+        break;
+      }
+      case "horizontalRule":
+        blocks.push({ id: id(), type: "divider" });
+        break;
+    }
+  }
+  return blocks;
+}
+
 // safeParse — malformed DB content returns empty array, never crashes the page.
+// Handles both the native ContentBlock[] format and Tiptap ProseMirror JSON.
 function parseContent(raw: unknown): ContentBlock[] {
-  const result = ContentSchema.safeParse(raw);
-  return result.success ? result.data : [];
+  // Native format first
+  const native = ContentSchema.safeParse(raw);
+  if (native.success) return native.data;
+
+  // Tiptap doc fallback
+  if (raw && typeof raw === "object" && "type" in raw && (raw as TiptapNode).type === "doc") {
+    return tiptapToContentBlocks(raw as TiptapNode);
+  }
+
+  return [];
 }
 
 function parseSources(raw: unknown): ArticleSource[] {
@@ -19,8 +112,11 @@ function parseSources(raw: unknown): ArticleSource[] {
   return result.success ? result.data : [];
 }
 
+const UNCATEGORIZED: Category = { id: "", slug: "", name: "Non classé" };
+
 // Supabase returns snake_case; our types use camelCase.
-function mapCategory(raw: { id: string; slug: string; name: string; color_hex: string | null }): Category {
+function mapCategory(raw: { id: string; slug: string; name: string; color_hex: string | null } | null): Category {
+  if (!raw) return UNCATEGORIZED;
   return {
     id: raw.id,
     slug: raw.slug,
@@ -32,12 +128,14 @@ function mapCategory(raw: { id: string; slug: string; name: string; color_hex: s
 export async function getArticles({
   categorySlug,
   tagSlug,
+  searchQuery,
   sort = "recent",
   limit = 20,
   offset = 0,
 }: {
   categorySlug?: string;
   tagSlug?: string;
+  searchQuery?: string;
   sort?: "recent" | "popular";
   limit?: number;
   offset?: number;
@@ -72,6 +170,11 @@ export async function getArticles({
 
   if (categorySlug) query = query.eq("categories.slug", categorySlug);
   if (tagSlug) query = query.eq("article_tags.tags.slug", tagSlug);
+  if (searchQuery) {
+    // Strip PostgREST filter special chars (comma, parentheses, dot used as operators)
+    const safe = searchQuery.replace(/[,().]/g, " ").trim();
+    if (safe) query = query.or(`title.ilike.%${safe}%,summary.ilike.%${safe}%`);
+  }
 
   const { data, error } = await query;
 
@@ -90,7 +193,7 @@ export async function getArticles({
     viewCount: row.view_count,
     publishedAt: row.published_at ?? undefined,
     category: mapCategory(row.categories as { id: string; slug: string; name: string; color_hex: string | null }),
-    tags: (row.article_tags as { tags: ArticleCard["tags"][number] }[]).map(
+    tags: ((row.article_tags ?? []) as { tags: ArticleCard["tags"][number] }[]).map(
       (at) => at.tags
     ),
   }));
@@ -134,6 +237,7 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
     wordCount: data.word_count,
     readingTimeMin: data.reading_time_min,
     viewCount: data.view_count,
+    isSponsored: data.is_sponsored ?? false,
     seoTitle: data.seo_title ?? undefined,
     seoDescription: data.seo_description ?? undefined,
     ogImageUrl: data.og_image_url ?? undefined,
@@ -145,7 +249,7 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
     createdBy: data.created_by ?? "",
     category: mapCategory(data.categories as { id: string; slug: string; name: string; color_hex: string | null }),
     authors: (
-      data.article_authors as {
+      (data.article_authors ?? []) as {
         order: number;
         authors: ArticleWithRelations["authors"][number];
       }[]
@@ -153,7 +257,7 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
       .sort((a, b) => a.order - b.order)
       .map((aa) => aa.authors),
     tags: (
-      data.article_tags as { tags: ArticleWithRelations["tags"][number] }[]
+      (data.article_tags ?? []) as { tags: ArticleWithRelations["tags"][number] }[]
     ).map((at) => at.tags),
     series: rawSeries
       ? { series: rawSeries.series, order: rawSeries.order }
@@ -168,6 +272,24 @@ export async function getCategories(): Promise<Category[]> {
     .select("id, slug, name, color_hex")
     .order("name");
   return (data ?? []).map(mapCategory);
+}
+
+export async function searchContributors(q: string) {
+  const client = await createClient();
+  if (!q.trim()) return [];
+  const { data } = await client
+    .from("authors")
+    .select("id, name, slug, avatar_url, role, institution")
+    .ilike("name", `%${q}%`)
+    .limit(8);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    avatarUrl: r.avatar_url ?? null,
+    role: r.role ?? null,
+    institution: r.institution ?? null,
+  }));
 }
 
 // adminClient — no cookies, safe for generateStaticParams at build time.

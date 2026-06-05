@@ -19,8 +19,8 @@ function getCookie(name: string): string | null {
 
 function setCookie(name: string, value: string, days: number) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  // TODO: add Secure flag once custom domain is confirmed HTTPS-only
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`;
 }
 
 // --- Consent ---
@@ -41,8 +41,7 @@ export function getOrCreateSession(): string {
   const existing = getCookie("ns_session");
   if (existing) return existing;
   const id = crypto.randomUUID();
-  // TODO: add Secure flag once custom domain is confirmed HTTPS-only
-  document.cookie = `ns_session=${id}; path=/; SameSite=Lax`;
+  setCookie("ns_session", id, 365);
   return id;
 }
 

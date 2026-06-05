@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { SITE_NAME } from "@/lib/config";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading]   = useState(false);
@@ -26,7 +27,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    const redirectTo = searchParams.get("redirectTo");
+    // Only allow redirects to internal /dashboard paths to prevent open-redirect
+    const destination =
+      redirectTo && redirectTo.startsWith("/dashboard") ? redirectTo : "/dashboard";
+
+    router.push(destination);
     router.refresh();
   }
 

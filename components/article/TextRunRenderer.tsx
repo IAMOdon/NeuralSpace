@@ -32,7 +32,7 @@ function TextRunRenderer({ run }: { run: TextRun }) {
     return (
       <>
         {node}
-        <sup className="text-ns-blue text-xs ml-0.5 cursor-pointer hover:opacity-70">
+        <sup className="text-ns-blue text-xs ml-0.5">
           [{run.citation + 1}]
         </sup>
       </>
