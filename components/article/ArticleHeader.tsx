@@ -47,7 +47,7 @@ export function ArticleHeader({
     <header className="mb-10">
       {/* Cover image */}
       {coverImageUrl && (
-        <div className="relative w-full aspect-[16/7] rounded-2xl overflow-hidden mb-8">
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] md:aspect-[16/7] rounded-2xl overflow-hidden mb-8">
           <Image
             src={coverImageUrl}
             alt={coverImageAlt || title}

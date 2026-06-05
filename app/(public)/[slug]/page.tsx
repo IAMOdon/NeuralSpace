@@ -136,7 +136,7 @@ export default async function ArticlePage({ params }: Props) {
             <ArticleRenderer blocks={article.content.filter((b) => b.type !== "heading")} />
           </WordLookup>
         </article>
-        <aside className="hidden lg:block w-64 shrink-0 pt-2">
+        <aside className="w-full lg:w-64 shrink-0 border-t border-neutral-100 pt-6 lg:border-0 lg:pt-2">
           <ContributorSidebar
             contributors={article.authors}
             isSponsored={article.isSponsored}

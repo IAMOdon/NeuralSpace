@@ -48,7 +48,7 @@ export default async function FeedPage({ searchParams }: Props) {
     <>
       {/* Hero — title only, clean blue strip */}
       <div className="bg-ns-blue w-full py-5">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
           <h1 className="font-heading font-black text-lg md:text-xl text-ns-white tracking-tight">
             La science, rendue accessible.
           </h1>
@@ -157,6 +157,7 @@ export default async function FeedPage({ searchParams }: Props) {
                             src={article.coverImageUrl}
                             alt={article.coverImageAlt ?? article.title}
                             fill
+                            unoptimized
                             className="object-cover"
                             sizes="80px"
                           />

@@ -13,6 +13,7 @@ export function ArticleCard({ article, priority = false }: { article: ArticleCar
               src={article.coverImageUrl}
               alt={article.coverImageAlt ?? article.title}
               fill
+              unoptimized
               className="object-cover transition-transform duration-200 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={priority}

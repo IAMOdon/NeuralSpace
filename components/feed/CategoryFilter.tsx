@@ -86,7 +86,7 @@ export function CategoryFilter({ categories }: { categories: Category[] }) {
           </button>
 
           {open && (
-            <div className="absolute top-full mt-2 left-0 bg-white rounded-2xl border border-neutral-100 shadow-lg py-1.5 min-w-[200px] z-50">
+            <div className="absolute top-full mt-2 right-0 bg-white rounded-2xl border border-neutral-100 shadow-lg py-1.5 min-w-[200px] z-50">
               {overflow.map((cat) => {
                 const isActive = cat.slug === active;
                 return (
