@@ -140,6 +140,7 @@ export default async function ArticlePage({ params }: Props) {
           <ContributorSidebar
             contributors={article.authors}
             isSponsored={article.isSponsored}
+            sources={article.sources}
           />
         </aside>
       </div>
