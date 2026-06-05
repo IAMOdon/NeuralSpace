@@ -134,6 +134,9 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
 > Chaque item est un tableau de TextRun (même format que `paragraph.content`).
 
 ### `key-takeaways` — Encadré "À retenir" (plain text)
+
+> ⚠️ **Règle absolue** : `items` est un tableau de **chaînes de caractères brutes**. Ne jamais écrire `[[{ "text": "..." }]]`. Ce format est réservé à `bullet-list` et `paragraph`. Ici, c'est `["phrase 1", "phrase 2", ...]`, point.
+
 ```json
 {
   "id": "b7",
@@ -145,6 +148,11 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
   ]
 }
 ```
+
+| ❌ Mauvais | ✅ Correct |
+|---|---|
+| `"items": [[{ "text": "..." }]]` | `"items": ["..."]` |
+| `"items": [{ "text": "..." }]` | `"items": ["phrase directe"]` |
 
 ### `callout` — Encadré thématique
 ```json
