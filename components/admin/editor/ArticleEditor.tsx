@@ -79,6 +79,7 @@ type ImportMeta = {
   title?: string; summary?: string; slug?: string;
   seoTitle?: string; seoDesc?: string;
   sources?: { label: string; url?: string }[];
+  coverUrl?: string; coverAlt?: string;
 };
 
 function JsonImportPanel({ onImport }: {
@@ -99,8 +100,10 @@ function JsonImportPanel({ onImport }: {
         if (parsed.title)          meta.title   = parsed.title;
         if (parsed.summary)        meta.summary = parsed.summary;
         if (parsed.slug)           meta.slug    = parsed.slug;
-        if (parsed.seo_title)      meta.seoTitle = parsed.seo_title;
-        if (parsed.seo_description) meta.seoDesc = parsed.seo_description;
+        if (parsed.seo_title)        meta.seoTitle  = parsed.seo_title;
+        if (parsed.seo_description)  meta.seoDesc   = parsed.seo_description;
+        if (parsed.cover_image_url)  meta.coverUrl  = parsed.cover_image_url;
+        if (parsed.cover_image_alt)  meta.coverAlt  = parsed.cover_image_alt;
         if (Array.isArray(parsed.sources)) meta.sources = parsed.sources;
       }
       if (!blocks.length) throw new Error("Aucun block trouvé.");
@@ -459,6 +462,8 @@ export function ArticleEditor({ article: initial, categories, initialContributor
               if (meta.seoDesc)  setSeoDesc(meta.seoDesc);
               if (meta.slug)     { setSlug(meta.slug); setSlugDirty(true); }
               if (meta.sources)  setSources(meta.sources);
+              if (meta.coverUrl) setCoverUrl(meta.coverUrl);
+              if (meta.coverAlt) setCoverAlt(meta.coverAlt);
             }} />
           </div>
         </div>
