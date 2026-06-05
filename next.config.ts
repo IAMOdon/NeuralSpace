@@ -6,8 +6,8 @@ const CSP = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   // KaTeX and Tiptap inject inline styles at runtime
   "style-src 'self' 'unsafe-inline'",
-  // Cloudinary, Wikimedia Commons, NASA, ESA — external image sources allowed in articles
-  "img-src 'self' https://res.cloudinary.com https://upload.wikimedia.org https://images.nasa.gov https://www.esa.int https://imagebank.nih.gov data: blob:",
+  // Any HTTPS image source — articles can embed from Nature, NASA, Wikimedia, etc.
+  "img-src 'self' https: data: blob:",
   "font-src 'self'",
   // Supabase API + realtime websocket
   `connect-src 'self' https://*.supabase.co wss://*.supabase.co`,
@@ -31,11 +31,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "res.cloudinary.com" },
-      { protocol: "https", hostname: "upload.wikimedia.org" },
-      { protocol: "https", hostname: "images.nasa.gov" },
-      { protocol: "https", hostname: "www.esa.int" },
-      { protocol: "https", hostname: "imagebank.nih.gov" },
+      // Allow any HTTPS source — articles can use Nature, NASA, Wikimedia, AP, etc.
+      { protocol: "https", hostname: "**" },
     ],
   },
   async headers() {
