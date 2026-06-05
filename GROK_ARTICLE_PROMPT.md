@@ -85,6 +85,8 @@ Les champs `seo_title` et `seo_description` sont critiques pour le référenceme
 
 ## Images — Règles absolues
 
+> ⛔ **INTERDIT** : fabriquer des URLs d'images (`https://artifacts/...`, `https://example.com/...`, IDs Unsplash inventés, chemins imaginaires). Si tu ne connais pas l'URL réelle d'une image qui existe, **omets le bloc image** — ne l'invente pas.
+
 ### Obligation d'images
 
 | Type d'article | Images minimum |
@@ -92,7 +94,7 @@ Les champs `seo_title` et `seo_description` sont critiques pour le référenceme
 | `short` (1500–2000 mots) | **2 images** — 1 image de couverture (`cover_image_url`) + 1 dans le `content` |
 | `long` (2500–4000 mots) | **3–4 images** — 1 couverture + 2–3 dans le `content` |
 
-**Aucun article ne doit être généré sans image.** L'absence d'image est une erreur, pas une option.
+**Si tu ne trouves pas assez d'images réelles et vérifiables, mets-en moins plutôt que d'en inventer.** La qualité prime sur la quantité.
 
 ### Placement des images dans l'article
 
@@ -153,8 +155,20 @@ Ne pas aller chercher sur Wikipedia/Wikimedia en premier — c'est un relais de 
 - ❌ `"alt": "Photo"` — ne rien dire
 - ✅ `"alt": "Vue microscopique de neurones humains interconnectés, colorisée en bleu et orange, obtenue par tomographie électronique à l'université de Harvard"` — précis, descriptif, contextualisé
 
+**🚨 RÈGLE CRITIQUE — URLs inventées INTERDITES 🚨**
+
+> Tu n'as PAS le droit de fabriquer une URL d'image. Si tu ne connais pas l'URL exacte d'une image réelle qui existe en ligne, **n'écris pas de bloc `image` du tout** pour ce slot — saute-le et passe au bloc suivant.
+
+Les URLs suivantes sont des exemples de ce qui est **STRICTEMENT INTERDIT** :
+- `https://artifacts/imagine_images/hair_growth_cycle_diagram_scientific.jpg` ← URL inventée, inexistante
+- `https://example.com/image.jpg` ← placeholder
+- `https://images.unsplash.com/photo-fake-id` ← ID inventé
+- Toute URL contenant `imagine`, `placeholder`, `fake`, `example`, `your-image`, `INSERT`, ou construite de toutes pièces
+
+**Une URL valide = une URL que tu as réellement vue ou que tu peux affirmer avec certitude qu'elle existe et est accessible.** Si tu doutes, omets le bloc image plutôt que d'inventer.
+
 **Règles absolues :**
-- ❌ Ne jamais inventer une URL d'image — utiliser uniquement des URLs que tu as de bonnes raisons de croire valides
+- ❌ **JAMAIS** fabriquer ou deviner une URL d'image — c'est la règle n°1, sans exception
 - ❌ Ne jamais utiliser Getty Images, Shutterstock, Reuters Photos sans licence explicite
 - ❌ Ne pas aller sur Wikimedia en premier — cherche d'abord la source primaire
 - ✅ Toujours renseigner `credit.url` (page originale de la source, pas l'URL directe du fichier)
