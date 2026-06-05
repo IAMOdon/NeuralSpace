@@ -15,6 +15,7 @@ Historique des migrations Supabase. Chaque fichier est appliqué une seule fois 
 | `20260605084351_full_text_search.sql` | Index `tsvector` sur `articles.title` + `articles.summary` pour la recherche admin |
 | `20260605090754_hero_config.sql` | Table `hero_config` singleton — contrôle le HeroBlock du feed sans redeploy. RLS : lecture publique, écriture authentifiée |
 | `20260605120000_is_sponsored.sql` | `ALTER TABLE articles ADD COLUMN is_sponsored BOOLEAN NOT NULL DEFAULT FALSE` |
+| `20260605140000_seed_categories.sql` | Insère les 13 catégories Neural Space avec UUIDs déterministes — `ON CONFLICT (slug) DO NOTHING` |
 
 ---
 
