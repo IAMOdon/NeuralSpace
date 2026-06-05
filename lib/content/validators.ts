@@ -130,10 +130,19 @@ export const ContentSchema = z.array(ContentBlockSchema);
 
 // --- Article sources ---
 
+const emptyToUndefined = (v: unknown) => (v === "" ? undefined : v);
+
 export const ArticleSourceSchema = z.object({
   label: z.string().min(1),
-  url: z.string().url().optional(),
-  doi: z.string().optional(),
+  // Empty strings (from the editor URL input) are treated as absent
+  url: z.preprocess(emptyToUndefined, z.string().url().optional()),
+  doi: z.preprocess(emptyToUndefined, z.string().optional()),
 });
 
-export const ArticleSourcesSchema = z.array(ArticleSourceSchema);
+// Per-element parse so one invalid source never silently wipes the whole list
+export const ArticleSourcesSchema = z.array(
+  z.unknown().transform((item) => {
+    const r = ArticleSourceSchema.safeParse(item);
+    return r.success ? r.data : null;
+  })
+).transform((arr) => arr.filter((x): x is z.infer<typeof ArticleSourceSchema> => x !== null));
