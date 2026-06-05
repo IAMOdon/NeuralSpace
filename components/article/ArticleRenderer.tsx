@@ -160,6 +160,7 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
               src={block.url}
               alt={block.alt}
               fill
+              unoptimized
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 65vw"
             />

@@ -52,6 +52,7 @@ export function ArticleHeader({
             src={coverImageUrl}
             alt={coverImageAlt || title}
             fill
+            unoptimized
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 65vw"
             priority

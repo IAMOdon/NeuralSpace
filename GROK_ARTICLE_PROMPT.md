@@ -23,7 +23,7 @@ Tu dois produire un **objet JSON valide** (pas de markdown autour, pas de texte 
   "title": "string — titre de l'article (45–60 car.)",
   "summary": "string — accroche éditoriale, 1–2 phrases, 120–180 car.",
   "slug": "string — kebab-case, ex: trous-noirs-horizon-evenements",
-  "type": "short | long",
+  "category_slug": "string — slug de la catégorie parmi la liste ci-dessous",
   "seo_title": "string — titre SEO optimisé (50–60 car.) incluant un mot-clé principal, null si identique à title",
   "seo_description": "string — meta description de 140–160 car., formulée comme une promesse de lecture incluant 1–2 mots-clés",
   "cover_image_url": "string — URL directe de l'image de couverture (ratio 16:9 ou 16:7, min 1200px de large)",
@@ -39,7 +39,30 @@ Tu dois produire un **objet JSON valide** (pas de markdown autour, pas de texte 
 }
 ```
 
-> Les champs `cover_image_url` et `cover_image_alt` pré-remplissent automatiquement l'image de couverture dans l'éditeur NeuralSpace.
+> `cover_image_url` et `cover_image_alt` pré-remplissent automatiquement l'image de couverture dans l'éditeur NeuralSpace.
+> Le `type` (court/long) est calculé automatiquement depuis le nombre de mots — ne pas l'inclure dans le JSON.
+
+## Catégories disponibles
+
+Utilise exactement l'un des slugs suivants pour `category_slug` :
+
+| Slug | Nom affiché |
+|---|---|
+| `physique` | Physique |
+| `biologie` | Biologie |
+| `chimie` | Chimie |
+| `mathematiques` | Mathématiques |
+| `astronomie` | Astronomie & Espace |
+| `neurosciences` | Neurosciences |
+| `medecine-sante` | Médecine & Santé |
+| `sante-tech` | Santé Tech |
+| `intelligence-artificielle` | Intelligence Artificielle |
+| `technologie` | Technologie |
+| `environnement-climat` | Environnement & Climat |
+| `ethique-societe` | Éthique & Société |
+| `psychologie` | Psychologie |
+
+> Choisis la catégorie la plus précise. Un article sur les neurones artificiels → `intelligence-artificielle`. Un article sur la dépression → `psychologie` ou `medecine-sante`.
 
 ---
 
@@ -299,7 +322,7 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
   "title": "Trous noirs : ce que l'horizon des événements nous dit de l'espace-temps",
   "summary": "À la frontière entre ce qui est connaissable et ce qui ne l'est pas, l'horizon des événements des trous noirs révèle les limites de notre physique.",
   "slug": "trous-noirs-horizon-evenements",
-  "type": "short",
+  "category_slug": "physique",
   "seo_title": "Trous noirs et horizon des événements — NeuralSpace",
   "seo_description": "Qu'est-ce que l'horizon des événements d'un trou noir ? Comment la relativité générale et la mécanique quantique s'y affrontent-elles ? Tout comprendre en 8 minutes.",
   "cover_image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Black_hole_-_Messier_87_crop_max_res.jpg/1280px-Black_hole_-_Messier_87_crop_max_res.jpg",
@@ -467,7 +490,8 @@ Le champ `content` est un tableau ordonné de blocs. Chaque bloc a un `id` uniqu
 
 | Champ | Consigne |
 |---|---|
-| `type` | `"short"` pour 1500–2000 mots, `"long"` pour 2500–4000 mots |
+| `category_slug` | Slug exact parmi la liste des 13 catégories. Ne pas inventer de slug. |
+| `type` | ❌ Ne pas inclure — calculé automatiquement depuis le nombre de mots à la sauvegarde. |
 | `cover_image_url` | Image de couverture obligatoire. Ratio 16:9 ou 16:7. Min 1200px de large. URL HTTPS directe. |
 | `cover_image_alt` | 80–120 car. Décrit précisément l'image. Mot-clé principal inclus. |
 | `seo_title` | 50–60 car., mot-clé principal, format "Sujet — NeuralSpace". Ne pas répéter le `title` mot pour mot. |

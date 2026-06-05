@@ -80,10 +80,12 @@ type ImportMeta = {
   seoTitle?: string; seoDesc?: string;
   sources?: { label: string; url?: string }[];
   coverUrl?: string; coverAlt?: string;
+  categoryId?: string;
 };
 
-function JsonImportPanel({ onImport }: {
+function JsonImportPanel({ onImport, categories }: {
   onImport: (blocks: object[], meta: ImportMeta) => void;
+  categories: Category[];
 }) {
   const [open, setOpen]       = useState(false);
   const [raw, setRaw]         = useState("");
@@ -104,6 +106,10 @@ function JsonImportPanel({ onImport }: {
         if (parsed.seo_description)  meta.seoDesc   = parsed.seo_description;
         if (parsed.cover_image_url)  meta.coverUrl  = parsed.cover_image_url;
         if (parsed.cover_image_alt)  meta.coverAlt  = parsed.cover_image_alt;
+        if (parsed.category_slug) {
+          const match = categories.find((c) => c.slug === parsed.category_slug);
+          if (match) meta.categoryId = match.id;
+        }
         if (Array.isArray(parsed.sources)) meta.sources = parsed.sources;
       }
       if (!blocks.length) throw new Error("Aucun block trouvé.");
@@ -179,7 +185,6 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   const [title, setTitle]   = useState(initial.title);
   const [summary, setSummary] = useState(initial.summary);
   const [blocks, setBlocks] = useState<ContentBlock[]>(() => parseBlocks(initial.content));
-  const [type, setType]     = useState(initial.type || "short");
   const [slug, setSlug]     = useState(initial.slug);
   const [slugDirty, setSlugDirty] = useState(!!initial.id);
   const [categoryId, setCategoryId]     = useState<string>(initial.categoryId ?? "");
@@ -191,6 +196,8 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   const [contributors, setContributors] = useState<ContributorRef[]>(initialContributors);
   const [isSponsored, setIsSponsored]   = useState(initial.isSponsored ?? false);
   const [wordCount, setWordCount]       = useState(() => countBlockWords(parseBlocks(initial.content)));
+  // Derived — no manual picker
+  const articleType = wordCount >= 1500 ? "long" : "short";
   const [uploading, setUploading]       = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -220,7 +227,7 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   function buildPayload() {
     return {
       title, summary, content: blocks as Parameters<typeof createArticle>[0]["content"],
-      type, slug: slug || slugify(title),
+      type: articleType, slug: slug || slugify(title),
       categoryId: categoryId || null,
       coverImageUrl: coverUrl || null,
       coverImageAlt: coverAlt || null,
@@ -385,7 +392,7 @@ export function ArticleEditor({ article: initial, categories, initialContributor
             >
               {coverUrl ? (
                 <>
-                  <Image src={coverUrl} alt={coverAlt || title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 672px" />
+                  <Image src={coverUrl} alt={coverAlt || title} fill unoptimized className="object-cover" sizes="(max-width: 1024px) 100vw, 672px" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-sans font-semibold bg-black/50 px-3 py-1.5 rounded-full">
                       Changer l'image
@@ -454,16 +461,17 @@ export function ArticleEditor({ article: initial, categories, initialContributor
             </p>
 
             {/* ── JSON import panel ── */}
-            <JsonImportPanel onImport={(importedBlocks, meta) => {
+            <JsonImportPanel categories={categories} onImport={(importedBlocks, meta) => {
               setBlocks(parseBlocks(importedBlocks));
-              if (meta.title)    setTitle(meta.title);
-              if (meta.summary)  setSummary(meta.summary);
-              if (meta.seoTitle) setSeoTitle(meta.seoTitle);
-              if (meta.seoDesc)  setSeoDesc(meta.seoDesc);
-              if (meta.slug)     { setSlug(meta.slug); setSlugDirty(true); }
-              if (meta.sources)  setSources(meta.sources);
-              if (meta.coverUrl) setCoverUrl(meta.coverUrl);
-              if (meta.coverAlt) setCoverAlt(meta.coverAlt);
+              if (meta.title)      setTitle(meta.title);
+              if (meta.summary)    setSummary(meta.summary);
+              if (meta.seoTitle)   setSeoTitle(meta.seoTitle);
+              if (meta.seoDesc)    setSeoDesc(meta.seoDesc);
+              if (meta.slug)       { setSlug(meta.slug); setSlugDirty(true); }
+              if (meta.sources)    setSources(meta.sources);
+              if (meta.coverUrl)   setCoverUrl(meta.coverUrl);
+              if (meta.coverAlt)   setCoverAlt(meta.coverAlt);
+              if (meta.categoryId) setCategoryId(meta.categoryId);
             }} />
           </div>
         </div>
@@ -486,23 +494,15 @@ export function ArticleEditor({ article: initial, categories, initialContributor
             </select>
           </div>
 
-          {/* Type */}
+          {/* Type — auto from word count */}
           <div>
             <SideLabel>Type</SideLabel>
-            <div className="flex gap-2">
-              {(["short", "long"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setType(t)}
-                  className={`flex-1 py-1.5 rounded-xl text-[10px] font-sans font-semibold border transition-colors duration-200 ${
-                    type === t ? "border-ns-blue bg-ns-blue/5 text-ns-blue" : "border-neutral-200 text-neutral-400"
-                  }`}
-                >
-                  {t === "short" ? "Court" : "Long"}
-                </button>
-              ))}
-            </div>
+            <p className="text-xs font-sans text-neutral-400">
+              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${articleType === "long" ? "bg-ns-blue/10 text-ns-blue" : "bg-neutral-100 text-neutral-500"}`}>
+                {articleType === "long" ? "Long" : "Court"}
+              </span>
+              <span className="ml-2 text-neutral-300">calculé depuis {wordCount} mots</span>
+            </p>
           </div>
 
           <div className="border-t border-neutral-100" />

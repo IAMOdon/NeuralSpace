@@ -244,7 +244,7 @@ function ImageEditor({ block, onChange }: { block: Extract<ContentBlock, { type:
       {block.url ? (
         <div className="relative group">
           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-            <NextImage src={block.url} alt={block.alt || "image"} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 672px" />
+            <NextImage src={block.url} alt={block.alt || "image"} fill unoptimized className="object-cover" sizes="(max-width: 1024px) 100vw, 672px" />
           </div>
           <button
             type="button"
@@ -252,6 +252,14 @@ function ImageEditor({ block, onChange }: { block: Extract<ContentBlock, { type:
             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-all"
           >
             <X className="w-3 h-3" />
+          </button>
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[10px] font-sans font-semibold bg-black/50 text-white px-2.5 py-1 rounded-lg hover:bg-black/70 transition-all"
+          >
+            <Upload className="w-2.5 h-2.5" />
+            Remplacer
           </button>
         </div>
       ) : (
@@ -264,13 +272,20 @@ function ImageEditor({ block, onChange }: { block: Extract<ContentBlock, { type:
           ) : (
             <>
               <Upload className="w-5 h-5 text-neutral-300" strokeWidth={1.5} />
-              <p className="text-xs font-sans text-neutral-300">Clic pour uploader une image</p>
+              <p className="text-xs font-sans text-neutral-300">Clic pour uploader · ou coller une URL ci-dessous</p>
             </>
           )}
         </div>
       )}
       <input ref={inputRef} type="file" accept="image/*" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }} />
+      {/* URL — always visible so Grok-imported external images can be seen and edited */}
+      <input
+        value={block.url}
+        onChange={(e) => onChange({ url: e.target.value })}
+        placeholder="URL de l'image (https://…)"
+        className="w-full text-xs font-mono text-neutral-400 bg-neutral-50 border border-neutral-200 rounded-xl px-3 py-2 outline-none focus:border-ns-blue transition-colors"
+      />
       <input
         value={block.alt}
         onChange={(e) => onChange({ alt: e.target.value })}
