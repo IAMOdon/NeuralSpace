@@ -148,7 +148,8 @@ export async function updateArticle(
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/articles");
-  revalidatePath(`/dashboard/articles/${id}/edit`);
+  // Do NOT revalidatePath the edit page — that would remount the client component
+  // mid-transition and wipe the flash message state.
   return { ok: true };
 }
 

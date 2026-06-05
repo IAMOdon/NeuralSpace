@@ -189,6 +189,7 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   const [isSponsored, setIsSponsored]   = useState(initial.isSponsored ?? false);
   const [wordCount, setWordCount]       = useState(() => countBlockWords(parseBlocks(initial.content)));
   const [uploading, setUploading]       = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   // Auto-slug from title when not dirty
   function handleTitleChange(v: string) {
@@ -235,14 +236,17 @@ export function ArticleEditor({ article: initial, categories, initialContributor
       if (articleId) {
         const r = await updateArticle(articleId, buildPayload());
         if (!r.ok) { flash(`Erreur : ${r.error}`); return; }
+        await updateArticleContributors(articleId, contributors);
+        flash("Sauvegardé ✓");
       } else {
         const r = await createArticle(buildPayload());
         if (!r.ok || !r.id) { flash(`Erreur : ${r.error}`); return; }
         articleId = r.id;
+        await updateArticleContributors(articleId, contributors);
+        // Navigate after contributors are saved — flash is set before replace
+        // so the new page load shows it is confirmed by the URL change itself.
         router.replace(`/dashboard/articles/${articleId}/edit`);
       }
-      await updateArticleContributors(articleId, contributors);
-      flash("Sauvegardé");
     });
   }
 
@@ -265,7 +269,7 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   }
 
   function handleDelete() {
-    if (!id || !window.confirm("Supprimer définitivement cet article ?")) return;
+    if (!id) return;
     startTransition(async () => { await deleteArticle(id); });
   }
 
@@ -305,7 +309,10 @@ export function ArticleEditor({ article: initial, categories, initialContributor
 
         <div className="flex items-center gap-2">
           {saveMsg && (
-            <span className="text-xs font-sans text-neutral-400 hidden sm:block">{saveMsg}</span>
+            <span className={`flex items-center gap-1 text-xs font-sans hidden sm:flex ${saveMsg.startsWith("Erreur") ? "text-red-500" : "text-green-600"}`}>
+              {!saveMsg.startsWith("Erreur") && <Check className="w-3.5 h-3.5" />}
+              {saveMsg.replace(" ✓", "")}
+            </span>
           )}
           {id && (
             <a
@@ -578,15 +585,40 @@ export function ArticleEditor({ article: initial, categories, initialContributor
 
           {/* Danger zone */}
           {id && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={isPending}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-sans font-semibold text-red-400 border border-red-100 hover:bg-red-50 transition-colors duration-200"
-            >
-              <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Supprimer l'article
-            </button>
+            deleteConfirm ? (
+              <div className="space-y-2">
+                <p className="text-[11px] text-red-500 font-sans text-center leading-5">
+                  Supprimer définitivement ?<br />
+                  <span className="text-neutral-400">Cette action est irréversible.</span>
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteConfirm(false)}
+                    className="flex-1 py-2 rounded-xl text-xs font-sans font-semibold text-neutral-500 border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isPending}
+                    className="flex-1 py-2 rounded-xl text-xs font-sans font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 disabled:opacity-40"
+                  >
+                    {isPending ? "…" : "Supprimer"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(true)}
+                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-sans font-semibold text-red-400 border border-red-100 hover:bg-red-50 transition-colors duration-200"
+              >
+                <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                Supprimer l'article
+              </button>
+            )
           )}
         </aside>
       </div>

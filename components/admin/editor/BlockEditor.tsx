@@ -59,22 +59,23 @@ function defaultBlock(type: ContentBlock["type"]): ContentBlock {
 // ── TextRun ↔ Tiptap ──────────────────────────────────────────────────────────
 
 function runsToTiptap(runs: TextRun[]): object {
-  return {
-    type: "doc",
-    content: [{
-      type: "paragraph",
-      content: (runs.length ? runs : [{ text: "" }]).map((run) => ({
-        type: "text",
-        text: run.text,
-        ...(run.marks?.length || run.link ? {
-          marks: [
-            ...(run.marks ?? []).map((m) => ({ type: m === "strikethrough" ? "strike" : m })),
-            ...(run.link ? [{ type: "link", attrs: { href: run.link.href } }] : []),
-          ],
-        } : {}),
-      })),
-    }],
-  };
+  // Tiptap rejects empty text nodes — filter them out before conversion.
+  // An empty paragraph (no content array) is valid and shows the placeholder.
+  const nonEmpty = runs.filter((r) => r.text !== "");
+  const para: Record<string, unknown> = { type: "paragraph" };
+  if (nonEmpty.length > 0) {
+    para.content = nonEmpty.map((run) => ({
+      type: "text",
+      text: run.text,
+      ...(run.marks?.length || run.link ? {
+        marks: [
+          ...(run.marks ?? []).map((m) => ({ type: m === "strikethrough" ? "strike" : m })),
+          ...(run.link ? [{ type: "link", attrs: { href: run.link.href } }] : []),
+        ],
+      } : {}),
+    }));
+  }
+  return { type: "doc", content: [para] };
 }
 
 type TiptapDoc = { type: string; content?: TiptapPara[] };
