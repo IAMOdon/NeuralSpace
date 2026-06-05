@@ -6,7 +6,6 @@ import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
-import NextImage from "next/image";
 import {
   Plus, Trash2, ChevronUp, ChevronDown, Upload, X,
   Bold, Italic, Link2, Strikethrough,
@@ -242,10 +241,9 @@ function ImageEditor({ block, onChange }: { block: Extract<ContentBlock, { type:
   return (
     <div className="space-y-2">
       {block.url ? (
-        <div className="relative group">
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-            <NextImage src={block.url} alt={block.alt || "image"} fill unoptimized className="object-cover" sizes="(max-width: 1024px) 100vw, 672px" />
-          </div>
+        <div className="relative group rounded-xl overflow-hidden">
+          {/* Natural ratio — no forced aspect-video crop */}
+          <img src={block.url} alt={block.alt || "image"} className="w-full h-auto block" />
           <button
             type="button"
             onClick={() => onChange({ url: "" })}

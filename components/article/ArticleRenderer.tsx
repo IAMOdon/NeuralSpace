@@ -1,4 +1,3 @@
-import Image from "next/image";
 import katex from "katex";
 import { highlightCode } from "@/lib/content/shiki";
 import type { ContentBlock } from "@/types/content";
@@ -155,14 +154,13 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
 
       return (
         <figure key={block.id} className="space-y-2">
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-            <Image
+          <div className="rounded-xl overflow-hidden">
+            {/* Plain img preserves the original aspect ratio — no cropping */}
+            <img
               src={block.url}
               alt={block.alt}
-              fill
-              unoptimized
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 65vw"
+              className="w-full h-auto block"
+              loading="lazy"
             />
           </div>
           {(block.caption || creditLine || credit?.license) && (
