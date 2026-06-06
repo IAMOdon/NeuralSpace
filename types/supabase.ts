@@ -183,6 +183,9 @@ export type Database = {
         Row: {
           category_id: string | null
           content: Json
+          content_simplified: Json | null
+          content_scientific: Json | null
+          has_dual_content: boolean
           is_sponsored: boolean
           cover_image_alt: string | null
           cover_image_url: string | null
@@ -212,6 +215,9 @@ export type Database = {
         Insert: {
           category_id?: string | null
           content?: Json
+          content_simplified?: Json | null
+          content_scientific?: Json | null
+          has_dual_content?: boolean
           cover_image_alt?: string | null
           cover_image_url?: string | null
           created_at?: string | null
@@ -241,6 +247,9 @@ export type Database = {
         Update: {
           category_id?: string | null
           content?: Json
+          content_simplified?: Json | null
+          content_scientific?: Json | null
+          has_dual_content?: boolean
           cover_image_alt?: string | null
           cover_image_url?: string | null
           created_at?: string | null
