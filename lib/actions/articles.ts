@@ -80,8 +80,8 @@ async function uniqueSlug(base: string): Promise<string> {
       .from("articles")
       .select("id", { count: "exact", head: true })
       .eq("slug", slug);
-    if ((count ?? 0) === 0) return slug;
-    slug = `${base}-${++i}`;
+    if (!count || count === 0) return slug;
+    slug = base + "-" + ++i;
   }
 }
 
@@ -96,22 +96,25 @@ export async function createArticle(
   const { data, error } = await adminClient
     .from("articles")
     .insert({
-      title:           input.title,
-      summary:         input.summary,
-      content:         input.content,
-      type:            input.type || "short",
+      title:              input.title,
+      summary:            input.summary,
+      content:            input.content,
+      content_simplified: input.contentSimplified ?? null,
+      content_scientific: input.contentScientific ?? null,
+      has_dual_content:   input.hasDualContent ?? false,
+      type:               input.type || "short",
       slug,
-      status:          "draft",
-      category_id:     input.categoryId ?? null,
-      cover_image_url: input.coverImageUrl ?? null,
-      cover_image_alt: input.coverImageAlt ?? null,
-      seo_title:       input.seoTitle ?? null,
-      seo_description: input.seoDescription ?? null,
-      sources:         input.sources ?? [],
-      is_sponsored:    input.isSponsored ?? false,
-      word_count:      words,
-      reading_time_min: readingTime(words),
-      created_by:      user.id,
+      status:             "draft",
+      category_id:        input.categoryId ?? null,
+      cover_image_url:    input.coverImageUrl ?? null,
+      cover_image_alt:    input.coverImageAlt ?? null,
+      seo_title:          input.seoTitle ?? null,
+      seo_description:    input.seoDescription ?? null,
+      sources:            input.sources ?? [],
+      is_sponsored:       input.isSponsored ?? false,
+      word_count:         words,
+      reading_time_min:   readingTime(words),
+      created_by:         user.id,
     })
     .select("id, slug")
     .single();
@@ -166,11 +169,7 @@ export async function publishArticle(
 
   const { data, error } = await adminClient
     .from("articles")
-    .update({
-      status:       "published",
-      published_at: new Date().toISOString(),
-      updated_at:   new Date().toISOString(),
-    })
+    .update({ status: "published", published_at: new Date().toISOString() })
     .eq("id", id)
     .select("slug")
     .single();
@@ -178,7 +177,6 @@ export async function publishArticle(
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/");
-  revalidatePath(`/${data.slug}`);
   revalidatePath("/dashboard/articles");
   return { ok: true, slug: data.slug };
 }
@@ -190,7 +188,7 @@ export async function unpublishArticle(
 
   const { error } = await adminClient
     .from("articles")
-    .update({ status: "draft", published_at: null, updated_at: new Date().toISOString() })
+    .update({ status: "draft", published_at: null })
     .eq("id", id);
 
   if (error) return { ok: false, error: error.message };
@@ -200,13 +198,15 @@ export async function unpublishArticle(
   return { ok: true };
 }
 
-export async function deleteArticle(id: string): Promise<{ ok: boolean; error?: string }> {
+export async function deleteArticle(
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
   await ensureAdmin();
 
   const { error } = await adminClient.from("articles").delete().eq("id", id);
+
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/articles");
-  revalidatePath("/");
   redirect("/dashboard/articles");
 }
