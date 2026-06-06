@@ -90,7 +90,7 @@ export function parseBlocks(raw: unknown): ContentBlock[] {
     "type" in (raw as object) &&
     (raw as TNode).type === "doc"
   ) {
-    return tiptapToBlocks(raw as TNode);
+    return tiptapToContentBlocks(raw as TNode);
   }
 
   return [];
