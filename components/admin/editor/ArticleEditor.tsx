@@ -108,6 +108,9 @@ function JsonImportPanel({ onImport, categories }: {
         // Extract metadata
         if (grokulData.metadata.title) meta.title = grokulData.metadata.title;
         if (grokulData.metadata.summary) meta.summary = grokulData.metadata.summary;
+        if (grokulData.metadata.slug) meta.slug = grokulData.metadata.slug;
+        if (grokulData.metadata.seoAlt) meta.coverAlt = grokulData.metadata.seoAlt;
+        if (grokulData.metadata.ogImageUrl) meta.coverUrl = grokulData.metadata.ogImageUrl;
         
         // Convert both versions to blocks
         const blocksSimplified = convertGrokulToBlocks(grokulData, "simplified");

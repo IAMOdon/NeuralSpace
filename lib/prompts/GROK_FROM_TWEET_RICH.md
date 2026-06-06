@@ -1,4 +1,4 @@
-# Grok Prompt: Convert X Tweet → Rich Dual-Content Article with Verified Images
+# Grok Prompt: Convert X Tweet → Rich Dual-Content Article with SEO & Sources
 
 ## Copy & Paste This Into Grok
 
@@ -10,97 +10,54 @@ A user is giving you a tweet/social post about a science topic. Your job is to:
 2. Generate TWO versions: simplified + scientific
 3. Output as JSON with RICH CONTENT BLOCKS (images, quotes, dividers)
 4. INCLUDE REAL, VERIFIED IMAGES FROM ORIGINAL SOURCES
-5. JSON ready for Neural Space
+5. INCLUDE SEO metadata, slug, og image, and sources
+6. JSON ready for Neural Space
 
-## CRITICAL: VERIFIED IMAGES FROM ORIGINAL SOURCES
+## METADATA REQUIREMENTS (CRITICAL!)
 
-**SIMPLIFIED VERSION:**
-- Keep article engaging and accessible
-- Include 1-2 images maximum (not overwhelming)
-- Images should be:
-  - Concept illustrations or diagrams easy to understand
-  - High-quality, clear visuals
-  - From reliable sources (Unsplash, Wikimedia, official institutions)
-  - NOT overly technical
+### Slug
+- URL-friendly version of title
+- lowercase, hyphens instead of spaces, no special characters
+- 3-6 words max
+- Examples:
+  - "pancreatic-cancer-ai-detection"
+  - "dna-repair-aging-breakthrough"
+  - "gut-bacteria-mood-connection"
 
-**SCIENTIFIC VERSION:**
-- Include 2-3 images minimum (proof-heavy)
-- Images MUST be:
-  - From the ORIGINAL research paper / study (not illustrations)
-  - Actual data visualizations, charts, graphs, or experimental photos
-  - Figures from the published work cited in bibliography
-  - Real scientific proof (ROC curves, results tables, microscopy images, etc)
-  - Can be more technical and detailed
+### SEO Alt Text
+- For og:image (social preview image)
+- Descriptive but concise (max 120 characters)
+- Include main keyword
+- Examples:
+  - "AI model detects pancreatic cancer years before diagnosis"
+  - "DNA repair mechanisms revealed in aging research"
+  - "Connection between gut bacteria and mental health"
 
-## IMAGE SOURCING STRATEGY
+### OG Image
+- URL of the image for social media preview
+- Usually the first/hero image from simplified version
+- Must be a REAL, verified URL
+- Should be visually striking and relevant
+- Same image sourcing rules as article images
 
-### For Simplified Version (1-2 images, concept-focused)
-
-**Type 1: Concept Illustration**
-- Search Unsplash/Pexels for the concept
-- Example: "pancreatic cancer cells" → real photo of cancer cells
-- Source: High-quality stock photos, official medical institution images
-
-**Type 2: Simplified Diagram**
-- Wikimedia Commons medical/scientific diagrams
-- Official institution infographics
-- Educational resources
-- Example: Anatomy diagram, process flowchart
-
-### For Scientific Version (2-3 images, proof-focused)
-
-**Type 1: Figure from Original Paper (MOST IMPORTANT)**
-- Search PubMed Central for the exact paper mentioned
-- Extract actual figures/tables from the PDF
-- Direct links to paper figures
-- Example: "Figure 2: ROC curve showing REDMOD performance"
-- Source: https://www.ncbi.nlm.nih.gov/pmc/articles/ or DOI link
-
-**Type 2: Data Visualization**
-- Charts showing actual results
-- Comparison graphs (AI vs human radiologist)
-- Statistical distributions
-- Source: Figure from the research paper itself
-
-**Type 3: Experimental Evidence**
-- Microscopy images
-- Scan results (CT, MRI, etc)
-- Lab photographs
-- Source: Supplementary materials or main figures in paper
-
-## HOW TO FIND VERIFIED IMAGES
-
-### For the Original Paper Images:
-1. Get the DOI from the citation (e.g., "10.1136/gutjnl-2025-337266")
-2. Go to: https://doi.org/[DOI]
-3. Find "Figures" or "Figures and Tables" section
-4. Right-click figure → Copy image URL
-5. Or go to PubMed Central: https://www.ncbi.nlm.nih.gov/pmc/articles/
-6. Search for paper → View figures
-
-### For Concept Images:
-1. Unsplash: https://unsplash.com (search keywords)
-2. Pexels: https://pexels.com (free high-quality)
-3. Wikimedia Commons: https://commons.wikimedia.org
-4. NIH/NLM Image Gallery: https://imagebase.nlm.nih.gov
-5. Official research institution websites
-
-## RICH CONTENT BLOCKS
-
-**Block Types to Use:**
-- `paragraph`: Regular text (max 3-4 per section)
-- `quote`: Key findings, researcher quotes, statistics (2-3 per version)
-- `divider`: Break up sections visually
-- `image`: VERIFIED images from sources above (1-2 for simplified, 2-3 for scientific)
+### Sources
+- COMPLETE list of all citations used in article
+- Every source mentioned in text should be here
+- Format: authors, year, title, journal, DOI
+- At least 3-5 sources for scientific version
+- Can include 1-2 for simplified if relevant
 
 ## OUTPUT FORMAT
 
 {
   "metadata": {
-    "title": "Curiosity-driven title",
-    "summary": "2-3 sentence teaser",
+    "title": "Curiosity-driven title (not too long)",
+    "summary": "2-3 sentence teaser with stakes",
     "readingTimeMin": 8,
-    "wordCount": 1900
+    "wordCount": 1900,
+    "slug": "pancreatic-cancer-ai-detection",
+    "seoAlt": "AI model detects pancreatic cancer years before diagnosis",
+    "ogImageUrl": "https://image-for-social-preview.jpg"
   },
   "simplified": {
     "intro": "150-200+ words with hook",
@@ -117,19 +74,10 @@ A user is giving you a tweet/social post about a science topic. Your job is to:
             "content": "Key insight or statistic"
           },
           {
-            "type": "paragraph",
-            "content": "Explanation..."
-          },
-          {
             "type": "image",
             "url": "https://verified-image-url.jpg",
             "caption": "What this shows and why it matters...",
-            "alt": "Accessibility description",
-            "sourceUrl": "https://source-of-image.org",
-            "sourceAttribution": "Source name / Institution"
-          },
-          {
-            "type": "divider"
+            "alt": "Accessibility + SEO description for this image"
           }
         ]
       }
@@ -147,24 +95,10 @@ A user is giving you a tweet/social post about a science topic. Your job is to:
             "content": "Methods with citations..."
           },
           {
-            "type": "quote",
-            "content": "Key result: AUC 0.82, Sensitivity 73%"
-          },
-          {
             "type": "image",
             "url": "https://doi.org/example/figure-2.jpg",
             "caption": "Figure 2: ROC curve comparing REDMOD vs radiologist performance...",
-            "alt": "ROC curve plot",
-            "sourceUrl": "https://doi.org/10.1136/gutjnl-2025-337266",
-            "sourceAttribution": "Mukherjee et al. (2026), Gut journal, Figure 2"
-          },
-          {
-            "type": "image",
-            "url": "https://doi.org/example/figure-3.jpg",
-            "caption": "Figure 3: Sensitivity comparison across different time intervals...",
-            "alt": "Bar chart comparing detection rates",
-            "sourceUrl": "https://doi.org/10.1136/gutjnl-2025-337266",
-            "sourceAttribution": "Mukherjee et al. (2026), Supplementary Figure 3"
+            "alt": "ROC curve showing REDMOD 0.82 AUC vs radiologist performance"
           }
         ]
       }
@@ -172,70 +106,167 @@ A user is giving you a tweet/social post about a science topic. Your job is to:
     "conclusion": "200-250+ words",
     "bibliography": [
       {
-        "authors": "LastName, F., LastName, F., et al.",
+        "authors": "Mukherjee, S., Antony, A., Patnam, N.G., et al.",
+        "year": 2026,
+        "title": "Next-generation AI for visually occult pancreatic cancer detection",
+        "journal": "Gut",
+        "doi": "10.1136/gutjnl-2025-337266"
+      },
+      {
+        "authors": "Author, F., Author, F.",
         "year": 2024,
-        "title": "Full paper title",
+        "title": "Full paper title here",
         "journal": "Journal Name",
         "doi": "10.xxxx/xxxxx"
       }
     ]
-  }
+  },
+  "sources": [
+    {
+      "label": "Mayo Clinic AI study - Pancreatic cancer detection",
+      "url": "https://doi.org/10.1136/gutjnl-2025-337266",
+      "authors": "Mukherjee et al.",
+      "year": 2026
+    },
+    {
+      "label": "Pancreatic cancer epidemiology overview",
+      "url": "https://doi.org/10.3322/caac.21763",
+      "authors": "Siegel, R.L., Miller, K.D., et al.",
+      "year": 2023
+    },
+    {
+      "label": "Radiomics fundamentals in early cancer detection",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/...",
+      "authors": "Chang, K., et al.",
+      "year": 2022
+    }
+  ]
 }
 
-## IMAGE BLOCK FIELDS
+## FIELD DETAILS
+
+### Slug
+- MUST be: lowercase, hyphenated, 3-6 words
+- Examples:
+  - "pancreatic-cancer-ai-detection" ✓
+  - "Pancreatic Cancer AI" ✗ (spaces, caps)
+  - "dna-repair-aging-breakthrough" ✓
+  - "extremely-long-title-about-something" ✗ (too long)
+
+### SEO Alt (og:image alt)
+- Descriptive but concise (max 120 chars)
+- Include main keyword
+- Written for search engines AND social preview
+- Examples:
+  - "AI model detects pancreatic cancer years before diagnosis"
+  - "DNA repair mechanisms revealed in aging breakthrough"
+  - "Gut bacteria influence mental health and mood"
+
+### OG Image URL
+- Image to show on Twitter/Facebook/LinkedIn when article is shared
+- Usually the BEST/most striking image from simplified version
+- Must be verified, working URL
+- Dimensions ideally 1200x630px (but any size works)
+- Examples:
+  - First hero image from article
+  - Key diagram or chart
+  - Striking medical/scientific image
+
+### Image Alt Text (individual images)
+- For accessibility AND SEO
+- Describes what's in the image
+- Helps search engines understand image relevance
+- Examples:
+  - "Microscopy photo of pancreatic cancer cells"
+  - "ROC curve comparing AI vs radiologist detection"
+  - "Bar chart showing sensitivity over time windows"
+
+### Sources Array
+- COMPLETE list of all sources referenced
+- Used in article sidebar
+- Must include: label, url, authors, year
+- 3-5 minimum for scientific articles
+- Can be 1-2 for simplified articles
+
+## CRITICAL RULES
+
+✓ Slug: lowercase, hyphenated, 3-6 words
+✓ SEO Alt: max 120 chars, include main keyword
+✓ OG Image: Real, verified URL, eye-catching
+✓ Image alt text: Accessibility + keyword relevance
+✓ Sources: Every citation gets a source entry
+✓ Bibliography: Formal citations for scientific version
+✓ Sources in scientific version: Should match bibliography
+
+✗ DON'T make up URLs
+✗ DON'T forget slug (article won't import)
+✗ DON'T skip image alt text (accessibility + SEO)
+✗ DON'T include sources that aren't cited
+✗ DON'T duplicate bibliography and sources (different purposes)
+
+## IMAGE ALT TEXT STRATEGY
+
+### For Social Preview (og:image alt)
+- Broad, attention-grabbing
+- "AI model detects pancreatic cancer years before diagnosis"
+- "Revolutionary breakthrough in early cancer detection"
+
+### For Individual Images (accessibility)
+- Specific to that image
+- "Microscopy image of pancreatic ductal adenocarcinoma cells"
+- "ROC curve showing REDMOD achieved 0.82 AUC"
+- "Bar chart comparing detection rates at different time windows"
+
+## EXAMPLE COMPLETE JSON
 
 ```json
 {
-  "type": "image",
-  "url": "https://direct-image-url",
-  "caption": "What the image shows and why it matters for the article...",
-  "alt": "Brief accessibility description",
-  "sourceUrl": "https://where-image-comes-from",
-  "sourceAttribution": "Author/Institution/Journal - Figure X"
+  "metadata": {
+    "title": "Your Cells Have a Repair Crew—And It's Getting Tired",
+    "summary": "Researchers discovered why our cellular repair mechanisms fail with age—and a promising new approach to restore them.",
+    "readingTimeMin": 8,
+    "wordCount": 1900,
+    "slug": "cellular-repair-aging-breakthrough",
+    "seoAlt": "Researchers reveal why cellular repair systems fail with age and discover restoration method",
+    "ogImageUrl": "https://unsplash.com/photos/DNA-structure-image.jpg"
+  },
+  "simplified": {
+    "intro": "...",
+    "body": [
+      {
+        "section": "How Your Cells Stay Young",
+        "blocks": [
+          {
+            "type": "image",
+            "url": "https://unsplash.com/photos/DNA-structure.jpg",
+            "caption": "...",
+            "alt": "DNA double helix structure in blue and white"
+          }
+        ]
+      }
+    ]
+  },
+  "scientific": {
+    "bibliography": [
+      {
+        "authors": "Beck, J.L., Smith, K., et al.",
+        "year": 2023,
+        "title": "Senescence-associated DNA repair mechanisms",
+        "journal": "Cell Metabolism",
+        "doi": "10.1016/j.cmet.2023.08.015"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "label": "Beck et al. - Senescence-associated DNA repair",
+      "url": "https://doi.org/10.1016/j.cmet.2023.08.015",
+      "authors": "Beck, J.L., Smith, K., et al.",
+      "year": 2023
+    }
+  ]
 }
 ```
-
-**IMPORTANT:**
-- `url`: MUST be a working, verified URL (test it!)
-- `caption`: Explain what reader should see and why it's relevant
-- `alt`: Short accessibility text (for screen readers)
-- `sourceUrl`: Where the image came from (paper DOI, Unsplash link, etc)
-- `sourceAttribution`: Proper credit line (Mukherjee et al. Fig 2, etc)
-
-## FINDING THE RIGHT IMAGES
-
-### Simplified Version Example:
-- Topic: Pancreatic cancer detection with AI
-- Image 1: "Pancreatic cancer cells under microscope" (concept)
-  - Source: Wikimedia Commons or NIH medical image
-  - Caption: "Pancreatic cancer cells viewed under a microscope. Early detection before visible tumors form could dramatically improve survival rates."
-  
-### Scientific Version Example:
-- Topic: Same (Pancreatic cancer + AI)
-- Image 1: "ROC curve from the REDMOD study"
-  - Source: Figure 2 from Mukherjee et al. (2026) paper
-  - Caption: "Figure 2: ROC curve comparison. REDMOD (blue line) achieved AUC 0.82 in detecting pre-diagnostic pancreatic cancer, significantly outperforming human radiologists (green line)."
-- Image 2: "Sensitivity across time windows"
-  - Source: Figure 3 from same paper
-  - Caption: "Figure 3: Detection sensitivity increases with longer time windows before diagnosis. REDMOD maintained 68% sensitivity when cancers were 24+ months pre-diagnostic, compared to 23% for human radiologists."
-
-## RULES
-
-✓ SIMPLIFIED: 1-2 engaging, concept-focused images
-✓ SCIENTIFIC: 2-3 detailed, evidence-focused images from the actual paper
-✓ ALL images must have REAL, WORKING URLs
-✓ ALL images must include source attribution
-✓ Simplified can use stock photos + diagrams (accessible)
-✓ Scientific MUST include original paper figures (proof)
-✓ Captions explain relevance to readers
-✓ Alt text for accessibility
-
-✗ DON'T make up image URLs
-✗ DON'T use placeholder URLs
-✗ DON'T forget source attribution
-✗ DON'T include figures without citing which figure/table
-✗ Scientific: DON'T skip the original paper figures
-✗ Simplified: DON'T overwhelm with 5+ images
 
 ## NOW CONVERT THIS TWEET
 
@@ -245,70 +276,58 @@ Here's the tweet/post:
 
 Generate the full JSON article with:
 - VERIFIED images from original sources
-- Simplified version: 1-2 concept images (engaging)
-- Scientific version: 2-3 paper figures (proof-heavy)
-- Proper source attribution for every image
-- Real, working image URLs
-- Both versions fully developed
-- 1500-2500 words simplified
-- 1800-3000 words scientific
+- Proper slug (lowercase, hyphenated, 3-6 words)
+- SEO alt text for og:image (max 120 chars, include keyword)
+- OG image URL (real, verified, eye-catching)
+- Alt text for every image (accessibility + SEO)
+- Complete sources list (3-5 minimum)
+- Bibliography in scientific version
+- Both versions fully developed (1500-3000 words)
 ```
 
 ---
 
 ## How to Use
 
-1. **Copy everything above** (from "You are an expert..." through "Generate the full JSON...")
+1. **Copy everything above**
 
 2. **Paste into Grok**
 
-3. **Replace the placeholder** with your tweet:
-   ```
-   Here's the tweet/post:
-   
-   [PASTE YOUR TWEET HERE]
-   ```
+3. **Replace placeholder with your tweet**
 
-4. **Submit** → Get full JSON with VERIFIED images
+4. **Submit** → Get complete JSON with:
+   - ✓ Slug
+   - ✓ SEO alt text
+   - ✓ OG image URL
+   - ✓ Image alt text
+   - ✓ Sources list
+   - ✓ Images with captions
+   - ✓ Quotes & dividers
+   - ✓ Both versions
 
 5. **Import into Neural Space**:
    - Go to `/dashboard/articles/new`
    - Click "Importer JSON"
-   - Paste the JSON
-   - Click "Importer" → Done!
+   - Paste JSON
+   - Click "Importer"
+   - Add category & tags (if desired)
+   - Publish
 
 ---
 
-## Example Workflow
+## Example Output
 
-### Your Tweet:
 ```
-Just found a study: AI detects pancreatic cancer 3 years early on routine CT scans. 73% detection vs radiologists at 39%. Mayo Clinic. This is huge for early detection.
+Slug: "pancreatic-cancer-ai-detection"
+SEO Alt: "AI detects pancreatic cancer 3 years early on routine CT scans"
+OG Image: https://unsplash.com/photos/medical-imaging.jpg
+Sources: 3 full citations with DOIs
+Images: 1-2 simplified, 2-3 scientific with alt text
+Article: Ready to publish with full SEO metadata
 ```
-
-### Grok Creates:
-- **Simplified version**: 
-  - Concept image of pancreatic cells (Wikimedia)
-  - Easy to understand diagram
-  - Accessible explanations
-  - 1-2 images total
-
-- **Scientific version**:
-  - Figure 2: ROC curve from Mukherjee et al. (2026)
-  - Figure 3: Sensitivity comparison chart
-  - Actual paper figures with proper captions
-  - 2-3 images total with full attribution
-
-### You Import:
-- JSON auto-converts all blocks
-- Images render with captions
-- Source attribution visible
-- Article is credible AND engaging
 
 ---
 
-**Version**: 3.0 (Verified source images)
-**Simplified**: 1-2 engaging concept images
-**Scientific**: 2-3 original paper figures
-**All images**: Verified URLs + source attribution
-**Ready**: Credible, professional articles
+**Version**: 4.0 (Complete SEO metadata)
+**Includes**: Slug, SEO alt, og image, sources, image alts
+**Ready**: Professional, discoverable, accessible articles

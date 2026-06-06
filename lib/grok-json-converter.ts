@@ -7,6 +7,9 @@ export type GrokulJSON = {
     summary: string;
     readingTimeMin: number;
     wordCount: number;
+    slug?: string;
+    seoAlt?: string;
+    ogImageUrl?: string;
   };
   simplified: {
     intro: string;
@@ -33,6 +36,12 @@ export type GrokulJSON = {
       doi: string;
     }>;
   };
+  sources?: Array<{
+    label: string;
+    url: string;
+    authors: string;
+    year: number;
+  }>;
 };
 
 export type GrokulBlock = 
