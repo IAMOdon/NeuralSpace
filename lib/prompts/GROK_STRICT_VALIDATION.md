@@ -141,12 +141,14 @@ Then regenerate the entire article ensuring every single field is included.
 - [ ] REAL URLs (test them mentally - would they work?)
 - [ ] From: Unsplash, Pexels, Wikimedia, NIH, official institutions
 - [ ] Each has: url, caption (20-100 words), alt (10-100 chars)
+- [ ] **EVERY image URL must be UNIQUE** — no URL may appear more than once across the entire article
 
 ### Scientific version images:
 - [ ] 2-3 images minimum
 - [ ] MUST be from original research papers
 - [ ] REAL figure URLs from papers (DOI links or PubMed Central)
 - [ ] Each has: url, caption with "Figure X: [description]", alt text
+- [ ] **EVERY image URL must be UNIQUE** — different figure for each section
 - [ ] Examples of captions:
   - "Figure 2: ROC curve comparing REDMOD (AUC 0.82) vs radiologist (AUC 0.62) performance"
   - "Figure 3: Sensitivity maintained 68% for cancers 24+ months pre-diagnostic"
