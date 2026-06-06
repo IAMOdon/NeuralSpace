@@ -58,6 +58,9 @@ export type ArticleInput = {
   title: string;
   summary: string;
   content: Json;
+  contentSimplified?: Json | null;
+  contentScientific?: Json | null;
+  hasDualContent?: boolean;
   type: string;
   categoryId?: string | null;
   coverImageUrl?: string | null;
@@ -128,19 +131,22 @@ export async function updateArticle(
   const { error } = await adminClient
     .from("articles")
     .update({
-      ...(input.title           !== undefined && { title: input.title }),
-      ...(input.summary         !== undefined && { summary: input.summary }),
-      ...(input.content         !== undefined && { content: input.content }),
-      ...(input.type            !== undefined && { type: input.type }),
-      ...(input.slug            !== undefined && { slug: input.slug }),
-      ...(input.categoryId      !== undefined && { category_id: input.categoryId }),
-      ...(input.coverImageUrl   !== undefined && { cover_image_url: input.coverImageUrl }),
-      ...(input.coverImageAlt   !== undefined && { cover_image_alt: input.coverImageAlt }),
-      ...(input.seoTitle        !== undefined && { seo_title: input.seoTitle }),
-      ...(input.seoDescription  !== undefined && { seo_description: input.seoDescription }),
-      ...(input.sources         !== undefined && { sources: input.sources }),
-      ...(input.isSponsored     !== undefined && { is_sponsored: input.isSponsored }),
-      ...(words                 !== undefined && { word_count: words, reading_time_min: readingTime(words) }),
+      ...(input.title             !== undefined && { title: input.title }),
+      ...(input.summary           !== undefined && { summary: input.summary }),
+      ...(input.content           !== undefined && { content: input.content }),
+      ...(input.contentSimplified !== undefined && { content_simplified: input.contentSimplified }),
+      ...(input.contentScientific !== undefined && { content_scientific: input.contentScientific }),
+      ...(input.hasDualContent    !== undefined && { has_dual_content: input.hasDualContent }),
+      ...(input.type              !== undefined && { type: input.type }),
+      ...(input.slug              !== undefined && { slug: input.slug }),
+      ...(input.categoryId        !== undefined && { category_id: input.categoryId }),
+      ...(input.coverImageUrl     !== undefined && { cover_image_url: input.coverImageUrl }),
+      ...(input.coverImageAlt     !== undefined && { cover_image_alt: input.coverImageAlt }),
+      ...(input.seoTitle          !== undefined && { seo_title: input.seoTitle }),
+      ...(input.seoDescription    !== undefined && { seo_description: input.seoDescription }),
+      ...(input.sources           !== undefined && { sources: input.sources }),
+      ...(input.isSponsored       !== undefined && { is_sponsored: input.isSponsored }),
+      ...(words                   !== undefined && { word_count: words, reading_time_min: readingTime(words) }),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
