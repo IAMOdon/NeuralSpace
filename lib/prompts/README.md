@@ -6,29 +6,54 @@ Complete guide for using Grok to generate dual-content articles (simplified + sc
 
 ## 📚 Files in This Directory
 
-### **For Quick Reference**
-- **`QUICK_START.md`** — 30-second version. Start here.
-- **`COPY_PASTE_PROMPT.md`** — Ready-to-paste prompt for Grok. Just fill in your topic.
+### **FOR ACTUALLY GENERATING ARTICLES** (START HERE)
+- **`GROK_PROMPT_EXTENDED.md`** ⭐ — **USE THIS ONE**. Full-length prompt that produces 1500-3000 word articles.
+- **`WHY_SHORT_OUTPUT.md`** — Explains why the old prompt was short + validation checklist
 
 ### **For Understanding**
-- **`grok-article-generator.md`** — Full technical reference. How everything works.
-- **`EXAMPLES.md`** — Real before/after examples. See the difference.
+- **`grok-article-generator.md`** — Full technical reference (background info, structure principles)
+- **`EXAMPLES.md`** — Real before/after examples of what good articles look like
 
-### **For Verification**
-- **`TONE_CHECKLIST.md`** — Checklist before publishing. Make sure article passes quality gates.
+### **For Quick Reference**
+- **`QUICK_START.md`** — 30-second overview
+- **`TONE_CHECKLIST.md`** — Pre-publish quality verification
+
+### **Deprecated** (Don't use anymore)
+- ~~`COPY_PASTE_PROMPT.md`~~ — Old version, produces short articles. Use `GROK_PROMPT_EXTENDED.md` instead.
 
 ---
 
 ## ⚡ 60-Second Start
 
 1. **Open Grok/Claude**
-2. **Paste** `COPY_PASTE_PROMPT.md` (all of it)
-3. **Replace** the bracketed sections with your topic info
-4. **Get** JSON output
-5. **Go to** Neural Space `/dashboard/articles/new`
-6. **Click** "Importer JSON" and paste
-7. **Click** "Importer" → Done
-8. **Add** cover image, category, publish
+2. **Go to**: `lib/prompts/GROK_PROMPT_EXTENDED.md`
+3. **Copy EVERYTHING** (the entire prompt)
+4. **Paste into Grok**
+5. **Fill in the 5 fields at bottom**:
+   - Topic
+   - Sources (with years)
+   - Audience
+   - Angle
+   - Key finding
+6. **Submit** → Get full JSON (should be 2000+ words)
+7. **Paste JSON into** `/dashboard/articles/new` → Click "Importer JSON"
+8. **Publish**
+
+---
+
+## ⚠️ Critical: Use the EXTENDED Prompt
+
+**PROBLEM**: Old prompt produced short, underdeveloped articles (400-600 words)
+
+**SOLUTION**: New prompt forces full-length development (1500-3000 words)
+
+**What changed**:
+- Explicit minimum word counts for each section
+- Each body section must be 300-400 words (flowing paragraphs)
+- Specific mechanisms explained, not just outcomes
+- Before/after examples showing proper length
+
+**See**: `WHY_SHORT_OUTPUT.md` for detailed explanation
 
 ---
 
@@ -37,48 +62,40 @@ Complete guide for using Grok to generate dual-content articles (simplified + sc
 ### Input
 You give Grok:
 - Topic (what's the discovery?)
-- Sources (papers, news, research)
-- Audience level (general / mixed / technical)
-- Angle (what makes this unique?)
+- Sources (papers, citations with years)
+- Audience (general / mixed / specialists)
+- Angle (what makes this unique/timely?)
+- Key finding (main result in 1-2 sentences)
 
 ### Output
-Grok returns JSON with:
+Grok returns FULL-LENGTH JSON with:
 - **Metadata**: title, summary, reading time, word count
-- **Simplified version**: Engaging, narrative, accessible
-- **Scientific version**: Rigorous, cited, technical
+- **Simplified version** (1500-2500 words): Engaging narrative for general readers
+- **Scientific version** (1800-3000 words): Rigorous, citation-heavy for specialists
 
 ### Result
-Both versions auto-populate in Neural Space editor → publish immediately
+Both versions auto-populate in Neural Space → publish immediately
 
 ---
 
-## ✨ Key Features
+## ✨ Key Requirements (Now Enforced)
 
-### Simplified Version (Comprendre simplement)
-- **Strong hook** in first 3 lines (surprise/question/stakes)
-- **Human story** (who discovered it, why they were researching)
-- **Why now?** (immediate, current relevance)
-- **Progressive complexity** (simple → technical)
-- **Reader-focused** (what changes for them?)
+### Simplified Version
+- **Hook**: First 3 lines (surprise/question/stakes)
+- **Human story**: Who discovered it, why they were researching
+- **Why now?**: Immediate, current relevance
+- **Progressive complexity**: Simple → technical (not all at once)
+- **Reader-focused**: What changes for them?
+- **Length**: 1500-2500 words minimum
 
-### Scientific Version (Version scientifique)
-- **Citations everywhere** (Author Year format)
-- **Mechanism explained** (how does it work?)
-- **Limitations acknowledged** (what we still don't know)
-- **Field implications** (where does this fit?)
-- **Full bibliography** (with DOI)
-
----
-
-## 🚀 Workflow
-
-```
-Research/Topic → Grok Prompt → JSON Output → Import to Neural Space → Publish
-```
-
-**Time**: ~10 minutes per article
-**Quality**: Consistent structure, strong hooks, proper citations
-**Bonus**: Two versions from one prompt
+### Scientific Version
+- **Citations**: Every claim backed by (Author Year)
+- **Mechanisms**: How does it work step-by-step?
+- **Data**: Specific metrics, statistics, effect sizes
+- **Limitations**: Honest about what we don't know
+- **Field implications**: Where does this fit in the research landscape?
+- **Bibliography**: Full details with DOI
+- **Length**: 1800-3000 words minimum
 
 ---
 
@@ -90,37 +107,56 @@ Research/Topic → Grok Prompt → JSON Output → Import to Neural Space → Pu
 
 **Pressing Question Hook**
 - "What if cancer's biggest advantage isn't that it mutates, but that it cooperates?"
-- "What if your gut bacteria are more responsible for your mood than your therapist?"
+- "What if your gut bacteria are running your mood more than your brain?"
 
 **Clear Stakes Hook**
 - "The thing keeping you alive might also be slowly breaking your DNA."
-- "We've been wrong about aging—and now we know why."
+- "We've been wrong about aging—and now we know exactly why."
+
+---
+
+## 🚀 Workflow
+
+```
+Find Research → Open GROK_PROMPT_EXTENDED.md → Copy → Paste in Grok
+                                                         ↓
+Fill 5 fields → Submit → Get full JSON → Copy JSON → Paste in Neural Space
+                                                         ↓
+Add cover image → Choose category → Publish
+```
+
+**Time**: ~15 minutes per article
+**Quality**: Consistent, detailed, properly structured
+**Result**: Two professional-quality versions
 
 ---
 
 ## ✅ Pre-Publish Checklist
 
 ### Simplified Version
-- [ ] Hook in sentence 1
+- [ ] Hook in sentence 1 (not buried)
 - [ ] "Why now?" answered by sentence 3
-- [ ] Human story included
-- [ ] Complexity builds gradually
-- [ ] Ends with reader takeaway
-- [ ] Reads like curious friend, not Wikipedia
+- [ ] Human story/researcher name included
+- [ ] Complexity builds gradually (simple → technical)
+- [ ] Ends with reader takeaway (not just summary)
+- [ ] **Word count 1500+** (not 600)
+- [ ] Reads like interesting article, not Wikipedia summary
 
 ### Scientific Version
-- [ ] Every claim cited (Author Year)
-- [ ] Mechanisms explained clearly
-- [ ] Limitations noted
+- [ ] Every claim cited (Author Year format)
+- [ ] Specific mechanisms explained step-by-step
+- [ ] Results include metrics (sensitivity, specificity, p-values)
+- [ ] Limitations honestly discussed
 - [ ] Bibliography complete with DOI
 - [ ] Technical but not jargon-soup
-- [ ] Field context clear
+- [ ] **Word count 1800+** (not 700)
 
 ### Both
-- [ ] Title is curiosity-driven, not generic
+- [ ] Title is curiosity-driven (not generic)
 - [ ] Summary has stakes + human element
-- [ ] Reading time realistic
-- [ ] Word count matches content
+- [ ] Reading time estimate realistic
+- [ ] Specific numbers included (not "many", "some")
+- [ ] Researcher names/labs mentioned
 
 **All checked?** → Ready to publish
 
@@ -128,137 +164,147 @@ Research/Topic → Grok Prompt → JSON Output → Import to Neural Space → Pu
 
 ## 🤔 Common Questions
 
-**Q: What if Grok's output isn't perfect?**
-A: Ask it to adjust specific sections: "Make the intro 20% punchier" or "Add more mechanisms to the scientific section."
+**Q: Why is my JSON output still short?**
+A: You're probably using the old `COPY_PASTE_PROMPT.md`. Use `GROK_PROMPT_EXTENDED.md` instead. See `WHY_SHORT_OUTPUT.md` for details.
+
+**Q: What if it's still too short?**
+A: See "If It's STILL Too Short" section in `WHY_SHORT_OUTPUT.md` for recovery instructions.
 
 **Q: Do I need to edit after importing?**
-A: Usually not. But you can add details, citations, or refine tone in the editor if needed.
-
-**Q: What about images?**
-A: Import the JSON first, then add cover image in the Neural Space editor before publishing.
+A: Usually not. But you can refine tone or add details in the Neural Space editor if needed.
 
 **Q: Can I use this for existing articles?**
-A: Yes. Edit any article, check "Dual content" checkbox, import JSON. It will populate both versions.
+A: Yes. Edit article → Check "Dual content" → Import JSON → Both versions populate.
 
-**Q: What if I only want one version?**
-A: Still use the prompt (gives both), but only publish the one you want. The other stays in draft.
-
----
-
-## 📊 File Organization
-
-```
-lib/prompts/
-├── README.md (this file)
-├── QUICK_START.md (start here)
-├── COPY_PASTE_PROMPT.md (use this for Grok)
-├── grok-article-generator.md (full reference)
-├── EXAMPLES.md (before/after examples)
-└── TONE_CHECKLIST.md (quality verification)
-```
+**Q: What about images?**
+A: Import JSON first, then add cover image in editor before publishing.
 
 ---
 
-## 🎓 Learning Path
+## 📊 File Guide
 
-**First time?** → `QUICK_START.md` → `COPY_PASTE_PROMPT.md`
+### For Generating Articles
+- **`GROK_PROMPT_EXTENDED.md`** ⭐ Main prompt (use this)
+- **`WHY_SHORT_OUTPUT.md`** Why old prompt was short + validation
 
-**Want to understand?** → `EXAMPLES.md` → `grok-article-generator.md`
+### For Understanding the System
+- `grok-article-generator.md` — Technical reference, structure, principles
+- `EXAMPLES.md` — Real before/after examples
 
-**Before publishing?** → `TONE_CHECKLIST.md`
+### For Quick Reference
+- `QUICK_START.md` — 30-second version
+- `TONE_CHECKLIST.md` — Pre-publish checklist
 
-**Need full reference?** → `grok-article-generator.md`
+### Deprecated
+- ~~`COPY_PASTE_PROMPT.md`~~ — Don't use (produces short articles)
+
+---
+
+## 🎓 Learning Paths
+
+**First time using this?**
+1. Read `QUICK_START.md` (2 minutes)
+2. Copy `GROK_PROMPT_EXTENDED.md` and use it
+3. Check output against `TONE_CHECKLIST.md`
+
+**Want to understand the theory?**
+1. Read `EXAMPLES.md` (see before/after)
+2. Read `grok-article-generator.md` (full reference)
+3. Then use `GROK_PROMPT_EXTENDED.md`
+
+**Output is too short?**
+1. Read `WHY_SHORT_OUTPUT.md` (explains why)
+2. Check you're using `GROK_PROMPT_EXTENDED.md` not old prompt
+3. Use recovery instructions if needed
+
+**Debugging quality issues?**
+1. Use `TONE_CHECKLIST.md` to identify what's missing
+2. Ask Grok to expand specific sections
+3. See `EXAMPLES.md` for reference level
 
 ---
 
 ## 💡 Pro Tips
 
-1. **Save Grok output** in a text file before importing:
+1. **Save Grok output** before importing:
    ```
    article-title-yyyy-mm-dd.json
    ```
 
-2. **Include specific sources**: Don't say "some research." Say "Smith et al. (2023) in Cell Metabolism."
+2. **Be specific with sources**: Include paper titles, years, authors:
+   - BAD: "some recent research"
+   - GOOD: "Mukherjee et al. (2026) in Gut; Chang et al. (2022) PNAS"
 
-3. **Mention the lab**: "A team at UC Berkeley led by Dr. X was trying to..." adds credibility.
+3. **Mention the human element**: Where, who, why they were researching
 
-4. **Iterate with Grok**: If output needs work, ask for specific edits rather than regenerating.
+4. **Batch articles**: Generate 3-4 at once, import them sequentially
 
-5. **Batch articles**: Generate 3-4 articles at once, then import them one by one.
+5. **Iterate if needed**: Ask Grok to expand specific sections rather than regenerating
 
 ---
 
 ## 🔗 Integration with Neural Space
 
-### Article Editor
-- `/dashboard/articles/new` → Import JSON
-- `/dashboard/articles/[id]/edit` → Check "Dual content" box, then import
+### Workflow
+- Create article → Check "Dual content" checkbox
+- Click "Importer JSON" button
+- Paste full JSON from Grok
 - Both versions populate automatically
-- Read time and word count auto-calculated
+- Add cover image, category → Publish
 
-### Article Page
-- Reader sees simplified version by default
-- Two tabs appear below header
-- Click to switch: "Comprendre simplement" ↔ "Version scientifique"
-- Both versions fully rendered with proper styling
+### Reader Experience
+- Default tab: "Comprendre simplement"
+- Click to switch: "Version scientifique"
+- Both fully styled and interactive
+- All tracking/analytics integrated
 
-### Analytics Dashboard
-- Can track engagement by version
-- Word count split (if needed)
-- Future: version-specific metrics
-
----
-
-## 📝 Example Workflow
-
-**Step 1: Find your topic**
-"DNA repair mechanisms and aging" from Beck et al. 2023
-
-**Step 2: Prepare Grok input**
-```
-Topic: DNA Repair and Aging
-Sources: Beck et al. (2023) Cell Metabolism; Nature News articles
-Audience: Mixed
-Angle: Recent breakthroughs change everything we thought about aging
-```
-
-**Step 3: Paste and run**
-Use `COPY_PASTE_PROMPT.md`, replace bracketed sections, submit to Grok
-
-**Step 4: Get JSON**
-Grok returns full article in JSON format
-
-**Step 5: Import to Neural Space**
-`/dashboard/articles/new` → Click "Importer JSON" → Paste → Click "Importer"
-
-**Step 6: Finalize**
-Add cover image, choose category, add tags if desired, click "Publier"
-
-**Result**: Live article with both versions, strong hook, proper citations, ready for readers
+### Admin Features
+- Edit each version independently
+- Save drafts before publishing
+- Preview both versions
+- Schedule or publish immediately
 
 ---
 
-## 🎯 Success Metrics
+## 📈 Success Metrics
 
 Your article is successful if:
-- ✓ Simplified version hooks reader in first 3 lines
+- ✓ Simplified hooks reader in first 3 lines
 - ✓ Reader keeps scrolling past paragraph 2
-- ✓ Scientific version has citations for every claim
-- ✓ Article answers "why now?"
-- ✓ Both versions include human element
-- ✓ Complexity builds gradually (not dumped all at once)
+- ✓ Scientific version has citations for every major claim
+- ✓ Both versions explain "why now?"
+- ✓ Human element (researcher, lab, story) included
+- ✓ Complexity builds gradually
+- ✓ Article teaches something new
 
 ---
 
 ## Need Help?
 
-1. **Quick reference**: `QUICK_START.md`
-2. **Examples**: `EXAMPLES.md`
-3. **Full prompt**: `COPY_PASTE_PROMPT.md`
-4. **Detailed guide**: `grok-article-generator.md`
-5. **Pre-publish check**: `TONE_CHECKLIST.md`
+1. **Quick overview**: `QUICK_START.md` (2 min read)
+2. **Real examples**: `EXAMPLES.md` (see before/after)
+3. **Main prompt**: `GROK_PROMPT_EXTENDED.md` (copy this)
+4. **Output too short?**: `WHY_SHORT_OUTPUT.md` (validation + fixes)
+5. **Pre-publish check**: `TONE_CHECKLIST.md` (quality gates)
+6. **Full reference**: `grok-article-generator.md` (all details)
+
+---
+
+## 🎯 TL;DR
+
+1. Copy `GROK_PROMPT_EXTENDED.md` (everything in it)
+2. Paste into Grok
+3. Fill in 5 fields: Topic, Sources, Audience, Angle, Key finding
+4. Submit
+5. Get JSON output (should be 2000+ words)
+6. Paste into Neural Space `/dashboard/articles/new`
+7. Click "Importer JSON"
+8. Add cover image, publish
+
+**Done.** Both versions are live.
 
 ---
 
 **Last updated**: 2026-06-06
-**Grok prompt version**: 2.0 (with dual-content output)
+**Current version**: 2.1 (with EXTENDED prompt)
+**Next step**: See `GROK_PROMPT_EXTENDED.md`
