@@ -122,6 +122,30 @@ export function validateGrokulJSON(data: any): ValidationResult {
     });
   }
 
+  // Duplicate image URL detection across both versions
+  const allImageUrls: { url: string; field: string }[] = [];
+  for (const [ver, sections] of [["simplified", data.simplified?.body ?? []], ["scientific", data.scientific?.body ?? []]] as [string, any[]][]) {
+    sections.forEach((sec: any, sIdx: number) => {
+      (sec.blocks ?? []).forEach((block: any, bIdx: number) => {
+        if (block.type === "image" && block.url) {
+          allImageUrls.push({ url: block.url, field: `${ver}.body[${sIdx}].blocks[${bIdx}]` });
+        }
+      });
+    });
+  }
+  const seen = new Map<string, string>();
+  allImageUrls.forEach(({ url, field }) => {
+    if (seen.has(url)) {
+      warnings.push({
+        field,
+        issue: `Duplicate image URL (already used at ${seen.get(url)}) — use unique images per section`,
+        severity: "warning",
+      });
+    } else {
+      seen.set(url, field);
+    }
+  });
+
   const valid = errors.length === 0;
   const summary = valid
     ? `✓ VALID - All required fields present`
