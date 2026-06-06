@@ -12,8 +12,8 @@ export type GrokulJSON = {
     intro: string;
     body: Array<{
       section: string;
-      content: string;
-      subSections?: Array<{ title: string; content: string }>;
+      content?: string;
+      blocks?: Array<GrokulBlock>;
     }>;
     conclusion: string;
   };
@@ -21,8 +21,8 @@ export type GrokulJSON = {
     intro: string;
     body: Array<{
       section: string;
-      content: string;
-      subSections?: Array<{ title: string; content: string }>;
+      content?: string;
+      blocks?: Array<GrokulBlock>;
     }>;
     conclusion: string;
     bibliography: Array<{
@@ -35,6 +35,12 @@ export type GrokulJSON = {
   };
 };
 
+export type GrokulBlock = 
+  | { type: "paragraph"; content: string }
+  | { type: "quote"; content: string }
+  | { type: "divider" }
+  | { type: "image"; url: string; caption: string; alt: string };
+
 // Convert plain text to RichText format (TextRun[])
 function stringToRichText(text: string): RichText {
   return [{ text } as TextRun];
@@ -42,6 +48,8 @@ function stringToRichText(text: string): RichText {
 
 /**
  * Convert Grok's dual-content format to ContentBlocks
+ * Handles both old format (intro/body/conclusion strings)
+ * and new format (blocks with images, quotes, dividers)
  */
 export function convertGrokulToBlocks(data: GrokulJSON, version: "simplified" | "scientific"): ContentBlock[] {
   const blocks: ContentBlock[] = [];
@@ -49,7 +57,7 @@ export function convertGrokulToBlocks(data: GrokulJSON, version: "simplified" | 
   
   const section = version === "simplified" ? data.simplified : data.scientific;
   
-  // Intro as paragraphs
+  // Intro as paragraphs (split by double newlines)
   const introParagraphs = section.intro.split("\n\n").filter(p => p.trim());
   introParagraphs.forEach(para => {
     if (para.trim()) {
@@ -70,39 +78,50 @@ export function convertGrokulToBlocks(data: GrokulJSON, version: "simplified" | 
       content: sec.section
     } as unknown as ContentBlock);
     
-    // Section content paragraphs
-    const contentParagraphs = sec.content.split("\n\n").filter(p => p.trim());
-    contentParagraphs.forEach(para => {
-      if (para.trim()) {
-        blocks.push({
-          id: `block-${blockId++}`,
-          type: "paragraph",
-          content: stringToRichText(para.trim())
-        } as unknown as ContentBlock);
-      }
-    });
-    
-    // Subsections if any
-    if (sec.subSections && sec.subSections.length > 0) {
-      sec.subSections.forEach(sub => {
-        blocks.push({
-          id: `block-${blockId++}`,
-          type: "subheading",
-          level: 2,
-          content: sub.title,
-          anchor: sub.title.toLowerCase().replace(/\s+/g, "-")
-        } as unknown as ContentBlock);
-        
-        const subParagraphs = sub.content.split("\n\n").filter(p => p.trim());
-        subParagraphs.forEach(para => {
-          if (para.trim()) {
-            blocks.push({
-              id: `block-${blockId++}`,
-              type: "paragraph",
-              content: stringToRichText(para.trim())
-            } as unknown as ContentBlock);
-          }
-        });
+    // If blocks are provided, use those (new format)
+    if (sec.blocks && sec.blocks.length > 0) {
+      sec.blocks.forEach(block => {
+        if (block.type === "paragraph") {
+          blocks.push({
+            id: `block-${blockId++}`,
+            type: "paragraph",
+            content: stringToRichText(block.content)
+          } as unknown as ContentBlock);
+        } else if (block.type === "quote") {
+          blocks.push({
+            id: `block-${blockId++}`,
+            type: "quote",
+            content: block.content
+          } as unknown as ContentBlock);
+        } else if (block.type === "image") {
+          blocks.push({
+            id: `block-${blockId++}`,
+            type: "image",
+            url: block.url,
+            caption: block.caption,
+            alt: block.alt,
+            credit: undefined,
+            creditLink: undefined,
+            license: undefined
+          } as unknown as ContentBlock);
+        } else if (block.type === "divider") {
+          blocks.push({
+            id: `block-${blockId++}`,
+            type: "divider"
+          } as unknown as ContentBlock);
+        }
+      });
+    } else if (sec.content) {
+      // Fallback: old format with just content string
+      const contentParagraphs = sec.content.split("\n\n").filter(p => p.trim());
+      contentParagraphs.forEach(para => {
+        if (para.trim()) {
+          blocks.push({
+            id: `block-${blockId++}`,
+            type: "paragraph",
+            content: stringToRichText(para.trim())
+          } as unknown as ContentBlock);
+        }
       });
     }
   });
