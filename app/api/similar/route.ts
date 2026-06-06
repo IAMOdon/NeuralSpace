@@ -14,6 +14,9 @@ export async function GET(req: NextRequest) {
   const filtered = exclude ? articles.filter((a) => a.slug !== exclude) : articles;
 
   return NextResponse.json(filtered.slice(0, 3), {
-    headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" },
+    headers: { 
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+      "Content-Type": "application/json",
+    },
   });
 }
