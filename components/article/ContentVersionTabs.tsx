@@ -13,24 +13,27 @@ export function ContentVersionTabs({
 }) {
   const hasScientific = (contentScientific && contentScientific.length > 0) ?? false;
 
+  const simplifiedContent = (
+    <WordLookup>
+      <Suspense>
+        <ArticleRenderer blocks={contentSimplified.filter((b) => b.type !== "heading")} />
+      </Suspense>
+    </WordLookup>
+  );
+
+  const scientificContent = hasScientific && (
+    <WordLookup>
+      <Suspense>
+        <ArticleRenderer blocks={(contentScientific ?? []).filter((b) => b.type !== "heading")} />
+      </Suspense>
+    </WordLookup>
+  );
+
   return (
-    <ContentVersionTabsClient hasScientific={hasScientific}>
-      <div data-version="simplified">
-        <WordLookup>
-          <Suspense>
-            <ArticleRenderer blocks={contentSimplified.filter((b) => b.type !== "heading")} />
-          </Suspense>
-        </WordLookup>
-      </div>
-      {hasScientific && (
-        <div data-version="scientific">
-          <WordLookup>
-            <Suspense>
-              <ArticleRenderer blocks={(contentScientific ?? []).filter((b) => b.type !== "heading")} />
-            </Suspense>
-          </WordLookup>
-        </div>
-      )}
-    </ContentVersionTabsClient>
+    <ContentVersionTabsClient
+      hasScientific={hasScientific}
+      simplifiedContent={simplifiedContent}
+      scientificContent={scientificContent}
+    />
   );
 }
