@@ -16,7 +16,7 @@ export default async function EditArticlePage({ params }: Props) {
   const [{ data: article }, categories] = await Promise.all([
     adminClient
       .from("articles")
-      .select("id, title, summary, content, type, status, slug, category_id, cover_image_url, cover_image_alt, seo_title, seo_description, sources, is_sponsored, article_authors(order, authors(id, name, slug, avatar_url, role, institution))")
+      .select("id, title, summary, content, content_simplified, content_scientific, has_dual_content, type, status, slug, category_id, cover_image_url, cover_image_alt, seo_title, seo_description, sources, is_sponsored, article_authors(order, authors(id, name, slug, avatar_url, role, institution))")
       .eq("id", id)
       .single(),
     getCategories(),
@@ -45,6 +45,12 @@ export default async function EditArticlePage({ params }: Props) {
   const parsedContent = ContentSchema.safeParse(article.content);
   const validContent = parsedContent.success ? article.content : [];
 
+  const parsedSimplified = ContentSchema.safeParse(article.content_simplified ?? article.content);
+  const validSimplified = parsedSimplified.success ? (article.content_simplified ?? article.content) : [];
+
+  const parsedScientific = article.content_scientific ? ContentSchema.safeParse(article.content_scientific) : { success: false };
+  const validScientific = parsedScientific.success ? article.content_scientific : undefined;
+
   return (
     <ArticleEditor
       categories={categories.map((c) => ({
@@ -55,20 +61,23 @@ export default async function EditArticlePage({ params }: Props) {
       }))}
       initialContributors={contributors}
       article={{
-        id:             article.id,
-        title:          article.title,
-        summary:        article.summary,
-        content:        validContent,
-        type:           article.type,
-        status:         article.status,
-        slug:           article.slug,
-        categoryId:     article.category_id,
-        coverImageUrl:  article.cover_image_url,
-        coverImageAlt:  article.cover_image_alt,
-        seoTitle:       article.seo_title,
-        seoDescription: article.seo_description,
+        id:                article.id,
+        title:             article.title,
+        summary:           article.summary,
+        content:           validContent,
+        contentSimplified: validSimplified,
+        contentScientific: validScientific,
+        hasDualContent:    article.has_dual_content ?? false,
+        type:              article.type,
+        status:            article.status,
+        slug:              article.slug,
+        categoryId:        article.category_id,
+        coverImageUrl:     article.cover_image_url,
+        coverImageAlt:     article.cover_image_alt,
+        seoTitle:          article.seo_title,
+        seoDescription:    article.seo_description,
         sources,
-        isSponsored:    article.is_sponsored ?? false,
+        isSponsored:       article.is_sponsored ?? false,
       }}
     />
   );
