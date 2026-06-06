@@ -235,7 +235,13 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   function buildPayload() {
     const contentToUse = hasDualContent ? blocksSimplified : blocks;
     return {
-      title, summary, content: contentToUse as Parameters<typeof createArticle>[0]["content"],
+      title, summary,
+      content: contentToUse as Parameters<typeof createArticle>[0]["content"],
+      ...(hasDualContent && {
+        contentSimplified: blocksSimplified as Parameters<typeof createArticle>[0]["content"],
+        contentScientific: blocksScientific.length > 0 ? blocksScientific as Parameters<typeof createArticle>[0]["content"] : null,
+      }),
+      hasDualContent,
       type: articleType, slug: slug || slugify(title),
       categoryId: categoryId || null,
       coverImageUrl: coverUrl || null,
