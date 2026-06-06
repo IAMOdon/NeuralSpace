@@ -11,6 +11,7 @@ import { ContributorPicker } from "./ContributorPicker";
 import type { ContributorRef } from "./ContributorPicker";
 import { parseBlocks } from "@/lib/content/parseBlocks";
 import { convertGrokulToBlocks, isGrokulFormat, type GrokulJSON } from "@/lib/grok-json-converter";
+import { validateGrokulJSON } from "@/lib/grok-validator";
 import { slugify } from "@/lib/slug";
 import { createArticle, updateArticle, publishArticle, unpublishArticle, deleteArticle } from "@/lib/actions/articles";
 import { updateArticleContributors } from "@/lib/actions/contributors";
@@ -105,6 +106,15 @@ function JsonImportPanel({ onImport, categories }: {
       if (isGrokulFormat(parsed)) {
         const grokulData = parsed as GrokulJSON;
         
+        // VALIDATE the Grok JSON structure
+        const validation = validateGrokulJSON(grokulData);
+        if (!validation.valid) {
+          setStatus("error");
+          const errorList = validation.errors.map(e => e.field + ": " + e.issue).join("\n");
+          setErrMsg("Grok JSON validation failed:\n" + errorList);
+          return;
+        }
+        
         // Extract metadata
         if (grokulData.metadata.title) meta.title = grokulData.metadata.title;
         if (grokulData.metadata.summary) meta.summary = grokulData.metadata.summary;
@@ -179,9 +189,12 @@ function JsonImportPanel({ onImport, categories }: {
           className="w-full px-3 py-2 rounded-xl border border-neutral-200 bg-neutral-50 text-xs font-mono text-ns-black focus:outline-none focus:border-ns-blue transition-colors resize-none"
         />
         {status === "error" && (
-          <div className="flex gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+          <div className="flex gap-2 p-3 rounded-lg bg-red-50 border border-red-200 max-h-48 overflow-y-auto">
             <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-            <span className="text-xs text-red-700">{errMsg}</span>
+            <div className="text-xs text-red-700 space-y-1">
+              <p className="font-semibold">Validation Error:</p>
+              <p>{errMsg}</p>
+            </div>
           </div>
         )}
         {status === "ok" && (
