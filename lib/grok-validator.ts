@@ -122,34 +122,44 @@ export function validateGrokulJSON(data: any): ValidationResult {
     });
   }
 
-  // Duplicate image URL detection across both versions
-  const allImageUrls: { url: string; field: string }[] = [];
+  // Duplicate image URL detection across both versions (CRITICAL)
+  const allImageUrls: { url: string; field: string; version: string }[] = [];
   for (const [ver, sections] of [["simplified", data.simplified?.body ?? []], ["scientific", data.scientific?.body ?? []]] as [string, any[]][]) {
     sections.forEach((sec: any, sIdx: number) => {
       (sec.blocks ?? []).forEach((block: any, bIdx: number) => {
         if (block.type === "image" && block.url) {
-          allImageUrls.push({ url: block.url, field: `${ver}.body[${sIdx}].blocks[${bIdx}]` });
+          allImageUrls.push({ url: block.url, field: `${ver}.body[${sIdx}].blocks[${bIdx}]`, version: ver });
         }
       });
     });
   }
-  const seen = new Map<string, string>();
-  allImageUrls.forEach(({ url, field }) => {
-    if (seen.has(url)) {
-      warnings.push({
-        field,
-        issue: `Duplicate image URL (already used at ${seen.get(url)}) — use unique images per section`,
-        severity: "warning",
-      });
-    } else {
-      seen.set(url, field);
+
+  const imageUrlMap = new Map<string, { field: string; version: string }[]>();
+  allImageUrls.forEach(({ url, field, version }) => {
+    if (!imageUrlMap.has(url)) {
+      imageUrlMap.set(url, []);
+    }
+    imageUrlMap.get(url)!.push({ field, version });
+  });
+
+  imageUrlMap.forEach((occurrences, url) => {
+    if (occurrences.length > 1) {
+      const locations = occurrences.map(o => o.version + ".body[...]").join(", ");
+      const firstOccurrence = occurrences[0];
+      if (firstOccurrence) {
+        errors.push({
+          field: firstOccurrence.field,
+          issue: "CRITICAL: Image URL used " + occurrences.length + " times (" + locations + ") — every image must have a unique URL for article quality",
+          severity: "error",
+        });
+      }
     }
   });
 
   const valid = errors.length === 0;
   const summary = valid
-    ? `✓ VALID - All required fields present`
-    : `✗ INVALID - ${errors.length} critical errors, ${warnings.length} warnings`;
+    ? "✓ VALID - All required fields present, all images unique"
+    : "✗ INVALID - " + errors.length + " critical errors, " + warnings.length + " warnings";
 
   return { valid, errors, warnings, summary };
 }
@@ -168,7 +178,7 @@ function validateSectionArray(
   sections.forEach((section, sIdx) => {
     if (!section.section || !section.section.trim()) {
       errors.push({
-        field: `${version}.body[${sIdx}].section`,
+        field: version + ".body[" + sIdx + "].section",
         issue: "Section title required",
         severity: "error",
       });
@@ -176,7 +186,7 @@ function validateSectionArray(
 
     if (!Array.isArray(section.blocks) || section.blocks.length < 2) {
       errors.push({
-        field: `${version}.body[${sIdx}].blocks`,
+        field: version + ".body[" + sIdx + "].blocks",
         issue: "Section requires minimum 2 blocks",
         severity: "error",
       });
@@ -184,7 +194,7 @@ function validateSectionArray(
       section.blocks.forEach((block: any, bIdx: number) => {
         if (!block.type) {
           errors.push({
-            field: `${version}.body[${sIdx}].blocks[${bIdx}].type`,
+            field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].type",
             issue: "Block type required (paragraph, quote, image, divider)",
             severity: "error",
           });
@@ -193,7 +203,7 @@ function validateSectionArray(
         if (block.type === "paragraph") {
           if (!block.content || block.content.trim().length < 20) {
             errors.push({
-              field: `${version}.body[${sIdx}].blocks[${bIdx}].content`,
+              field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].content",
               issue: "Paragraph content required (20+ characters)",
               severity: "error",
             });
@@ -202,7 +212,7 @@ function validateSectionArray(
           totalQuotes++;
           if (!block.content || block.content.trim().length < 10) {
             errors.push({
-              field: `${version}.body[${sIdx}].blocks[${bIdx}].content`,
+              field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].content",
               issue: "Quote content required (10+ characters)",
               severity: "error",
             });
@@ -211,21 +221,21 @@ function validateSectionArray(
           totalImages++;
           if (!block.url || !block.url.startsWith("http")) {
             errors.push({
-              field: `${version}.body[${sIdx}].blocks[${bIdx}].url`,
+              field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].url",
               issue: "Image URL required (must be valid HTTP URL)",
               severity: "error",
             });
           }
           if (!block.caption || block.caption.trim().length < 20) {
             errors.push({
-              field: `${version}.body[${sIdx}].blocks[${bIdx}].caption`,
+              field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].caption",
               issue: "Image caption required (20+ characters)",
               severity: "error",
             });
           }
           if (!block.alt || block.alt.trim().length < 10) {
             errors.push({
-              field: `${version}.body[${sIdx}].blocks[${bIdx}].alt`,
+              field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].alt",
               issue: "Image alt text required (10+ characters for accessibility)",
               severity: "error",
             });
@@ -234,8 +244,8 @@ function validateSectionArray(
           totalDividers++;
         } else {
           errors.push({
-            field: `${version}.body[${sIdx}].blocks[${bIdx}].type`,
-            issue: `Unknown block type: ${block.type}`,
+            field: version + ".body[" + sIdx + "].blocks[" + bIdx + "].type",
+            issue: "Unknown block type: " + block.type,
             severity: "error",
           });
         }
@@ -245,29 +255,29 @@ function validateSectionArray(
 
   if (totalImages < minImages) {
     errors.push({
-      field: `${version}.body`,
-      issue: `Requires minimum ${minImages} image blocks, found ${totalImages}`,
+      field: version + ".body",
+      issue: "Requires minimum " + minImages + " image blocks, found " + totalImages,
       severity: "error",
     });
   }
 
   if (version === "simplified" && totalQuotes === 0) {
     warnings.push({
-      field: `${version}.body`,
+      field: version + ".body",
       issue: "No quote blocks found (at least 1 recommended)",
       severity: "warning",
     });
   } else if (version === "scientific" && totalQuotes < 2) {
     warnings.push({
-      field: `${version}.body`,
-      issue: `Only ${totalQuotes} quote block(s) found (minimum 2 recommended for scientific)`,
+      field: version + ".body",
+      issue: "Only " + totalQuotes + " quote block(s) found (minimum 2 recommended for scientific)",
       severity: "warning",
     });
   }
 
   if (totalDividers === 0) {
     warnings.push({
-      field: `${version}.body`,
+      field: version + ".body",
       issue: "No divider blocks found (at least 1 recommended for readability)",
       severity: "warning",
     });

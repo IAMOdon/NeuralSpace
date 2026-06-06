@@ -20,7 +20,7 @@ A user is giving you a tweet/social post about a science topic. Your job is to:
 - [ ] summary (string, 2-3 sentences)
 - [ ] readingTimeMin (number, 6-15 minutes)
 - [ ] wordCount (number, 1500-3000)
-- [ ] slug (string, lowercase-hyphenated-3-6-words)
+- [ ] slug (string, lowercase-hyphenated-3-6-words, MAXIMUM 50 CHARS)
 - [ ] seoAlt (string, max 120 chars, includes main keyword)
 - [ ] ogImageUrl (string, REAL verified URL)
 
@@ -58,6 +58,14 @@ A user is giving you a tweet/social post about a science topic. Your job is to:
 - [ ] caption (string, 20-100 words, explains relevance)
 - [ ] alt (string, 10-100 chars, accessibility + SEO)
 
+### CRITICAL: EVERY IMAGE URL MUST BE UNIQUE (NO DUPLICATES)
+- [ ] No image URL can appear more than once in the entire article
+- [ ] Simplified version: 1+ images, each with DIFFERENT URL
+- [ ] Scientific version: 2+ images, each with DIFFERENT URL
+- [ ] Check: Do not reuse Twitter images or placeholder URLs across sections
+- [ ] Example of WRONG: Using same PubMed URL twice
+- [ ] Example of RIGHT: Section 1 uses PubMed Figure A, Section 2 uses PubMed Figure B, Section 3 uses Wikimedia image
+
 ### EVERY Quote block MUST have:
 - [ ] type: "quote" (exact string)
 - [ ] content (string, 10-50 words, impactful)
@@ -86,7 +94,7 @@ METADATA (7/7 required):
 - [ ] summary exists and is 2-3 sentences ✓
 - [ ] readingTimeMin is 6-15 ✓
 - [ ] wordCount is 1500-3000 ✓
-- [ ] slug exists, lowercase, hyphenated, 3-6 words ✓
+- [ ] slug exists, lowercase, hyphenated, 3-6 words, MAXIMUM 50 CHARS ✓
 - [ ] seoAlt exists, max 120 chars, has keyword ✓
 - [ ] ogImageUrl exists and is REAL verified URL ✓
 
@@ -95,7 +103,7 @@ SIMPLIFIED VERSION:
 - [ ] body: minimum 3 sections ✓
 - [ ] Each section: section name + blocks array ✓
 - [ ] Blocks: minimum 2 per section ✓
-- [ ] Images: minimum 1, with url + caption + alt ✓
+- [ ] Images: minimum 1, with url + caption + alt, ALL UNIQUE URLS ✓
 - [ ] Quotes: minimum 1, with content ✓
 - [ ] Dividers: minimum 1 ✓
 - [ ] conclusion: 150-200+ words ✓
@@ -106,12 +114,17 @@ SCIENTIFIC VERSION:
 - [ ] body: minimum 4 sections ✓
 - [ ] Each section: section name + blocks array ✓
 - [ ] Blocks: minimum 2 per section ✓
-- [ ] Images: minimum 2 from original papers, url + caption + alt ✓
+- [ ] Images: minimum 2 from original papers, url + caption + alt, ALL UNIQUE URLS ✓
 - [ ] Quotes: minimum 2, with content ✓
 - [ ] Dividers: minimum 1 ✓
 - [ ] conclusion: 200-250+ words ✓
 - [ ] bibliography: minimum 3 entries with all fields ✓
 - [ ] Total: 1800-3000 words ✓
+
+IMAGE QUALITY CHECK:
+- [ ] All image URLs are DIFFERENT (no duplicates within article) ✓
+- [ ] No image URL appears in both simplified AND scientific versions ✓
+- [ ] All URLs actually exist and would load ✓
 
 SOURCES:
 - [ ] Array exists ✓
@@ -119,20 +132,21 @@ SOURCES:
 - [ ] Each: label + url + authors + year ✓
 - [ ] All URLs are REAL and verified ✓
 
-## IF ANY FIELD IS MISSING
+## IF ANY FIELD IS MISSING OR INVALID
 
 DO NOT OUTPUT THE JSON. Instead, output this error message:
 
 ```
-VALIDATION FAILED - MISSING REQUIRED FIELDS:
+VALIDATION FAILED - MISSING OR INVALID REQUIRED FIELDS:
 - [List missing fields]
+- [List invalid fields with reason]
 - [Show what was expected]
 - [Show what you provided]
 
-Please regenerate the article with ALL required fields present.
+Please regenerate the article with ALL required fields present and valid.
 ```
 
-Then regenerate the entire article ensuring every single field is included.
+Then regenerate the entire article ensuring every single field is included and correct.
 
 ## STRICT IMAGE REQUIREMENTS
 
@@ -141,14 +155,14 @@ Then regenerate the entire article ensuring every single field is included.
 - [ ] REAL URLs (test them mentally - would they work?)
 - [ ] From: Unsplash, Pexels, Wikimedia, NIH, official institutions
 - [ ] Each has: url, caption (20-100 words), alt (10-100 chars)
-- [ ] **EVERY image URL must be UNIQUE** — no URL may appear more than once across the entire article
+- [ ] EACH IMAGE MUST HAVE A UNIQUE URL (different from scientific version too)
 
 ### Scientific version images:
 - [ ] 2-3 images minimum
 - [ ] MUST be from original research papers
 - [ ] REAL figure URLs from papers (DOI links or PubMed Central)
 - [ ] Each has: url, caption with "Figure X: [description]", alt text
-- [ ] **EVERY image URL must be UNIQUE** — different figure for each section
+- [ ] EACH IMAGE MUST HAVE A UNIQUE URL (different from simplified version too)
 - [ ] Examples of captions:
   - "Figure 2: ROC curve comparing REDMOD (AUC 0.82) vs radiologist (AUC 0.62) performance"
   - "Figure 3: Sensitivity maintained 68% for cancers 24+ months pre-diagnostic"
@@ -161,7 +175,7 @@ Then regenerate the entire article ensuring every single field is included.
     "summary": "2-3 sentence teaser with stakes",
     "readingTimeMin": 8,
     "wordCount": 1900,
-    "slug": "lowercase-hyphenated-3-6-words",
+    "slug": "lowercase-hyphenated-max-50-chars",
     "seoAlt": "SEO keyword-rich alt text, max 120 chars",
     "ogImageUrl": "https://real-verified-url.jpg"
   },
@@ -173,7 +187,7 @@ Then regenerate the entire article ensuring every single field is included.
         "blocks": [
           {"type": "paragraph", "content": "Paragraph text..."},
           {"type": "quote", "content": "Quote text..."},
-          {"type": "image", "url": "https://...", "caption": "...", "alt": "..."},
+          {"type": "image", "url": "https://unique-url-1.jpg", "caption": "...", "alt": "..."},
           {"type": "divider"}
         ]
       },
@@ -181,7 +195,7 @@ Then regenerate the entire article ensuring every single field is included.
         "section": "Section 2 Title",
         "blocks": [
           {"type": "paragraph", "content": "..."},
-          {"type": "image", "url": "https://...", "caption": "...", "alt": "..."}
+          {"type": "image", "url": "https://unique-url-2.jpg", "caption": "...", "alt": "..."}
         ]
       },
       {
@@ -201,7 +215,7 @@ Then regenerate the entire article ensuring every single field is included.
         "section": "Background & Methods",
         "blocks": [
           {"type": "paragraph", "content": "Methods with citations..."},
-          {"type": "image", "url": "https://doi.org/figure-1", "caption": "Figure 1: ...", "alt": "..."}
+          {"type": "image", "url": "https://unique-url-3.jpg", "caption": "Figure 1: ...", "alt": "..."}
         ]
       },
       {
@@ -209,7 +223,7 @@ Then regenerate the entire article ensuring every single field is included.
         "blocks": [
           {"type": "paragraph", "content": "Results..."},
           {"type": "quote", "content": "Key statistic..."},
-          {"type": "image", "url": "https://doi.org/figure-2", "caption": "Figure 2: ...", "alt": "..."}
+          {"type": "image", "url": "https://unique-url-4.jpg", "caption": "Figure 2: ...", "alt": "..."}
         ]
       },
       {
@@ -248,16 +262,17 @@ Here's the tweet/post:
 [USER WILL PASTE THEIR TWEET HERE]
 
 Generate the COMPLETE JSON article with EVERY required field:
-- Metadata: title, summary, readingTimeMin, wordCount, slug, seoAlt, ogImageUrl
-- Simplified: intro, body (3+ sections, 2+ blocks each), conclusion, images, quotes, dividers
-- Scientific: intro, body (4+ sections, 2+ blocks each), conclusion, bibliography, images, quotes, dividers
+- Metadata: title, summary, readingTimeMin, wordCount, slug (max 50 chars!), seoAlt, ogImageUrl
+- Simplified: intro, body (3+ sections, 2+ blocks each), conclusion, images (unique URLs), quotes, dividers
+- Scientific: intro, body (4+ sections, 2+ blocks each), conclusion, bibliography, images (unique URLs), quotes, dividers
 - Sources: minimum 3 entries
+- IMAGE CRITICAL: Every image URL must be unique (no repeats within article)
 
 BEFORE YOU OUTPUT, CHECK THE VALIDATION CHECKLIST ABOVE.
 
-If ANY field is missing, output error message and regenerate.
+If ANY field is missing, invalid, or duplicate image URLs found, output error message and regenerate.
 
-If all fields are present, output the complete, valid JSON.
+If all fields are present and valid, output the complete, valid JSON.
 ```
 
 ---
@@ -268,17 +283,18 @@ If all fields are present, output the complete, valid JSON.
 2. **Paste into Grok**
 3. **Replace placeholder with your tweet**
 4. **Submit**
-5. **Grok validates and returns COMPLETE JSON with every field**
-6. **Paste into Neural Space** - everything is guaranteed to be present
+5. **Grok validates and returns COMPLETE JSON with every field and unique images**
+6. **Paste into Neural Space** - everything is guaranteed to be present and rigorous
 
 ---
 
 ## What This Ensures
 
-✓ Metadata complete (slug, seoAlt, ogImageUrl always present)
-✓ Simplified version always has images, quotes, dividers
-✓ Scientific version always has 2+ images from papers, citations
+✓ Metadata complete (slug max 50 chars, seoAlt, ogImageUrl always present)
+✓ Simplified version always has images, quotes, dividers with UNIQUE URLs
+✓ Scientific version always has 2+ images from papers with UNIQUE URLs
 ✓ All images have captions and alt text
+✓ NO duplicate image URLs (image quality gate)
 ✓ Sources list always has 3+ entries
 ✓ Bibliography always validated
 ✓ Word counts meet minimums
@@ -286,6 +302,6 @@ If all fields are present, output the complete, valid JSON.
 
 ---
 
-**Version**: 5.0 (Strict Validation)
-**Guarantee**: 100% complete articles with no missing fields
-**No Exceptions**: Every required field is non-negotiable
+**Version**: 6.0 (Strict Validation + Unique Images)
+**Guarantee**: 100% complete articles with unique images, no reused content
+**No Exceptions**: Every required field is non-negotiable, duplicate images are forbidden
