@@ -16,7 +16,7 @@ const nav = [
   { label: "Live",        href: "/dashboard/live",         icon: Radio           },
 ];
 
-const ready = new Set(["/dashboard", "/dashboard/hero", "/dashboard/articles"]);
+const ready = new Set(["/dashboard", "/dashboard/hero", "/dashboard/articles", "/dashboard/analytics"]);
 
 export function Sidebar() {
   const pathname = usePathname();
