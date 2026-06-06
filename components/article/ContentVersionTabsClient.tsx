@@ -6,10 +6,12 @@ import { BookOpen, Microscope } from "lucide-react";
 
 export function ContentVersionTabsClient({
   hasScientific,
-  children,
+  simplifiedContent,
+  scientificContent,
 }: {
   hasScientific: boolean;
-  children: ReactNode;
+  simplifiedContent: ReactNode;
+  scientificContent: ReactNode;
 }) {
   const [activeTab, setActiveTab] = useState<"simplified" | "scientific">("simplified");
 
@@ -42,12 +44,10 @@ export function ContentVersionTabsClient({
         </div>
       )}
 
-      {Array.isArray(children)
-        ? children.find(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (child: any) => child?.props?.["data-version"] === activeTab
-          ) ?? children[0]
-        : children}
+      <div>
+        {activeTab === "simplified" && simplifiedContent}
+        {activeTab === "scientific" && scientificContent}
+      </div>
     </>
   );
 }
