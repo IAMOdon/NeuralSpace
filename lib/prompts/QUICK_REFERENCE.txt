@@ -1,0 +1,171 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    NEURAL SPACE GROK ARTICLE PROMPT                        ║
+║                          QUICK REFERENCE CARD                              ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+WHAT TO USE
+───────────
+File: GROK_PROMPT_EXTENDED.md ⭐
+(NOT the old COPY_PASTE_PROMPT.md)
+
+WHY?
+Old prompt → short articles (400-600 words) ❌
+New prompt → full articles (1500-3000 words) ✓
+
+
+5-STEP WORKFLOW
+───────────────
+
+1. Open: lib/prompts/GROK_PROMPT_EXTENDED.md
+
+2. Copy EVERYTHING in that file
+
+3. Paste into Grok/Claude
+
+4. Fill in these 5 fields at the bottom:
+   - Topic: [What's the discovery?]
+   - Sources: [Papers with years: Smith et al. 2024, etc]
+   - Audience: [General / Mixed / Specialists]
+   - Angle: [What makes this unique/timely?]
+   - Key finding: [Main result in 1-2 sentences]
+
+5. Submit → Get JSON
+
+6. Go to: /dashboard/articles/new
+   Click: "Importer JSON"
+   Paste: The full JSON
+   Click: "Importer"
+   Done!
+
+
+WHAT YOU GET
+────────────
+✓ Simplified version (1500-2500 words)
+✓ Scientific version (1800-3000 words)
+✓ Proper JSON format for Neural Space
+✓ Both auto-populate in editor
+
+
+VALIDATION CHECKLIST
+────────────────────
+Before publishing, check JSON has:
+
+Simplified:
+[ ] 1500+ words (not 600)
+[ ] Hook in sentence 1
+[ ] Human story included
+[ ] "Why now?" explained
+[ ] Proper paragraph length
+
+Scientific:
+[ ] 1800+ words (not 700)
+[ ] Citations with (Author Year)
+[ ] Mechanisms explained
+[ ] Limitations discussed
+[ ] Full bibliography with DOI
+
+
+IF OUTPUT IS STILL SHORT
+────────────────────────
+See: lib/prompts/WHY_SHORT_OUTPUT.md
+For recovery instructions
+
+
+HOOK PATTERNS
+─────────────
+Surprising: "Every time you sleep, your brain erases memories—on purpose."
+Question: "What if cancer's strength is cooperation, not mutation?"
+Stakes: "Your gut bacteria might control your mood more than your brain."
+
+
+INTEGRATION
+───────────
+1. Generate JSON with Grok (using EXTENDED prompt)
+2. Go to /dashboard/articles/new
+3. Check: "Activer deux versions (simplifiée + scientifique)"
+4. Paste JSON in "Importer JSON"
+5. Add cover image
+6. Choose category
+7. Publish
+
+Readers see:
+- Simplified by default
+- Click tabs to switch to scientific
+- Both fully styled and interactive
+
+
+FILES GUIDE
+───────────
+USE THESE:
+✓ GROK_PROMPT_EXTENDED.md (main prompt)
+✓ WHY_SHORT_OUTPUT.md (if output is short)
+✓ TONE_CHECKLIST.md (before publishing)
+
+REFERENCE:
+- README.md (overview)
+- QUICK_START.md (30-second version)
+- EXAMPLES.md (before/after examples)
+- grok-article-generator.md (full technical)
+
+DEPRECATED:
+✗ COPY_PASTE_PROMPT.md (produces short articles)
+
+
+TROUBLESHOOTING
+───────────────
+
+Q: JSON is too short
+A: You probably used old prompt. Use GROK_PROMPT_EXTENDED.md
+
+Q: Still short after using EXTENDED?
+A: See WHY_SHORT_OUTPUT.md recovery section
+
+Q: How long should it be?
+A: Simplified 1500-2500 words, Scientific 1800-3000
+
+Q: Can I edit after importing?
+A: Yes, but usually not needed
+
+Q: What about images?
+A: Import JSON first, then add cover image
+
+
+TIME ESTIMATE
+─────────────
+Prepare topic/sources: 5 min
+Run Grok prompt: 2 min (Grok thinking)
+Validate JSON: 2 min
+Import to Neural Space: 1 min
+Add metadata: 2 min
+
+TOTAL: ~12 minutes per article
+
+
+PRO TIPS
+────────
+• Save JSON in file: article-title-yyyy-mm-dd.json
+• Be specific with sources (not "some research")
+• Include researcher names
+• Batch generate 3-4 articles at once
+• Ask Grok to expand specific sections if needed
+
+
+EXAMPLE INPUT (COMPLETE)
+────────────────────────
+Topic: AI detects pancreatic cancer 3 years early on routine CT scans
+Sources: Mukherjee et al. (2026) Gut; Goenka Mayo Clinic; Chang et al. (2022) PNAS
+Audience: Mixed
+Angle: Machine learning revealing cancers before they're visible
+Key finding: AI detected 73% of cancers years early vs radiologists at 39%
+
+
+CONTACT/HELP
+─────────────
+See: lib/prompts/README.md for full guide
+Or ask: Use the recovery instructions in WHY_SHORT_OUTPUT.md
+
+
+═══════════════════════════════════════════════════════════════════════════════
+Version: 2.1 | Last Updated: 2026-06-06
+Start with: GROK_PROMPT_EXTENDED.md ⭐
+═══════════════════════════════════════════════════════════════════════════════
