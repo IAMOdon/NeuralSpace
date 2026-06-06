@@ -7,7 +7,8 @@ export function NewsletterForm() {
       <input
         type="email"
         placeholder="votre@email.com"
-        className="flex-1 md:w-64 px-4 py-2.5 rounded-full bg-white/10 border border-white/20 text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 font-sans"
+        autoComplete="email"
+        className="flex-1 md:w-64 px-4 py-2.5 rounded-full bg-white/10 border border-white/20 text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/10 font-sans transition-colors"
       />
       <button
         type="submit"

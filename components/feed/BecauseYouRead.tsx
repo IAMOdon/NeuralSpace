@@ -51,7 +51,7 @@ export function BecauseYouRead() {
 
   if (state === "loading") {
     return (
-      <section className="space-y-5">
+      <section className="space-y-5" aria-busy="true" aria-label="Chargement des recommandations">
         <div className="h-6 w-56 rounded-full bg-neutral-100 animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
           <CardSkeleton />

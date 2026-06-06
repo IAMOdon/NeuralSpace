@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
 import { getCategories } from "@/lib/articles";
 import { ArticleEditor } from "@/components/admin/editor/ArticleEditor";
+import { ContentSchema } from "@/lib/content/validators";
 import type { Json } from "@/types/supabase";
 
 export const metadata: Metadata = { title: "Éditer l'article — Admin" };
@@ -40,6 +41,10 @@ export default async function EditArticlePage({ params }: Props) {
       institution: aa.authors.institution,
     }));
 
+  // Validate and parse content — falls back to empty array if invalid
+  const parsedContent = ContentSchema.safeParse(article.content);
+  const validContent = parsedContent.success ? article.content : [];
+
   return (
     <ArticleEditor
       categories={categories.map((c) => ({
@@ -53,7 +58,7 @@ export default async function EditArticlePage({ params }: Props) {
         id:             article.id,
         title:          article.title,
         summary:        article.summary,
-        content:        (article.content as object) ?? [],
+        content:        validContent,
         type:           article.type,
         status:         article.status,
         slug:           article.slug,

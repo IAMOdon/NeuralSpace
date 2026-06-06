@@ -111,6 +111,7 @@ function LiveVariant({ config }: { config: Extract<HeroConfig, { type: "live" }>
                 alt={config.title}
                 fill
                 unoptimized
+                loading="eager"
                 className="object-cover opacity-80"
                 sizes="(max-width: 768px) 100vw, 500px"
               />

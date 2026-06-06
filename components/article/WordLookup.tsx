@@ -85,6 +85,7 @@ export function WordLookup({ children }: { children: React.ReactNode }) {
       {children}
       {visible && (
         <div
+          role="tooltip"
           className="fixed z-50 pointer-events-none"
           style={{
             left: tooltip.x,

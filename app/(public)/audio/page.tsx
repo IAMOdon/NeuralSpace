@@ -16,9 +16,17 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: SITE_LOCALE,
     type: "website",
+    images: [
+      {
+        url: `${SITE_URL}/og-audio.png`,
+        width: 1200,
+        height: 630,
+        alt: "Neural Space — Podcasts scientifiques",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Audio — Neural Space",
     description,
   },

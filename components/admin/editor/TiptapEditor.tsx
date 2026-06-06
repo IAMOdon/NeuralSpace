@@ -79,8 +79,13 @@ export function TiptapEditor({ content, onChange, onWordCountChange }: Props) {
     const prev = editor.getAttributes("link").href as string ?? "";
     const url  = window.prompt("URL du lien", prev);
     if (url === null) return;
-    if (url === "") { editor.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    
+    const chain = editor.chain().focus().extendMarkRange("link");
+    if (url === "") {
+      chain.unsetLink().run();
+    } else {
+      chain.setLink({ href: url }).run();
+    }
   }
 
   return (

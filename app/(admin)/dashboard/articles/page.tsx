@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { adminClient } from "@/lib/supabase/admin";
-import { Plus, ExternalLink, Pencil } from "lucide-react";
+import { Plus, ExternalLink, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Articles — Admin" };
+
+const PER_PAGE = 25;
 
 const STATUS: Record<string, { label: string; color: string }> = {
   published: { label: "Publié",    color: "bg-green-100 text-green-700" },
@@ -11,14 +13,27 @@ const STATUS: Record<string, { label: string; color: string }> = {
   archived:  { label: "Archivé",   color: "bg-red-100 text-red-500" },
 };
 
-export default async function ArticlesPage() {
-  const { data: articles } = await adminClient
-    .from("articles")
-    .select("id, title, slug, status, type, published_at, updated_at, view_count, reading_time_min, categories(name, color_hex)")
-    .order("updated_at", { ascending: false })
-    .limit(100);
+type Props = { searchParams: Promise<{ page?: string }> };
 
-  const rows = articles ?? [];
+export default async function ArticlesPage({ searchParams }: Props) {
+  const { page: pageStr } = await searchParams;
+  const page   = Math.max(1, parseInt(pageStr ?? "1", 10));
+  const offset = (page - 1) * PER_PAGE;
+
+  const [{ data: articles }, { count }] = await Promise.all([
+    adminClient
+      .from("articles")
+      .select("id, title, slug, status, type, published_at, updated_at, view_count, reading_time_min, categories(name, color_hex)")
+      .order("updated_at", { ascending: false })
+      .range(offset, offset + PER_PAGE - 1),
+    adminClient
+      .from("articles")
+      .select("id", { count: "exact", head: true }),
+  ]);
+
+  const rows       = articles ?? [];
+  const total      = count ?? 0;
+  const totalPages = Math.ceil(total / PER_PAGE);
 
   return (
     <div className="p-6 md:p-8 space-y-6 w-full">
@@ -28,7 +43,8 @@ export default async function ArticlesPage() {
         <div>
           <h1 className="font-heading font-black text-2xl text-ns-black">Articles</h1>
           <p className="text-sm text-neutral-400 font-sans mt-1">
-            {rows.length} article{rows.length !== 1 ? "s" : ""}
+            {total} article{total !== 1 ? "s" : ""}
+            {totalPages > 1 && ` — page ${page}/${totalPages}`}
           </p>
         </div>
         <Link
@@ -57,14 +73,18 @@ export default async function ArticlesPage() {
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-5 py-16 text-center">
-                  <p className="text-sm text-neutral-400 font-sans">Aucun article — crée le premier.</p>
-                  <Link
-                    href="/dashboard/articles/new"
-                    className="mt-3 inline-flex items-center gap-1.5 text-sm font-sans font-semibold text-ns-blue hover:opacity-70 transition-opacity"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Nouvel article
-                  </Link>
+                  <p className="text-sm text-neutral-400 font-sans">
+                    {total === 0 ? "Aucun article — crée le premier." : "Aucun article sur cette page."}
+                  </p>
+                  {total === 0 && (
+                    <Link
+                      href="/dashboard/articles/new"
+                      className="mt-3 inline-flex items-center gap-1.5 text-sm font-sans font-semibold text-ns-blue hover:opacity-70 transition-opacity"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Nouvel article
+                    </Link>
+                  )}
                 </td>
               </tr>
             ) : rows.map((article) => {
@@ -131,6 +151,53 @@ export default async function ArticlesPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-neutral-400 font-sans">
+            {offset + 1}–{Math.min(offset + PER_PAGE, total)} sur {total}
+          </p>
+          <div className="flex items-center gap-1">
+            <Link
+              href={`?page=${page - 1}`}
+              aria-disabled={page <= 1}
+              className={`p-2 rounded-lg transition-colors ${page <= 1 ? "text-neutral-200 pointer-events-none" : "text-neutral-500 hover:bg-neutral-100"}`}
+            >
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            </Link>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+              .map((p, i, arr) => {
+                const showEllipsis = i > 0 && arr[i - 1] !== p - 1;
+                return (
+                  <span key={p} className="flex items-center gap-1">
+                    {showEllipsis && <span className="px-1 text-xs text-neutral-300">…</span>}
+                    <Link
+                      href={`?page=${p}`}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-sans font-semibold transition-colors ${
+                        p === page
+                          ? "bg-ns-blue text-white"
+                          : "text-neutral-500 hover:bg-neutral-100"
+                      }`}
+                    >
+                      {p}
+                    </Link>
+                  </span>
+                );
+              })}
+
+            <Link
+              href={`?page=${page + 1}`}
+              aria-disabled={page >= totalPages}
+              className={`p-2 rounded-lg transition-colors ${page >= totalPages ? "text-neutral-200 pointer-events-none" : "text-neutral-500 hover:bg-neutral-100"}`}
+            >
+              <ChevronRight className="w-4 h-4" strokeWidth={2} />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

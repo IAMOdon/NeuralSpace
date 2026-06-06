@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { checkRateLimit } from "@/lib/redis";
 import { z } from "zod";
 
 const ViewSchema = z.object({
@@ -44,6 +45,20 @@ function getReferrerSource(referer: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Extract client IP — Vercel forwards real IP in x-forwarded-for
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+             req.headers.get("x-real-ip") ||
+             "unknown";
+
+  // Check rate limit before any processing
+  const allowed = await checkRateLimit(ip, 100, 60); // 100 events per minute per IP
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
+
   const ua = req.headers.get("user-agent") ?? "";
   const referer = req.headers.get("referer") ?? "";
   const country = req.headers.get("x-vercel-ip-country") ??

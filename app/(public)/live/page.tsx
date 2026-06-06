@@ -17,9 +17,17 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: SITE_LOCALE,
     type: "website",
+    images: [
+      {
+        url: `${SITE_URL}/og-live.png`,
+        width: 1200,
+        height: 630,
+        alt: "Neural Space — Sessions en direct",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Live — Neural Space",
     description,
   },
