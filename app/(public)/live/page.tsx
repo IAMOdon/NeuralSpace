@@ -1,24 +1,27 @@
 import type { Metadata } from "next";
 import { Radio, Calendar, Clock, Users } from "lucide-react";
 import { LivePlayer } from "@/components/live/LivePlayer";
+import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
+
+const description = "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.";
 
 export const metadata: Metadata = {
   title: "Live — Neural Space",
-  description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
+  description,
   robots: { index: false },
-  alternates: { canonical: "https://neuralspace.io/live" },
+  alternates: { canonical: `${SITE_URL}/live` },
   openGraph: {
     title: "Live — Neural Space",
-    description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
-    url: "https://neuralspace.io/live",
-    siteName: "Neural Space",
-    locale: "fr_FR",
+    description,
+    url: `${SITE_URL}/live`,
+    siteName: SITE_NAME,
+    locale: SITE_LOCALE,
     type: "website",
   },
   twitter: {
     card: "summary",
     title: "Live — Neural Space",
-    description: "Sessions en direct, Q&A et conférences scientifiques avec Neural Space.",
+    description,
   },
 };
 

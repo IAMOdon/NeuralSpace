@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
 import { PlayCircle, Clock, Headphones } from "lucide-react";
+import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
+
+const description = "Podcasts et épisodes audio pour explorer la science autrement.";
 
 export const metadata: Metadata = {
   title: "Audio — Neural Space",
-  description: "Podcasts et épisodes audio pour explorer la science autrement.",
+  description,
   robots: { index: false },
-  alternates: { canonical: "https://neuralspace.io/audio" },
+  alternates: { canonical: `${SITE_URL}/audio` },
   openGraph: {
     title: "Audio — Neural Space",
-    description: "Podcasts et épisodes audio pour explorer la science autrement.",
-    url: "https://neuralspace.io/audio",
-    siteName: "Neural Space",
-    locale: "fr_FR",
+    description,
+    url: `${SITE_URL}/audio`,
+    siteName: SITE_NAME,
+    locale: SITE_LOCALE,
     type: "website",
   },
   twitter: {
     card: "summary",
     title: "Audio — Neural Space",
-    description: "Podcasts et épisodes audio pour explorer la science autrement.",
+    description,
   },
 };
 

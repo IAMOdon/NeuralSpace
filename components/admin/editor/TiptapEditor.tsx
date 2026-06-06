@@ -75,11 +75,12 @@ export function TiptapEditor({ content, onChange, onWordCountChange }: Props) {
   if (!editor) return null;
 
   function setLink() {
-    const prev = editor!.getAttributes("link").href as string ?? "";
+    if (!editor) return;
+    const prev = editor.getAttributes("link").href as string ?? "";
     const url  = window.prompt("URL du lien", prev);
     if (url === null) return;
-    if (url === "") { editor!.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
-    editor!.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    if (url === "") { editor.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }
 
   return (
