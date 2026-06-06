@@ -47,6 +47,9 @@ export type Article = {
   coverImageUrl?: string;
   coverImageAlt?: string;
   content: ContentBlock[];
+  contentSimplified?: ContentBlock[];
+  contentScientific?: ContentBlock[];
+  hasDualContent: boolean;
   sources: ArticleSource[];
   layoutPreset?: string;
   wordCount: number;

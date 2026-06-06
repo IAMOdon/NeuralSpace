@@ -2,10 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getArticleBySlug, getArticleSlugs } from "@/lib/articles";
 import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
-import { ArticleRenderer } from "@/components/article/ArticleRenderer";
 import { ArticleHeader } from "@/components/article/ArticleHeader";
+import { ContentVersionTabs } from "@/components/article/ContentVersionTabs";
 import { ContributorSidebar } from "@/components/article/ContributorSidebar";
-import { WordLookup } from "@/components/article/WordLookup";
 import { ArticleTracker } from "@/components/article/ArticleTracker";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -132,9 +131,10 @@ export default async function ArticlePage({ params }: Props) {
             publishedAt={article.publishedAt ?? null}
             authors={article.authors}
           />
-          <WordLookup>
-            <ArticleRenderer blocks={article.content.filter((b) => b.type !== "heading")} />
-          </WordLookup>
+          <ContentVersionTabs
+            contentSimplified={article.contentSimplified || article.content}
+            contentScientific={article.contentScientific}
+          />
         </article>
         <aside className="w-full lg:w-64 shrink-0 border-t border-neutral-100 pt-6 lg:border-0 lg:pt-2">
           <ContributorSidebar
