@@ -10,6 +10,7 @@ import { BlockEditor, countBlockWords } from "./BlockEditor";
 import { ContributorPicker } from "./ContributorPicker";
 import type { ContributorRef } from "./ContributorPicker";
 import { parseBlocks } from "@/lib/content/parseBlocks";
+import { convertGrokulToBlocks, isGrokulFormat, type GrokulJSON } from "@/lib/grok-json-converter";
 import { slugify } from "@/lib/slug";
 import { createArticle, updateArticle, publishArticle, unpublishArticle, deleteArticle } from "@/lib/actions/articles";
 import { updateArticleContributors } from "@/lib/actions/contributors";
@@ -87,7 +88,7 @@ type ImportMeta = {
 };
 
 function JsonImportPanel({ onImport, categories }: {
-  onImport: (blocks: object[], meta: ImportMeta) => void;
+  onImport: (blocks: object[], meta: ImportMeta, extra?: { simplified?: object[]; scientific?: object[]; hasDual?: boolean }) => void;
   categories: Category[];
 }) {
   const [open, setOpen]       = useState(false);
@@ -98,21 +99,48 @@ function JsonImportPanel({ onImport, categories }: {
   function handleApply() {
     try {
       const parsed = JSON.parse(raw);
-      // Accept full article wrapper OR bare blocks array
-      const blocks: unknown[]     = Array.isArray(parsed) ? parsed : (parsed.content ?? []);
       const meta: ImportMeta = {};
-      if (parsed.title)      meta.title      = parsed.title;
-      if (parsed.summary)    meta.summary    = parsed.summary;
-      if (parsed.slug)       meta.slug       = parsed.slug;
-      if (parsed.seoTitle)   meta.seoTitle   = parsed.seoTitle;
-      if (parsed.seoDesc)    meta.seoDesc    = parsed.seoDesc;
-      if (parsed.sources)    meta.sources    = parsed.sources;
-      if (parsed.coverUrl)   meta.coverUrl   = parsed.coverUrl;
-      if (parsed.coverAlt)   meta.coverAlt   = parsed.coverAlt;
-      if (parsed.categoryId) meta.categoryId = parsed.categoryId;
-      setStatus("ok");
-      setTimeout(() => { setStatus("idle"); setOpen(false); setRaw(""); }, 500);
-      onImport(blocks as object[], meta);
+      
+      // Check if it's the new Grok format (simplified/scientific dual-content)
+      if (isGrokulFormat(parsed)) {
+        const grokulData = parsed as GrokulJSON;
+        
+        // Extract metadata
+        if (grokulData.metadata.title) meta.title = grokulData.metadata.title;
+        if (grokulData.metadata.summary) meta.summary = grokulData.metadata.summary;
+        
+        // Convert both versions to blocks
+        const blocksSimplified = convertGrokulToBlocks(grokulData, "simplified");
+        const blocksScientific = convertGrokulToBlocks(grokulData, "scientific");
+        
+        setStatus("ok");
+        setTimeout(() => { 
+          setStatus("idle"); 
+          setOpen(false); 
+          setRaw(""); 
+          // Import simplified version, pass scientific version via extra param
+          onImport(blocksSimplified as object[], meta, {
+            simplified: blocksSimplified as object[],
+            scientific: blocksScientific as object[],
+            hasDual: true
+          });
+        }, 500);
+      } else {
+        // Legacy format: accept full article wrapper OR bare blocks array
+        const blocks: unknown[] = Array.isArray(parsed) ? parsed : (parsed.content ?? []);
+        if (parsed.title)      meta.title      = parsed.title;
+        if (parsed.summary)    meta.summary    = parsed.summary;
+        if (parsed.slug)       meta.slug       = parsed.slug;
+        if (parsed.seoTitle)   meta.seoTitle   = parsed.seoTitle;
+        if (parsed.seoDesc)    meta.seoDesc    = parsed.seoDesc;
+        if (parsed.sources)    meta.sources    = parsed.sources;
+        if (parsed.coverUrl)   meta.coverUrl   = parsed.coverUrl;
+        if (parsed.coverAlt)   meta.coverAlt   = parsed.coverAlt;
+        if (parsed.categoryId) meta.categoryId = parsed.categoryId;
+        setStatus("ok");
+        setTimeout(() => { setStatus("idle"); setOpen(false); setRaw(""); }, 500);
+        onImport(blocks as object[], meta);
+      }
     } catch (e) {
       setStatus("error");
       setErrMsg((e instanceof Error) ? e.message : String(e));
@@ -545,12 +573,21 @@ export function ArticleEditor({ article: initial, categories, initialContributor
             </p>
 
             {/* ── JSON import panel ── */}
-            <JsonImportPanel categories={categories} onImport={(importedBlocks, meta) => {
-              const parsedBlocks = parseBlocks(importedBlocks);
-              if (hasDualContent) {
-                setBlocksSimplified(parsedBlocks);
+            <JsonImportPanel categories={categories} onImport={(importedBlocks, meta, extra) => {
+              // Handle Grok dual-content format
+              if (extra?.hasDual && extra.simplified && extra.scientific) {
+                setBlocksSimplified(importedBlocks as ContentBlock[]);
+                setBlocksScientific(extra.scientific as ContentBlock[]);
+                setHasDualContent(true);
+                setActiveContentTab("simplified");
               } else {
-                setBlocks(parsedBlocks);
+                // Legacy format
+                const parsedBlocks = parseBlocks(importedBlocks);
+                if (hasDualContent) {
+                  setBlocksSimplified(parsedBlocks);
+                } else {
+                  setBlocks(parsedBlocks);
+                }
               }
               if (meta.title)      setTitle(meta.title);
               if (meta.summary)    setSummary(meta.summary);
