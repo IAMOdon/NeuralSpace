@@ -5,8 +5,6 @@ import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
-import CharacterCount from "@tiptap/extension-character-count";
 import {
   Bold, Italic, Link2, Heading2, Heading3, Quote, Code,
 } from "lucide-react";
@@ -55,10 +53,6 @@ export function TiptapEditor({ content, onChange, onWordCountChange }: Props) {
         openOnClick: false,
         HTMLAttributes: { class: "text-ns-blue underline underline-offset-2" },
       }),
-      Image.configure({
-        HTMLAttributes: { class: "rounded-xl my-6 w-full" },
-      }),
-      CharacterCount,
     ],
     content,
     onUpdate({ editor }) {

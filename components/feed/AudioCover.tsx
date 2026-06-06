@@ -91,7 +91,7 @@ export function AudioCover({
         {/* Play button */}
         <button
           onClick={togglePlay}
-          aria-label={playing ? `Pause — ${title}` : `Écouter — ${title}`}
+          aria-label={playing ? `Pause l'épisode: ${title}` : `Écouter l'épisode: ${title}`}
           className="relative z-10 w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95"
           style={{ backgroundColor: categoryColor }}
         >

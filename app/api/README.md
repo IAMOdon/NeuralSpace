@@ -37,6 +37,7 @@ Recherche de contributeurs par nom (pour le `ContributorPicker`).
 Enregistrement d'events analytics. Appelé par `ArticleTracker` côté client.
 
 - Auth : aucune — public
+- Rate limiting : 100 events par minute par IP (429 si dépassé) via Redis
 - Events : `view` (lecture simple) et `watch` (watch time, scroll depth, interactions)
 - Sans consentement : enregistre dans `article_views` sans session_id
 - Avec consentement : enregistre dans `watch_events` avec session
@@ -58,5 +59,5 @@ Définition d'un mot via Wiktionnaire (fr) ou Wikipedia (fr) en fallback.
 
 ## À faire
 
-- [ ] Rate limiting sur `/api/track` (Vercel KV ou Upstash) — risque d'abus sur endpoint public
+- [x] Rate limiting sur `/api/track` — 100 events/min par IP via Redis
 - [ ] Pagination sur `/api/search` (actuellement limite 20)
