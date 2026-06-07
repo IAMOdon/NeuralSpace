@@ -8,6 +8,8 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   // Any HTTPS image source — articles can embed from Nature, NASA, Wikimedia, etc.
   "img-src 'self' https: data: blob:",
+  // Allow media (video/audio) from any HTTPS source — toolbox previews, article embeds
+  "media-src 'self' https: blob:",
   "font-src 'self'",
   // Supabase API + realtime websocket
   `connect-src 'self' https://*.supabase.co wss://*.supabase.co`,
