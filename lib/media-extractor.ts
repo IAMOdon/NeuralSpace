@@ -13,26 +13,74 @@ export interface ExtractedMedia {
  * Extract direct download URLs from various social media platforms
  */
 export async function extractMediaUrl(pageUrl: string, platform: string): Promise<ExtractedMedia> {
-  try {
-    switch (platform.toLowerCase()) {
-      case "x":
-      case "twitter":
-        throw new Error("X/Twitter n'est pas supporté — téléchargez manuellement depuis l'application.");
-      case "instagram":
-        return await extractInstagramMedia(pageUrl);
-      case "tiktok":
-        return await extractTikTokMedia(pageUrl);
-      case "reddit":
-        return await extractRedditMedia(pageUrl);
-      case "youtube":
-        return await extractYouTubeMedia(pageUrl);
-      default:
-        return await extractGenericMedia(pageUrl);
-    }
-  } catch (err) {
-    console.error(`Error extracting from ${platform}:`, err);
-    throw new Error(`Failed to extract media from ${platform}`);
+  switch (platform.toLowerCase()) {
+    case "x":
+    case "twitter":
+      return await extractTwitterMedia(pageUrl);
+    case "instagram":
+      return await extractInstagramMedia(pageUrl);
+    case "tiktok":
+      return await extractTikTokMedia(pageUrl);
+    case "reddit":
+      return await extractRedditMedia(pageUrl);
+    case "youtube":
+      return await extractYouTubeMedia(pageUrl);
+    default:
+      return await extractGenericMedia(pageUrl);
   }
+}
+
+async function extractTwitterMedia(url: string): Promise<ExtractedMedia> {
+  const tweetIdMatch = url.match(/\/status\/(\d+)/);
+  if (!tweetIdMatch) throw new Error("URL X invalide — lien de tweet attendu");
+  const tweetId = tweetIdMatch[1];
+
+  // Twitter syndication API — no key, no cost, works without login
+  const res = await axios.get(
+    `https://cdn.syndication.twimg.com/tweet-result?id=${tweetId}&token=0&lang=fr`,
+    { headers: { "User-Agent": "Mozilla/5.0" }, timeout: 10000 }
+  );
+
+  const tweet = res.data;
+  const media = tweet.mediaDetails?.[0];
+  if (!media) throw new Error("Aucun média trouvé dans ce tweet");
+
+  if (media.type === "video" || media.type === "animated_gif") {
+    const variants: { content_type: string; bitrate?: number; url: string }[] =
+      media.video_info?.variants ?? [];
+    const mp4s = variants
+      .filter((v) => v.content_type === "video/mp4")
+      .sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
+    const best = mp4s[0];
+    if (!best) throw new Error("Aucune variante MP4 trouvée");
+    return {
+      url: best.url,
+      type: "video",
+      preview: media.media_url_https,
+      filename: `tweet_${tweetId}.mp4`,
+      qualities: mp4s.map((v) => ({
+        label: v.bitrate && v.bitrate >= 2_000_000 ? "HD" : v.bitrate && v.bitrate >= 800_000 ? "SD" : "Low",
+        value: String(v.bitrate ?? 0),
+        url: v.url,
+      })),
+    };
+  }
+
+  if (media.type === "photo") {
+    const orig = `${media.media_url_https}?name=orig`;
+    return {
+      url: orig,
+      type: "image",
+      preview: media.media_url_https,
+      filename: `tweet_${tweetId}.jpg`,
+      qualities: [
+        { label: "Original", value: "orig", url: orig },
+        { label: "Large", value: "large", url: `${media.media_url_https}?name=large` },
+      ],
+    };
+  }
+
+  throw new Error("Type de média non supporté");
 }
 
 
