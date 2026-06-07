@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, BarChart2, Radio, Tv, Mail, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, BarChart2, Radio, Tv, Mail, Settings, LogOut, Wrench } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import { SITE_NAME } from "@/lib/config";
@@ -11,12 +11,19 @@ const nav = [
   { label: "Dashboard",   href: "/dashboard",              icon: LayoutDashboard },
   { label: "Articles",    href: "/dashboard/articles",     icon: FileText        },
   { label: "Analytics",   href: "/dashboard/analytics",    icon: BarChart2       },
+  { label: "Toolbox",     href: "/dashboard/toolbox",      icon: Wrench          },
   { label: "Hero Config", href: "/dashboard/hero",         icon: Tv              },
   { label: "Newsletter",  href: "/dashboard/newsletter",   icon: Mail            },
   { label: "Live",        href: "/dashboard/live",         icon: Radio           },
 ];
 
-const ready = new Set(["/dashboard", "/dashboard/hero", "/dashboard/articles", "/dashboard/analytics"]);
+const ready = new Set([
+  "/dashboard",
+  "/dashboard/hero",
+  "/dashboard/articles",
+  "/dashboard/analytics",
+  "/dashboard/toolbox"
+]);
 
 export function Sidebar() {
   const pathname = usePathname();
