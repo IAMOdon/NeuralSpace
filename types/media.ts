@@ -18,6 +18,7 @@ export type MediaType = "image" | "video" | "carousel" | "unknown";
 export interface QualityOption {
   label: string;
   value: string;
+  url?: string;
 }
 
 export interface MediaInfo {
@@ -30,6 +31,7 @@ export interface MediaInfo {
   author?: string;
   size?: string;
   qualities?: QualityOption[];
+  directUrl?: string;
 }
 
 export interface AnalyzeResponse {

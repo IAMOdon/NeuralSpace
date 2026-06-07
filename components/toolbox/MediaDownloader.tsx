@@ -48,10 +48,12 @@ export function MediaDownloader() {
       const res = await fetch("/api/toolbox/download-media", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          url: url.trim(),
+        body: JSON.stringify({
+          url: (quality
+            ? mediaInfo.qualities?.find((q) => q.value === quality)?.url
+            : undefined) ?? mediaInfo.directUrl ?? url.trim(),
           platform: mediaInfo.platform,
-          quality: quality || "best"
+          quality: quality || "best",
         }),
       });
 

@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
       preview: extracted.preview,
       filename: extracted.filename,
       qualities: extracted.qualities,
+      directUrl: extracted.url,
     };
 
     return NextResponse.json({ media });
