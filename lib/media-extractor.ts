@@ -200,26 +200,58 @@ async function extractRedditMedia(url: string): Promise<ExtractedMedia> {
 }
 
 async function extractYouTubeMedia(url: string): Promise<ExtractedMedia> {
-  // YouTube requires ytdl-core
-  // For now, we'll use a simple approach
-  const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-  if (!videoId) throw new Error("Invalid YouTube URL");
+  // Handle watch, youtu.be, and Shorts URLs
+  const videoId =
+    url.match(/[?&]v=([^&\n?#]+)/)?.[1] ??
+    url.match(/youtu\.be\/([^?&\n#]+)/)?.[1] ??
+    url.match(/\/shorts\/([^?&\n#]+)/)?.[1];
 
-  // Try using invidious or piped API for metadata
-  const res = await axios.get(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}`, {
-    timeout: 10000,
-  });
+  if (!videoId) throw new Error("URL YouTube invalide");
 
+  // Piped API — open-source YouTube proxy, no key, no cost
+  const pipedInstances = [
+    "https://pipedapi.kavin.rocks",
+    "https://piped-api.garudalinux.org",
+    "https://api.piped.projectsegfau.lt",
+  ];
+
+  let data: any = null;
+  for (const instance of pipedInstances) {
+    try {
+      const res = await axios.get(`${instance}/streams/${videoId}`, { timeout: 8000 });
+      data = res.data;
+      break;
+    } catch {
+      continue;
+    }
+  }
+
+  if (!data) throw new Error("Impossible d'accéder aux métadonnées YouTube (Piped API indisponible)");
+
+  // Filter MP4 video+audio streams (not DASH-only)
+  const streams: { url: string; quality: string; format: string; videoOnly?: boolean }[] =
+    data.videoStreams ?? [];
+
+  const mp4Streams = streams
+    .filter((s) => s.format === "MPEG_4" && !s.videoOnly)
+    .sort((a, b) => {
+      const q = (s: string) => parseInt(s) || 0;
+      return q(b.quality) - q(a.quality);
+    });
+
+  if (!mp4Streams.length) throw new Error("Aucun flux MP4 disponible pour cette vidéo");
+
+  const best = mp4Streams[0]!;
   return {
-    url: url, // YouTube requires special handling
+    url: best.url,
     type: "video",
-    preview: res.data.thumbnail_url,
+    preview: data.thumbnailUrl,
     filename: `youtube_${videoId}.mp4`,
-    qualities: [
-      { label: "720p", value: "720", url: url },
-      { label: "480p", value: "480", url: url },
-      { label: "360p", value: "360", url: url },
-    ],
+    qualities: mp4Streams.map((s) => ({
+      label: s.quality,
+      value: s.quality,
+      url: s.url,
+    })),
   };
 }
 
