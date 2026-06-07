@@ -17,7 +17,7 @@ export async function extractMediaUrl(pageUrl: string, platform: string): Promis
     switch (platform.toLowerCase()) {
       case "x":
       case "twitter":
-        return await extractTwitterMedia(pageUrl);
+        throw new Error("X/Twitter n'est pas supporté — téléchargez manuellement depuis l'application.");
       case "instagram":
         return await extractInstagramMedia(pageUrl);
       case "tiktok":
@@ -35,59 +35,6 @@ export async function extractMediaUrl(pageUrl: string, platform: string): Promis
   }
 }
 
-async function extractTwitterMedia(url: string): Promise<ExtractedMedia> {
-  // X/Twitter uses API approach
-  // Extract tweet ID from URL
-  const tweetIdMatch = url.match(/\/status\/(\d+)/);
-  if (!tweetIdMatch) throw new Error("Invalid Twitter URL");
-
-  const tweetId = tweetIdMatch[1];
-
-  // Use nitter.net as proxy for media extraction (privacy-friendly)
-  // Convert twitter.com to nitter.net
-  const nitterUrl = url.replace(/twitter\.com|x\.com/, "nitter.net");
-
-  const res = await axios.get(nitterUrl, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    },
-    timeout: 10000,
-  });
-
-  const $ = cheerio.load(res.data);
-
-  // Extract video if present
-  const videoUrl = $("video source, a[href*='.mp4'], a[href*='.webm']").attr("href");
-  if (videoUrl) {
-    const fullUrl = videoUrl.startsWith("http") ? videoUrl : `https://nitter.net${videoUrl}`;
-    return {
-      url: fullUrl,
-      type: "video",
-      preview: fullUrl,
-      filename: `twitter_${tweetId}.mp4`,
-      qualities: [
-        { label: "Original", value: "best", url: fullUrl },
-      ],
-    };
-  }
-
-  // Extract image if present
-  const imageUrl = $("img[alt*='Attachment'], img[class*='tweet-image']").attr("src");
-  if (imageUrl) {
-    const fullUrl = imageUrl.startsWith("http") ? imageUrl : `https://nitter.net${imageUrl}`;
-    return {
-      url: fullUrl,
-      type: "image",
-      preview: fullUrl,
-      filename: `twitter_${tweetId}.jpg`,
-      qualities: [
-        { label: "Original", value: "best", url: fullUrl },
-      ],
-    };
-  }
-
-  throw new Error("No media found in this tweet");
-}
 
 async function extractInstagramMedia(url: string): Promise<ExtractedMedia> {
   // Instagram posts can be extracted via oEmbed or direct scraping
