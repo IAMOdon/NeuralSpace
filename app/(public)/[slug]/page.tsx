@@ -9,6 +9,12 @@ import { ArticleTracker } from "@/components/article/ArticleTracker";
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Remove a trailing brand suffix like "— NeuralSpace" / "— Neural Space" (any
+// dash variant, spacing, or casing) so the layout's title template adds it once.
+function stripBrandSuffix(title: string): string {
+  return title.replace(/\s*[—–-]\s*neural\s*space\s*$/i, "").trim();
+}
+
 export async function generateStaticParams() {
   const slugs = await getArticleSlugs();
   return slugs.map((slug) => ({ slug }));
@@ -19,7 +25,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticleBySlug(slug);
   if (!article) return {};
 
-  const title = article.seoTitle ?? article.title;
+  // The root layout title template appends " — {SITE_NAME}". Strip any brand
+  // suffix the author/AI may have already baked into seoTitle so it isn't doubled
+  // (e.g. "Sujet — NeuralSpace" would otherwise render "Sujet — NeuralSpace — Neural Space").
+  const title = stripBrandSuffix(article.seoTitle ?? article.title);
   const description = article.seoDescription ?? article.summary;
   const canonical = `${SITE_URL}/${article.slug}`;
   const images = article.ogImageUrl

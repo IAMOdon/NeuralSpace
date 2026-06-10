@@ -24,6 +24,12 @@ export type HeroConfig =
       publishedAt?: string;
       articleSlug?: string;
       cta?: { label: string; href: string };
+      // Auto-pulled from the linked article (see app/(public)/page.tsx)
+      imageUrl?: string;
+      imageAlt?: string;
+      categoryName?: string;
+      categoryColor?: string | null;
+      readingTimeMin?: number | null;
     }
   | {
       type: "player";
@@ -143,50 +149,106 @@ function LiveVariant({ config }: { config: Extract<HeroConfig, { type: "live" }>
 // ── News ─────────────────────────────────────────────────────────────────────
 
 function NewsVariant({ config }: { config: Extract<HeroConfig, { type: "news" }> }) {
-  const label = config.label ?? "Dernière heure";
-  const href  = config.articleSlug ? `/${config.articleSlug}` : config.cta?.href;
+  const label   = config.label ?? "Dernière heure";
+  const href    = config.articleSlug ? `/${config.articleSlug}` : config.cta?.href;
+  const hasImage = !!config.imageUrl;
+  const catColor = config.categoryColor ?? "#2233f0";
 
-  const content = (
+  // Shared meta row (label · time · reading time)
+  const meta = (
+    <div className="flex items-center gap-3 flex-wrap">
+      <span className="flex items-center gap-1.5">
+        <Zap className="w-3.5 h-3.5 text-ns-blue" fill="#2233f0" />
+        <span className="text-[10px] font-sans font-bold text-ns-blue uppercase tracking-widest">{label}</span>
+      </span>
+      {config.publishedAt && (
+        <>
+          <span className="text-neutral-200 select-none">·</span>
+          <span className="text-xs text-neutral-400 font-sans">
+            {new Date(config.publishedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        </>
+      )}
+      {config.readingTimeMin && (
+        <>
+          <span className="text-neutral-200 select-none">·</span>
+          <span className="text-xs text-neutral-400 font-sans">{config.readingTimeMin} min de lecture</span>
+        </>
+      )}
+    </div>
+  );
+
+  const cta = (config.cta || config.articleSlug) && (
+    <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ns-blue text-white text-sm font-sans font-bold group-hover:opacity-90 transition-opacity duration-200">
+      {config.cta?.label ?? "Lire l'article"}
+      <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </svg>
+    </span>
+  );
+
+  // ── With image: magazine-style featured split ──
+  const featured = (
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
-      <div className="border-l-[3px] border-ns-blue pl-5 md:pl-8 max-w-3xl space-y-3">
+      <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
 
-        {/* Label + time */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-ns-blue" fill="#2233f0" />
-            <span className="text-[10px] font-sans font-bold text-ns-blue uppercase tracking-widest">{label}</span>
+        {/* Content */}
+        <div className="order-2 md:order-1 space-y-4 md:space-y-5 relative">
+          <div className="absolute -left-24 -top-20 w-72 h-72 rounded-full bg-ns-blue/5 blur-3xl pointer-events-none" />
+          <div className="relative space-y-4 md:space-y-5">
+            {meta}
+            <h2 className="font-heading font-black text-3xl md:text-[2.75rem] md:leading-[1.05] text-ns-black tracking-tight break-words group-hover:text-ns-blue transition-colors duration-200">
+              {config.headline}
+            </h2>
+            <p className="text-base md:text-lg text-neutral-500 font-sans leading-relaxed break-words whitespace-pre-line line-clamp-3 max-w-xl">
+              {config.body}
+            </p>
+            {cta && <div className="pt-1">{cta}</div>}
           </div>
-          {config.publishedAt && (
-            <span className="text-xs text-neutral-400 font-sans">
-              {new Date(config.publishedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+        </div>
+
+        {/* Image */}
+        <div className="order-1 md:order-2 relative aspect-[16/10] rounded-2xl overflow-hidden bg-neutral-100 shadow-sm">
+          <Image
+            src={config.imageUrl!}
+            alt={config.imageAlt ?? config.headline}
+            fill
+            unoptimized
+            loading="eager"
+            className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+            sizes="(max-width: 768px) 100vw, 600px"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
+          {config.categoryName && (
+            <span
+              className="absolute bottom-4 left-4 text-[11px] font-sans font-bold uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-sm"
+              style={{ backgroundColor: `${catColor}E6`, color: "#fff" }}
+            >
+              {config.categoryName}
             </span>
           )}
         </div>
-
-        {/* Headline */}
-        <h2 className="font-heading font-black text-2xl md:text-4xl text-ns-black leading-tight break-words">
-          {config.headline}
-        </h2>
-
-        {/* Body */}
-        <p className="text-sm md:text-base text-neutral-500 font-sans leading-relaxed break-words whitespace-pre-line">
-          {config.body}
-        </p>
-
-        {/* CTA */}
-        {(config.cta || config.articleSlug) && (
-          <div className="pt-1">
-            <span className="inline-flex items-center gap-1.5 text-sm font-sans font-semibold text-ns-blue group-hover:opacity-70 transition-opacity duration-200">
-              {config.cta?.label ?? "Lire l'article"}
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
+
+  // ── No image: refined text-only featured strip ──
+  const textOnly = (
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="border-l-[3px] border-ns-blue pl-5 md:pl-8 max-w-3xl space-y-4">
+        {meta}
+        <h2 className="font-heading font-black text-2xl md:text-4xl text-ns-black leading-tight tracking-tight break-words group-hover:text-ns-blue transition-colors duration-200">
+          {config.headline}
+        </h2>
+        <p className="text-sm md:text-base text-neutral-500 font-sans leading-relaxed break-words whitespace-pre-line">
+          {config.body}
+        </p>
+        {cta && <div className="pt-1">{cta}</div>}
+      </div>
+    </div>
+  );
+
+  const content = hasImage ? featured : textOnly;
 
   return (
     <section aria-label="Actualité" className="w-full overflow-hidden bg-white border-b border-neutral-100">

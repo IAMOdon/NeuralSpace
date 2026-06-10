@@ -1,77 +1,96 @@
 import { NextRequest, NextResponse } from "next/server";
+import { spawn } from "child_process";
+import { Readable } from "stream";
+import path from "path";
+
+const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
+// Override with a newer interpreter (e.g. the .venv-ytdlp venv) to get the
+// latest yt-dlp; defaults to system python3.
+const PYTHON_BIN = process.env.YTDLP_PYTHON ?? "python3";
+// yt-dlp needs deno (JS challenge solver) and ffmpeg on PATH.
+const SPAWN_ENV = {
+  ...process.env,
+  PATH: `/usr/local/bin:/opt/homebrew/bin:${process.env.PATH ?? ""}`,
+};
 
 interface DownloadRequest {
   url: string;
-  platform: string;
   quality: string;
+  type?: "video" | "image";
+  filename?: string;
 }
 
-function refererFor(platform: string): string {
-  switch (platform.toLowerCase()) {
-    case "x":
-    case "twitter": return "https://twitter.com/";
-    case "instagram": return "https://www.instagram.com/";
-    case "tiktok": return "https://www.tiktok.com/";
-    case "reddit": return "https://www.reddit.com/";
-    case "youtube": return "https://www.youtube.com/";
-    default: return "https://neural-space.ai/";
+function contentTypeForExt(ext: string): string {
+  switch (ext.toLowerCase()) {
+    case "mp4": return "video/mp4";
+    case "webm": return "video/webm";
+    case "mp3": return "audio/mpeg";
+    case "m4a": return "audio/mp4";
+    case "jpg":
+    case "jpeg": return "image/jpeg";
+    case "png": return "image/png";
+    case "webp": return "image/webp";
+    case "gif": return "image/gif";
+    default: return "application/octet-stream";
   }
+}
+
+function replaceExt(filename: string, ext: string): string {
+  return filename.replace(/\.[^.]+$/, "") + "." + ext;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { url, platform, quality } = (await request.json()) as DownloadRequest;
+    const { url, quality, type, filename } = (await request.json()) as DownloadRequest;
 
-    if (!url || !platform) {
-      return NextResponse.json({ error: "URL ou plateforme manquante" }, { status: 400 });
+    if (!url) {
+      return NextResponse.json({ error: "URL manquante" }, { status: 400 });
     }
-
-    let parsed: URL;
     try {
-      parsed = new URL(url);
+      new URL(url);
     } catch {
       return NextResponse.json({ error: "Format d'URL invalide" }, { status: 400 });
     }
 
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Referer": refererFor(platform),
-        "Origin": refererFor(platform).replace(/\/$/, ""),
-      },
-      redirect: "follow",
+    const format = quality || "best";
+
+    // Resolve the output extension / content-type before streaming.
+    let outName = filename || `media_${Date.now()}.mp4`;
+    let contentType: string;
+    if (format === "audio") {
+      outName = replaceExt(outName, "mp3");
+      contentType = "audio/mpeg";
+    } else if (type === "image" || format === "image") {
+      const ext = (outName.split(".").pop() || "jpg").toLowerCase();
+      contentType = contentTypeForExt(ext);
+    } else {
+      outName = replaceExt(outName, "mp4");
+      contentType = "video/mp4";
+    }
+
+    // Spawn yt-dlp (via media_download.py) and stream its stdout straight to the client.
+    const child = spawn(
+      PYTHON_BIN,
+      [path.join(SCRIPTS_DIR, "media_download.py"), url, format],
+      { stdio: ["ignore", "pipe", "pipe"], env: SPAWN_ENV }
+    );
+
+    let stderr = "";
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString();
+      if (stderr.length > 4000) stderr = stderr.slice(-4000);
+    });
+    child.on("error", (e) => console.error("[media_download spawn]", e));
+    child.on("close", (code) => {
+      if (code !== 0) console.error(`[media_download] exit ${code}:`, stderr.slice(-600));
     });
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `Le serveur distant a refusé la requête (${response.status} ${response.statusText})` },
-        { status: 502 }
-      );
-    }
+    const stream = Readable.toWeb(child.stdout) as ReadableStream<Uint8Array>;
 
-    // Prefer content-type from response, fall back to URL/platform detection
-    const remoteType = response.headers.get("content-type") ?? "";
-    let contentType = (remoteType.split(";")[0] ?? "").trim() || "application/octet-stream";
-    let extension = (parsed.pathname.split(".").pop() ?? "bin").split("?")[0];
-
-    if (!remoteType) {
-      if (url.includes(".mp4") || platform === "youtube" || platform === "tiktok") {
-        contentType = "video/mp4"; extension = "mp4";
-      } else if (url.includes(".webm")) {
-        contentType = "video/webm"; extension = "webm";
-      } else if (url.includes(".jpg") || url.includes(".jpeg")) {
-        contentType = "image/jpeg"; extension = "jpg";
-      } else if (url.includes(".png")) {
-        contentType = "image/png"; extension = "png";
-      }
-    }
-
-    const filename = `media_${Date.now()}.${extension}`;
-
-    return new NextResponse(response.body, {
+    return new NextResponse(stream, {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `attachment; filename="${outName}"`,
         "Cache-Control": "no-cache",
       },
     });
