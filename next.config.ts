@@ -13,8 +13,8 @@ const CSP = [
   "font-src 'self'",
   // Supabase API + realtime websocket
   `connect-src 'self' https://*.supabase.co wss://*.supabase.co`,
-  // No iframes, no plugins, no base-tag injection
-  "frame-src 'none'",
+  // Allow YouTube/Vimeo video embeds (ArticleRenderer renders these as iframes)
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

@@ -30,6 +30,15 @@ export function Nav() {
             Articles
           </Link>
           <Link
+            href="/coherence"
+            className="text-sm font-sans text-neutral-400 hover:text-ns-blue transition-colors flex items-center gap-1.5"
+          >
+            Coherence
+            <span className="text-[10px] font-sans bg-ns-blue/10 text-ns-blue px-1.5 py-0.5 rounded-full">
+              Bientôt
+            </span>
+          </Link>
+          <Link
             href="/neurallab"
             className="text-sm font-sans text-neutral-400 hover:text-ns-blue transition-colors flex items-center gap-1.5"
           >
@@ -62,6 +71,16 @@ export function Nav() {
               className="flex items-center h-12 text-base font-sans font-medium text-ns-black hover:text-ns-blue transition-colors"
             >
               Articles
+            </Link>
+            <Link
+              href="/coherence"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 h-12 text-base font-sans font-medium text-neutral-400 hover:text-ns-blue transition-colors"
+            >
+              Coherence
+              <span className="text-[10px] bg-ns-blue/10 text-ns-blue px-1.5 py-0.5 rounded-full">
+                Bientôt
+              </span>
             </Link>
             <Link
               href="/neurallab"

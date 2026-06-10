@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getArticles, getCategories } from "@/lib/articles";
+import { getArticles, getCategories, getArticleHeroMeta } from "@/lib/articles";
 import { adminClient } from "@/lib/supabase/admin";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_LOCALE } from "@/lib/config";
 
@@ -40,9 +40,25 @@ export default async function FeedPage({ searchParams }: Props) {
   const hero = category ? articles : articles.slice(0, 3);
   const rest = category ? []       : articles.slice(3);
 
-  const heroConfig: HeroConfig = heroRow.data
+  let heroConfig: HeroConfig = heroRow.data
     ? { type: heroRow.data.type, ...(heroRow.data.config as object) } as HeroConfig
     : { type: "none" };
+
+  // Enrich a news hero with the linked article's cover image + metadata so the
+  // featured card shows the article visual (no extra admin step needed).
+  if (heroConfig.type === "news" && heroConfig.articleSlug) {
+    const meta = await getArticleHeroMeta(heroConfig.articleSlug);
+    if (meta) {
+      heroConfig = {
+        ...heroConfig,
+        imageUrl: meta.coverImageUrl,
+        imageAlt: meta.coverImageAlt,
+        categoryName: meta.categoryName,
+        categoryColor: meta.categoryColor,
+        readingTimeMin: meta.readingTimeMin,
+      };
+    }
+  }
 
   return (
     <>

@@ -121,6 +121,14 @@ function JsonImportPanel({ onImport, categories }: {
         if (grokulData.metadata.slug) meta.slug = grokulData.metadata.slug;
         if (grokulData.metadata.seoAlt) meta.coverAlt = grokulData.metadata.seoAlt;
         if (grokulData.metadata.ogImageUrl) meta.coverUrl = grokulData.metadata.ogImageUrl;
+        if (grokulData.metadata.seoTitle) meta.seoTitle = grokulData.metadata.seoTitle;
+        if (grokulData.metadata.seoDescription) meta.seoDesc = grokulData.metadata.seoDescription;
+        // Map the AI-chosen category slug to its DB id (case-insensitive)
+        if (grokulData.metadata.categorySlug) {
+          const slug = grokulData.metadata.categorySlug.toLowerCase();
+          const match = categories.find((c) => c.slug.toLowerCase() === slug);
+          if (match) meta.categoryId = match.id;
+        }
         if (grokulData.sources) meta.sources = grokulData.sources.map((s) => ({ label: s.label, url: s.url }));
         
         // Convert both versions to blocks

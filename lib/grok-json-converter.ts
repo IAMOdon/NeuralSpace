@@ -10,6 +10,9 @@ export type GrokulJSON = {
     slug?: string;
     seoAlt?: string;
     ogImageUrl?: string;
+    categorySlug?: string;
+    seoTitle?: string;
+    seoDescription?: string;
   };
   simplified: {
     intro: string;

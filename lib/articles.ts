@@ -198,6 +198,36 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
   };
 });
 
+// Lightweight fetch for the feed news hero — just what's needed to render the
+// featured card (cover image, category, reading time) without parsing content.
+export type ArticleHeroMeta = {
+  coverImageUrl?: string;
+  coverImageAlt?: string;
+  categoryName?: string;
+  categoryColor?: string | null;
+  readingTimeMin?: number | null;
+};
+
+export async function getArticleHeroMeta(slug: string): Promise<ArticleHeroMeta | null> {
+  const client = await createClient();
+  const { data, error } = await client
+    .from("articles")
+    .select("cover_image_url, cover_image_alt, reading_time_min, categories(name, color_hex)")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
+
+  if (error || !data) return null;
+  const cat = data.categories as { name: string; color_hex: string | null } | null;
+  return {
+    coverImageUrl: data.cover_image_url ?? undefined,
+    coverImageAlt: data.cover_image_alt ?? undefined,
+    categoryName: cat?.name,
+    categoryColor: cat?.color_hex ?? null,
+    readingTimeMin: data.reading_time_min ?? null,
+  };
+}
+
 export async function getCategories(): Promise<Category[]> {
   const client = await createClient();
   const { data } = await client
