@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ScanEye, CalendarCheck, Users, Lock, Sparkles, Mic, AudioLines, Wand2, ChevronDown } from "lucide-react";
+import { ScanEye, CalendarCheck, Users, Lock, Sparkles, Mic, AudioLines, Wand2, ChevronDown, Apple } from "lucide-react";
 import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
 import { WaitlistForm } from "@/components/coherence/WaitlistForm";
 import { Orb } from "@/components/coherence/Orb";
@@ -8,6 +8,9 @@ import { ScrollShowcase } from "@/components/coherence/ScrollShowcase";
 import { Reveal } from "@/components/coherence/Reveal";
 import { PageFx } from "@/components/coherence/PageFx";
 import { CursorGlow } from "@/components/coherence/CursorGlow";
+import {
+  PersonasSection, WhatChangesSection, HowItWorksSection, PricingSection, TrustStrip,
+} from "@/components/coherence/ProductSections";
 
 // Staggered kinetic-typography reveal — pure CSS, runs on load.
 function RisingWords({ words, baseDelay = 0 }: { words: { t: string; shimmer?: boolean }[]; baseDelay?: number }) {
@@ -120,10 +123,28 @@ export default function CoherencePage() {
           </p>
 
           <div
-            className="mt-10 w-full flex justify-center opacity-0"
+            className="mt-10 w-full flex flex-col items-center gap-4 opacity-0"
             style={{ animation: "word-rise 0.8s ease-out 1.4s forwards" }}
           >
             <WaitlistForm variant="dark" />
+
+            {/* Honest pre-launch download: disabled until the DMG ships */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
+              <span
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 border border-white/15 text-sm font-sans font-semibold text-white/40 cursor-not-allowed"
+                title="Disponible au lancement"
+                aria-disabled="true"
+              >
+                <Apple className="w-4 h-4" strokeWidth={1.75} />
+                Télécharger pour macOS
+                <span className="text-[10px] font-bold uppercase tracking-widest text-ns-blue bg-ns-blue/15 px-1.5 py-0.5 rounded-full">
+                  Bientôt
+                </span>
+              </span>
+              <span className="text-xs font-sans text-white/40">
+                Essai gratuit de 14 jours · sans carte · sans compte
+              </span>
+            </div>
           </div>
 
           {/* Scroll cue */}
@@ -198,6 +219,15 @@ export default function CoherencePage() {
         </div>
       </section>
 
+      {/* ── Who it's for ── */}
+      <PersonasSection />
+
+      {/* ── What it changes ── */}
+      <WhatChangesSection />
+
+      {/* ── How it works ── */}
+      <HowItWorksSection />
+
       {/* ── Honesty band ── */}
       <section className="w-full bg-neutral-50 border-y border-neutral-100">
         <div className="max-w-3xl mx-auto px-4 md:px-6 py-16 md:py-20 text-center space-y-5">
@@ -219,8 +249,14 @@ export default function CoherencePage() {
         </div>
       </section>
 
+      {/* ── Pricing ── */}
+      <PricingSection />
+
+      {/* ── Trust ── */}
+      <TrustStrip />
+
       {/* ── Final CTA ── */}
-      <section className="relative w-full bg-ns-black overflow-hidden">
+      <section id="acces" className="relative w-full bg-ns-black overflow-hidden scroll-mt-20">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-ns-blue/15 blur-[120px] pointer-events-none" />
         <CursorGlow />
         <div className="relative max-w-4xl mx-auto px-4 md:px-6 py-24 md:py-32 text-center space-y-8">
