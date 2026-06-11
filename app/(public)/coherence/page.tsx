@@ -9,7 +9,7 @@ import { Reveal } from "@/components/coherence/Reveal";
 import { PageFx } from "@/components/coherence/PageFx";
 import { CursorGlow } from "@/components/coherence/CursorGlow";
 import {
-  PersonasSection, WhatChangesSection, HowItWorksSection, PricingSection, TrustStrip,
+  WorksTodaySection, PersonasSection, WhatChangesSection, HowItWorksSection, PricingSection, TrustStrip,
 } from "@/components/coherence/ProductSections";
 
 // Staggered kinetic-typography reveal — pure CSS, runs on load.
@@ -72,9 +72,9 @@ const PILLARS = [
 ];
 
 const ROADMAP = [
-  { icon: AudioLines, label: "Une vraie voix", detail: "réponses parlées naturelles, interruptibles" },
-  { icon: Mic, label: "Réunions", detail: "transcription continue, notes et décisions extraites automatiquement" },
-  { icon: Wand2, label: "Agir pour vous", detail: "l'orbe exécute les étapes lui-même — toujours visible, toujours annulable" },
+  { icon: Wand2, label: "Guider votre main", detail: "un halo sur le vrai bouton à cliquer, dans n'importe quelle app — puis l'orbe peut le presser pour vous" },
+  { icon: AudioLines, label: "Une vraie voix", detail: "voix Gemini naturelle, interruptible, qui remplace la synthèse système" },
+  { icon: Mic, label: "Entendre les réunions", detail: "capture de l'audio système : une échéance dite à l'oral devient la même proposition d'agenda" },
 ];
 
 export default function CoherencePage() {
@@ -218,6 +218,9 @@ export default function CoherencePage() {
           </div>
         </div>
       </section>
+
+      {/* ── What already ships ── */}
+      <WorksTodaySection />
 
       {/* ── Who it's for ── */}
       <PersonasSection />
