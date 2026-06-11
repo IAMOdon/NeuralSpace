@@ -38,15 +38,13 @@ export function Nav() {
               Bientôt
             </span>
           </Link>
-          <Link
-            href="/neurallab"
-            className="text-sm font-sans text-neutral-400 hover:text-ns-blue transition-colors flex items-center gap-1.5"
-          >
+          {/* Pas encore de page /neurallab — teaser inerte plutôt qu'un lien 404 */}
+          <span className="text-sm font-sans text-neutral-300 flex items-center gap-1.5 cursor-default select-none">
             NeuralLab
             <span className="text-[10px] font-sans bg-ns-blue/10 text-ns-blue px-1.5 py-0.5 rounded-full">
               Bientôt
             </span>
-          </Link>
+          </span>
         </nav>
 
         {/* Hamburger — mobile only */}
@@ -82,16 +80,12 @@ export function Nav() {
                 Bientôt
               </span>
             </Link>
-            <Link
-              href="/neurallab"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 h-12 text-base font-sans font-medium text-neutral-400 hover:text-ns-blue transition-colors"
-            >
+            <span className="flex items-center gap-2 h-12 text-base font-sans font-medium text-neutral-300 cursor-default select-none">
               NeuralLab
               <span className="text-[10px] bg-ns-blue/10 text-ns-blue px-1.5 py-0.5 rounded-full">
                 Bientôt
               </span>
-            </Link>
+            </span>
           </nav>
         </div>
       )}

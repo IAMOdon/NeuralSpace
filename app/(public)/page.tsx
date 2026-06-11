@@ -23,7 +23,6 @@ import { ArticleCard } from "@/components/feed/ArticleCard";
 import { CategoryFilter } from "@/components/feed/CategoryFilter";
 import { BecauseYouRead } from "@/components/feed/BecauseYouRead";
 import { HeroBlock, type HeroConfig } from "@/components/feed/HeroBlock";
-import { AudioCover } from "@/components/feed/AudioCover";
 
 type Props = {
   searchParams: Promise<{ category?: string; q?: string }>;
@@ -101,59 +100,6 @@ export default async function FeedPage({ searchParams }: Props) {
                 ))}
               </div>
             </section>
-
-            {/* Audio — épisodes récents */}
-            {!category && (
-              <section className="space-y-5">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-heading font-bold text-lg text-ns-black">Écouter</h2>
-                  <Link
-                    href="/audio"
-                    className="text-xs font-sans font-semibold text-ns-blue hover:opacity-70 transition-opacity duration-200 flex items-center gap-1"
-                  >
-                    Tous les épisodes
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-                {/* TODO: remplacer par fetch depuis table episodes Supabase */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <AudioCover
-                    episodeNumber={8}
-                    title="Les trous noirs, portes vers l'infini"
-                    duration="38 min"
-                    categoryName="Physique"
-                    categoryColor="#2233f0"
-                    publishedAt="2026-06-12"
-                  />
-                  <AudioCover
-                    episodeNumber={7}
-                    title="CRISPR, dix ans après : où en est-on ?"
-                    duration="45 min"
-                    categoryName="Biologie"
-                    categoryColor="#10b981"
-                    publishedAt="2026-06-05"
-                  />
-                  <AudioCover
-                    episodeNumber={6}
-                    title="L'IA peut-elle vraiment raisonner ?"
-                    duration="52 min"
-                    categoryName="IA"
-                    categoryColor="#f59e0b"
-                    publishedAt="2026-05-29"
-                  />
-                  <AudioCover
-                    episodeNumber={5}
-                    title="Matière noire : le grand mystère cosmique"
-                    duration="41 min"
-                    categoryName="Cosmologie"
-                    categoryColor="#8b5cf6"
-                    publishedAt="2026-05-22"
-                  />
-                </div>
-              </section>
-            )}
 
             {/* Rest — compact list */}
             {rest.length > 0 && (
