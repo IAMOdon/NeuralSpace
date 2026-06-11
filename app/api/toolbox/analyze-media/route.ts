@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getAdminUser } from "@/lib/auth";
 import { extractMediaUrl } from "@/lib/media-extractor";
-import type { MediaInfo } from "@/types/media";
+import type { MediaInfo, MediaPlatform } from "@/types/media";
 
 // Platform detection patterns
-function detectPlatform(url: string): string {
+function detectPlatform(url: string): MediaPlatform {
   const urlLower = url.toLowerCase();
   if (urlLower.includes("twitter.com") || urlLower.includes("x.com")) return "x";
   if (urlLower.includes("instagram.com")) return "instagram";
@@ -21,6 +22,11 @@ function detectPlatform(url: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Outil interne — spawn yt-dlp côté serveur, jamais exposé publiquement.
+  if (!(await getAdminUser())) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
   try {
     const { url } = await request.json();
 
@@ -47,7 +53,7 @@ export async function POST(request: NextRequest) {
     const extracted = await extractMediaUrl(url, platform);
 
     const media: MediaInfo = {
-      platform: platform as any,
+      platform,
       type: extracted.type,
       preview: extracted.preview,
       filename: extracted.filename,

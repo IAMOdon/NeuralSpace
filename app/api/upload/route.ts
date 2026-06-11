@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -16,9 +16,9 @@ function isAllowedImage(buf: Buffer): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  if (!(await getAdminUser())) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;

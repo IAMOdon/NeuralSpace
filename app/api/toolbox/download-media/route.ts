@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { spawn } from "child_process";
 import { Readable } from "stream";
 import path from "path";
+import { getAdminUser } from "@/lib/auth";
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 // Override with a newer interpreter (e.g. the .venv-ytdlp venv) to get the
@@ -39,7 +40,19 @@ function replaceExt(filename: string, ext: string): string {
   return filename.replace(/\.[^.]+$/, "") + "." + ext;
 }
 
+// Client-supplied filename ends up in a quoted Content-Disposition header —
+// strip quotes, control chars and path separators to prevent header injection.
+function sanitizeFilename(name: string): string {
+  const clean = name.replace(/["\\/\u0000-\u001f]/g, "").trim();
+  return clean || `media_${Date.now()}.mp4`;
+}
+
 export async function POST(request: NextRequest) {
+  // Outil interne — spawn yt-dlp côté serveur, jamais exposé publiquement.
+  if (!(await getAdminUser())) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
   try {
     const { url, quality, type, filename } = (await request.json()) as DownloadRequest;
 
@@ -55,7 +68,7 @@ export async function POST(request: NextRequest) {
     const format = quality || "best";
 
     // Resolve the output extension / content-type before streaming.
-    let outName = filename || `media_${Date.now()}.mp4`;
+    let outName = sanitizeFilename(filename || `media_${Date.now()}.mp4`);
     let contentType: string;
     if (format === "audio") {
       outName = replaceExt(outName, "mp3");
