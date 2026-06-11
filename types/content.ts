@@ -62,7 +62,7 @@ export type KeyTakeawaysBlock = {
   items: string[]; // plain text — summary points, not formatted
 };
 
-export type CalloutVariant = "key-concept" | "warning" | "anecdote";
+export type CalloutVariant = "key-concept" | "warning" | "anecdote" | "study-limits";
 
 export type CalloutBlock = {
   id: string;

@@ -63,7 +63,7 @@ const KeyTakeawaysBlockSchema = z.object({
 const CalloutBlockSchema = z.object({
   id: z.string(),
   type: z.literal("callout"),
-  variant: z.enum(["key-concept", "warning", "anecdote"]),
+  variant: z.enum(["key-concept", "warning", "anecdote", "study-limits"]),
   title: z.string().optional(),
   content: RichTextSchema,
 });
@@ -146,3 +146,17 @@ export const ArticleSourcesSchema = z.array(
     return r.success ? r.data : null;
   })
 ).transform((arr) => arr.filter((x): x is z.infer<typeof ArticleSourceSchema> => x !== null));
+
+// --- Corrections éditoriales (affichées publiquement, datées) ---
+
+export const ArticleCorrectionSchema = z.object({
+  date: z.string().min(1),
+  note: z.string().min(1),
+});
+
+export const ArticleCorrectionsSchema = z.array(
+  z.unknown().transform((item) => {
+    const r = ArticleCorrectionSchema.safeParse(item);
+    return r.success ? r.data : null;
+  })
+).transform((arr) => arr.filter((x): x is z.infer<typeof ArticleCorrectionSchema> => x !== null));

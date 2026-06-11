@@ -153,21 +153,34 @@ export async function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/neurallab" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
-                  NeuralLab
+                <Link href="/a-propos" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  À propos
                 </Link>
               </li>
-              {/* TODO: Audio — épisodes & podcasts scientifiques */}
+              <li>
+                <Link href="/charte" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  Charte éditoriale
+                </Link>
+              </li>
+              <li>
+                <Link href="/labos" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  Espace labos
+                </Link>
+              </li>
               <li>
                 <Link href="/audio" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
                   Audio
                 </Link>
               </li>
-              {/* TODO: Live — sessions en direct, Q&A, conférences */}
               <li>
                 <Link href="/live" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
                   Live
                 </Link>
+              </li>
+              <li>
+                <a href="/feed.xml" className="text-sm font-sans text-white/70 hover:text-white transition-colors duration-200">
+                  Flux RSS
+                </a>
               </li>
             </ul>
           </div>

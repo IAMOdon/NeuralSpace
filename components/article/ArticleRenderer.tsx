@@ -94,6 +94,13 @@ async function renderBlock(block: ContentBlock): Promise<React.ReactNode> {
           bg: "bg-neutral-50 border-neutral-200",
           text: "text-neutral-600",
         },
+        // Honnêteté scientifique : ce que l'étude ne montre PAS (échantillon,
+        // portée, conflits d'intérêts) — signal de maturité éditoriale.
+        "study-limits": {
+          label: "Limites de l'étude",
+          bg: "bg-violet-50 border-violet-200",
+          text: "text-violet-700",
+        },
       };
       const s = styles[block.variant];
       return (

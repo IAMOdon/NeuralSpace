@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { classifySource } from "@/lib/sources";
 import type { AuthorSummary } from "@/types/author";
 import type { ArticleSource } from "@/types/article";
 
@@ -70,39 +71,60 @@ export function ContributorSidebar({ contributors, isSponsored, sources = [] }: 
             Sources
           </p>
           <ol className="space-y-3">
-            {sources.map((s, i) => (
-              <li key={i} className="flex gap-2.5">
-                <span className="text-[10px] font-sans font-bold text-ns-blue mt-0.5 shrink-0 w-4 text-right">
-                  {i + 1}
-                </span>
-                <div className="min-w-0">
-                  {s.url ? (
-                    <a
-                      href={s.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] font-sans text-neutral-600 hover:text-ns-blue hover:underline transition-colors leading-snug block"
-                    >
-                      {s.label}
-                    </a>
-                  ) : (
-                    <span className="text-[11px] font-sans text-neutral-600 leading-snug block">
-                      {s.label}
+            {sources.map((s, i) => {
+              const kind = classifySource(s);
+              return (
+                <li key={i} className="flex gap-2.5">
+                  <span className="text-[10px] font-sans font-bold text-ns-blue mt-0.5 shrink-0 w-4 text-right">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    {s.url ? (
+                      <a
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] font-sans text-neutral-600 hover:text-ns-blue hover:underline transition-colors leading-snug block"
+                      >
+                        {s.label}
+                      </a>
+                    ) : (
+                      <span className="text-[11px] font-sans text-neutral-600 leading-snug block">
+                        {s.label}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1.5 flex-wrap">
+                      {s.doi && (
+                        <a
+                          href={`https://doi.org/${s.doi}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] font-mono text-neutral-400 hover:text-ns-blue transition-colors"
+                        >
+                          DOI {s.doi}
+                        </a>
+                      )}
+                      {kind === "preprint" && (
+                        <span
+                          title="Préprint — résultats non encore évalués par les pairs"
+                          className="text-[9px] font-sans font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700"
+                        >
+                          Préprint
+                        </span>
+                      )}
+                      {kind === "doi" && !s.doi && (
+                        <span
+                          title="Publication identifiée par un DOI"
+                          className="text-[9px] font-sans font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-ns-blue/10 text-ns-blue"
+                        >
+                          DOI
+                        </span>
+                      )}
                     </span>
-                  )}
-                  {s.doi && (
-                    <a
-                      href={`https://doi.org/${s.doi}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-mono text-neutral-400 hover:text-ns-blue transition-colors"
-                    >
-                      DOI {s.doi}
-                    </a>
-                  )}
-                </div>
-              </li>
-            ))}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </div>
       )}

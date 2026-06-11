@@ -446,9 +446,10 @@ function KeyTakeawaysEditor({ block, onChange }: { block: Extract<ContentBlock, 
 }
 
 const CALLOUT_STYLES = {
-  "key-concept": { label: "Concept clé", bg: "bg-ns-blue/5 border-ns-blue/20", badge: "text-ns-blue bg-ns-blue/10" },
-  warning:       { label: "Attention",   bg: "bg-amber-50 border-amber-200",    badge: "text-amber-700 bg-amber-100" },
-  anecdote:      { label: "Anecdote",    bg: "bg-neutral-50 border-neutral-200", badge: "text-neutral-600 bg-neutral-100" },
+  "key-concept":  { label: "Concept clé",        bg: "bg-ns-blue/5 border-ns-blue/20",   badge: "text-ns-blue bg-ns-blue/10" },
+  warning:        { label: "Attention",          bg: "bg-amber-50 border-amber-200",     badge: "text-amber-700 bg-amber-100" },
+  anecdote:       { label: "Anecdote",           bg: "bg-neutral-50 border-neutral-200", badge: "text-neutral-600 bg-neutral-100" },
+  "study-limits": { label: "Limites de l'étude", bg: "bg-violet-50 border-violet-200",   badge: "text-violet-700 bg-violet-100" },
 } as const;
 
 function CalloutEditor({ block, onChange }: { block: Extract<ContentBlock, { type: "callout" }>; onChange: Upd<typeof block> }) {
@@ -456,7 +457,7 @@ function CalloutEditor({ block, onChange }: { block: Extract<ContentBlock, { typ
   return (
     <div className={`rounded-2xl border p-4 space-y-3 ${s.bg}`}>
       <div className="flex items-center gap-2 flex-wrap">
-        {(["key-concept", "warning", "anecdote"] as const).map((v) => (
+        {(["key-concept", "warning", "anecdote", "study-limits"] as const).map((v) => (
           <button
             key={v}
             type="button"
