@@ -125,6 +125,15 @@ export default function CookiesPage() {
                   </td>
                   <td className="px-4 py-3 text-neutral-400">Persistant</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-xs text-ns-blue">ns_mobile_banner_dismissed</td>
+                  <td className="px-4 py-3">
+                    Mémorise la fermeture du bandeau d&apos;information mobile pour ne pas le
+                    réafficher. Strictement fonctionnel (exempté de consentement), jamais transmis
+                    à nos serveurs.
+                  </td>
+                  <td className="px-4 py-3 text-neutral-400">Persistant</td>
+                </tr>
               </tbody>
             </table>
           </div>

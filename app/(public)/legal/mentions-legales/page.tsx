@@ -32,6 +32,15 @@ export default function MentionsLegalesPage() {
           </p>
         </section>
         <section className="space-y-3">
+          <h2 className="font-heading font-bold text-lg text-ns-black">Contact</h2>
+          <p className="text-sm leading-6">
+            Pour toute question, y compris l&apos;exercice de vos droits sur vos données personnelles :{" "}
+            <a href="mailto:contact@neuralspace.fr" className="text-ns-blue underline underline-offset-2">
+              contact@neuralspace.fr
+            </a>
+          </p>
+        </section>
+        <section className="space-y-3">
           <h2 className="font-heading font-bold text-lg text-ns-black">Hébergement</h2>
           <p className="text-sm leading-6">
             Ce site est hébergé par <strong>Vercel Inc.</strong>, 340 Pine Street Suite 701, San Francisco, CA 94104, États-Unis.

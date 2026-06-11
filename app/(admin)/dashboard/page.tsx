@@ -144,10 +144,9 @@ export default async function DashboardPage() {
     referrerRows,
     hourRows,
     sessionCount,
+    sessions7d,
     watchRows,
     profileRows,
-    interestRows,
-    articleViewRows,
     articlesRows,
     recentArticles,
   ] = await Promise.all([
@@ -156,12 +155,11 @@ export default async function DashboardPage() {
     adminClient.from("article_views").select("device"),
     adminClient.from("article_views").select("country_code"),
     adminClient.from("article_views").select("referrer_source"),
-    adminClient.from("article_views").select("hour_of_day"),
+    adminClient.from("article_views").select("created_at"),
     adminClient.from("session_profiles").select("id", { count: "exact", head: true }),
+    adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
     adminClient.from("watch_events").select("duration_sec, read_completed, word_lookups, source_clicks"),
     adminClient.from("session_profiles").select("preferred_format, expertise_signal, quality_reads, articles_read, total_duration_sec"),
-    adminClient.from("session_interests").select("entity_id, entity_type, score"),
-    adminClient.from("article_views").select("article_id"),
     adminClient.from("articles").select("id, title, slug, view_count").eq("status", "published").order("view_count", { ascending: false }).limit(8),
     adminClient.from("articles").select("id, title, slug, status, published_at, view_count, categories(name)").order("published_at", { ascending: false }).limit(10),
   ]);
@@ -193,13 +191,23 @@ export default async function DashboardPage() {
     k === "null" || k === "—" ? "Inconnu" : k, n,
   ] as [string, number]);
 
-  const hours = groupCount(hourRows.data ?? [], "hour_of_day");
+  // Regroupement horaire en heure de Paris (les buckets UTC de la base
+  // décalent les pics de 1–2 h pour une audience française)
+  const parisHourFmt = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit", hourCycle: "h23", timeZone: "Europe/Paris",
+  });
+  const hours: Record<string, number> = {};
+  (hourRows.data ?? []).forEach((row) => {
+    if (!row.created_at) return;
+    const h = String(Number(parisHourFmt.format(new Date(row.created_at))));
+    hours[h] = (hours[h] ?? 0) + 1;
+  });
 
-  // --- Consent proxy ---
-  // Sessions with consent = session_profiles count
-  // Total views = article_views count
-  // Proxy: sessions/views ratio gives a rough idea
-  const consentProxy = pct(sessions, Math.max(views7dCount, 1));
+  // --- Proxy consentement ---
+  // Fenêtres alignées (7 j / 7 j) — comparer des sessions all-time à des vues
+  // 7 j donnait un ratio sans signification, potentiellement > 100 %.
+  const s7d = sessions7d.count ?? 0;
+  const consentProxy = Math.min(100, pct(s7d, Math.max(views7dCount, 1)));
 
   // --- Reader profiles ---
   const profiles = profileRows.data ?? [];
@@ -258,13 +266,13 @@ export default async function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-end gap-2">
                 <p className="font-heading font-black text-4xl text-ns-blue">{consentProxy}%</p>
-                <p className="text-xs text-neutral-400 font-sans pb-1">sessions / vues 7j</p>
+                <p className="text-xs text-neutral-400 font-sans pb-1">sessions 7 j / vues 7 j</p>
               </div>
               <div className="h-2 rounded-full bg-neutral-100 overflow-hidden">
                 <div className="h-full rounded-full bg-ns-blue" style={{ width: `${consentProxy}%` }} />
               </div>
               <p className="text-[11px] text-neutral-400 font-sans leading-4">
-                Ratio sessions consenties (profils créés) sur les vues totales des 7 derniers jours.
+                Sessions consenties (profils créés sur 7 j) rapportées aux vues des 7 derniers jours.
               </p>
             </div>
           </div>
@@ -370,7 +378,7 @@ export default async function DashboardPage() {
 
           {/* Hours */}
           <div className="rounded-2xl border border-neutral-100 bg-white p-5 space-y-4">
-            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-neutral-400">Heures de pointe (UTC)</p>
+            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-neutral-400">Heures de pointe (heure de Paris)</p>
             <HourChart hours={hours} />
             <div className="flex justify-between text-[10px] text-neutral-300 font-sans">
               <span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span>
@@ -382,7 +390,7 @@ export default async function DashboardPage() {
       {/* ── Top articles ── */}
       <section>
         <SectionHeader title="Performance des articles" sub="Classement par vues — données articles_views" />
-        <div className="rounded-2xl border border-neutral-100 bg-white overflow-hidden">
+        <div className="rounded-2xl border border-neutral-100 bg-white overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 border-b border-neutral-100">
               <tr>
@@ -411,7 +419,7 @@ export default async function DashboardPage() {
       {/* ── Récemment listé ── */}
       <section>
         <SectionHeader title="Récemment listé" sub="Les derniers articles créés ou mis à jour" />
-        <div className="rounded-2xl border border-neutral-100 bg-white overflow-hidden">
+        <div className="rounded-2xl border border-neutral-100 bg-white overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 border-b border-neutral-100">
               <tr>

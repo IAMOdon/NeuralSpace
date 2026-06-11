@@ -19,15 +19,33 @@ function fmtDuration(sec: number) {
   return `${m}m ${s.toString().padStart(2, "0")}s`;
 }
 
+// Badge de tendance vs période précédente. previous=0 → pas de badge
+// (un "+0%" ou "+∞%" serait trompeur sans historique de comparaison).
 function trendIcon(current: number, previous: number) {
-  if (current === previous) return null;
+  if (current === previous || previous === 0) return null;
   const up = current > previous;
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   const color = up ? "text-green-600" : "text-red-600";
   const bgColor = up ? "bg-green-50" : "bg-red-50";
-  const pctChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100);
-  return { Icon, color, bgColor, pctChange, up };
+  const pctChange = Math.round(((current - previous) / previous) * 100);
+  return { Icon, color, bgColor, pctChange, up } as const;
 }
+
+// Les buckets hour_of_day/day_of_week en base sont en UTC — pour des
+// tendances lisibles on regroupe depuis created_at en heure de Paris.
+const parisHourFmt = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit", hourCycle: "h23", timeZone: "Europe/Paris",
+});
+function hourInParis(date: Date): number {
+  return Number(parisHourFmt.format(date));
+}
+const parisDayLabel = new Intl.DateTimeFormat("fr-FR", {
+  weekday: "short", day: "numeric", timeZone: "Europe/Paris",
+});
+// fr-CA → format YYYY-MM-DD, pratique comme clé de regroupement
+const parisDayKey = new Intl.DateTimeFormat("fr-CA", {
+  year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Europe/Paris",
+});
 
 function MetricCard({
   label, value, sub, icon: Icon, trend, accent = false,
@@ -113,21 +131,32 @@ function MiniChart({
 
 export default async function AnalyticsPage() {
   const now = new Date();
-  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
+  const HOUR = 60 * 60 * 1000;
+  const DAY = 24 * HOUR;
 
-  // Real-time + time-windowed queries
+  const oneHourAgo = ago(HOUR);
+  const twoHoursAgo = ago(2 * HOUR);
+  const oneDayAgo = ago(DAY);
+  const twoDaysAgo = ago(2 * DAY);
+  const sevenDaysAgo = ago(7 * DAY);
+  const fourteenDaysAgo = ago(14 * DAY);
+
+  // Fenêtres courantes + fenêtres précédentes (pour les tendances réelles)
   const [
     views1h,
+    views1hPrev,
     views24h,
+    views24hPrev,
     views7d,
+    views7dPrev,
     sessions24h,
+    sessions24hPrev,
     sessions7d,
     completedReads7d,
     allReads7d,
     avgDuration7d,
+    avgDuration7dPrev,
     wordLookups7d,
     sourceClicks7d,
     topArticles7d,
@@ -137,18 +166,23 @@ export default async function AnalyticsPage() {
     referrerBreakdown,
   ] = await Promise.all([
     adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", oneHourAgo),
+    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", twoHoursAgo).lt("created_at", oneHourAgo),
     adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", oneDayAgo),
+    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", twoDaysAgo).lt("created_at", oneDayAgo),
     adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
     adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", oneDayAgo),
+    adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", twoDaysAgo).lt("created_at", oneDayAgo),
     adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
     adminClient.from("watch_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo).eq("read_completed", true),
     adminClient.from("watch_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
     adminClient.from("watch_events").select("duration_sec").gte("created_at", sevenDaysAgo),
+    adminClient.from("watch_events").select("duration_sec").gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
     adminClient.from("watch_events").select("word_lookups").gte("created_at", sevenDaysAgo),
     adminClient.from("watch_events").select("source_clicks").gte("created_at", sevenDaysAgo),
     adminClient.from("article_views").select("article_id").gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("hour_of_day, created_at").gte("created_at", oneDayAgo),
-    adminClient.from("article_views").select("created_at, day_of_week").gte("created_at", sevenDaysAgo),
+    adminClient.from("article_views").select("created_at").gte("created_at", oneDayAgo),
+    adminClient.from("article_views").select("created_at").gte("created_at", sevenDaysAgo),
     adminClient.from("article_views").select("device").gte("created_at", sevenDaysAgo),
     adminClient.from("article_views").select("referrer_source").gte("created_at", sevenDaysAgo),
   ]);
@@ -162,11 +196,21 @@ export default async function AnalyticsPage() {
   const total = allReads7d.count ?? 0;
   const completionRate = pct(completed, total);
 
-  // Avg duration
+  const trendV1h = trendIcon(v1h, views1hPrev.count ?? 0);
+  const trendV24h = trendIcon(v24h, views24hPrev.count ?? 0);
+  const trendV7d = trendIcon(v7d, views7dPrev.count ?? 0);
+  const trendS24h = trendIcon(s24h, sessions24hPrev.count ?? 0);
+
+  // Avg duration (+ période précédente pour la tendance)
   const durationData = avgDuration7d.data ?? [];
   const avgDur = durationData.length > 0
     ? durationData.reduce((s, w) => s + (w.duration_sec ?? 0), 0) / durationData.length
     : 0;
+  const durationPrevData = avgDuration7dPrev.data ?? [];
+  const avgDurPrev = durationPrevData.length > 0
+    ? durationPrevData.reduce((s, w) => s + (w.duration_sec ?? 0), 0) / durationPrevData.length
+    : 0;
+  const trendDur = trendIcon(Math.round(avgDur), Math.round(avgDurPrev));
 
   // Word lookups & source clicks
   const lookups = (wordLookups7d.data ?? []).reduce((s, w) => s + (w.word_lookups ?? 0), 0);
@@ -192,30 +236,32 @@ export default async function AnalyticsPage() {
     views: articleCounts[a.id] ?? 0,
   }));
 
-  // Hourly breakdown (last 24h)
-  const hourlyData = (hourlyViews.data ?? []);
+  // Répartition horaire (24 dernières heures, heure de Paris)
   const hourlyGrouped: Record<number, number> = {};
-  hourlyData.forEach(h => {
-    const hod = h.hour_of_day ?? 0;
-    hourlyGrouped[hod] = (hourlyGrouped[hod] ?? 0) + 1;
+  (hourlyViews.data ?? []).forEach((row) => {
+    if (!row.created_at) return;
+    const h = hourInParis(new Date(row.created_at));
+    hourlyGrouped[h] = (hourlyGrouped[h] ?? 0) + 1;
   });
   const hourlyChart = Array.from({ length: 24 }, (_, h) => ({
     hour: `${h}h`,
     views: hourlyGrouped[h] ?? 0,
   }));
 
-  // Daily breakdown (last 7d)
-  const dailyData = (dailyViews.data ?? []);
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const dailyGrouped: Record<number, number> = {};
-  dailyData.forEach(d => {
-    const dow = d.day_of_week ?? 0;
-    dailyGrouped[dow] = (dailyGrouped[dow] ?? 0) + 1;
+  // Série quotidienne réelle (7 derniers jours, du plus ancien à aujourd'hui)
+  const dailyGrouped: Record<string, number> = {};
+  (dailyViews.data ?? []).forEach((row) => {
+    if (!row.created_at) return;
+    const key = parisDayKey.format(new Date(row.created_at)); // YYYY-MM-DD Paris
+    dailyGrouped[key] = (dailyGrouped[key] ?? 0) + 1;
   });
-  const dailyChart = Array.from({ length: 7 }, (_, i) => ({
-    day: dayNames[i],
-    views: dailyGrouped[i] ?? 0,
-  }));
+  const dailyChart = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getTime() - (6 - i) * DAY);
+    return {
+      day: parisDayLabel.format(d), // ex. "mer. 10"
+      views: dailyGrouped[parisDayKey.format(d)] ?? 0,
+    };
+  });
 
   // Device breakdown
   const deviceData = (deviceBreakdown.data ?? []);
@@ -243,98 +289,104 @@ export default async function AnalyticsPage() {
       <div className="space-y-4">
         <div>
           <h1 className="font-heading font-black text-2xl text-ns-black">Analytics</h1>
-          <p className="text-sm text-neutral-400 font-sans mt-1">Real-time + 7-day insights</p>
+          <p className="text-sm text-neutral-400 font-sans mt-1">
+            Temps réel + 7 jours — tendances vs période précédente
+          </p>
         </div>
       </div>
 
-      {/* ── Real-time KPIs ── */}
+      {/* ── KPIs temps réel ── */}
       <section>
-        <SectionHeader title="Real-time" sub="Last hour vs 24h vs 7d" />
+        <SectionHeader title="Temps réel" sub="Tendance vs heure / jour / semaine précédents" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            label="Views (1h)"
+            label="Vues (1 h)"
             value={v1h.toLocaleString("fr-FR")}
-            sub={`${v24h.toLocaleString("fr-FR")} in 24h`}
+            sub={`${v24h.toLocaleString("fr-FR")} sur 24 h`}
             icon={Eye}
+            trend={trendV1h ?? trendV24h ?? undefined}
             accent
           />
           <MetricCard
-            label="Views (7d)"
+            label="Vues (7 j)"
             value={v7d.toLocaleString("fr-FR")}
-            sub="Last 7 days"
+            sub="vs 7 jours précédents"
             icon={BarChart3}
+            trend={trendV7d ?? undefined}
           />
           <MetricCard
-            label="Sessions (24h)"
+            label="Sessions (24 h)"
             value={s24h.toLocaleString("fr-FR")}
-            sub={`${s7d.toLocaleString("fr-FR")} in 7d`}
+            sub={`${s7d.toLocaleString("fr-FR")} sur 7 j`}
             icon={Users}
+            trend={trendS24h ?? undefined}
           />
           <MetricCard
-            label="Avg. read time"
+            label="Lecture moyenne"
             value={avgDur > 0 ? fmtDuration(avgDur) : "—"}
-            sub="7-day average"
+            sub="vs 7 jours précédents"
             icon={Clock}
+            trend={trendDur ?? undefined}
           />
         </div>
       </section>
 
       {/* ── Engagement ── */}
       <section>
-        <SectionHeader title="Engagement (7d)" sub="Reader interactions & depth" />
+        <SectionHeader title="Engagement (7 j)" sub="Interactions et profondeur de lecture" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricCard
-            label="Completion rate"
+            label="Taux de complétion"
             value={`${completionRate}%`}
-            sub={`${completed} of ${total} reads`}
+            sub={`${completed} sur ${total} lectures`}
             icon={Zap}
             accent={completionRate >= 60}
           />
           <MetricCard
-            label="Word lookups"
+            label="Lookups dictionnaire"
             value={lookups.toLocaleString("fr-FR")}
-            sub="Dictionary usage"
+            sub="Mots recherchés"
             icon={FileText}
           />
           <MetricCard
-            label="Source clicks"
+            label="Clics sources"
             value={clicks.toLocaleString("fr-FR")}
-            sub="Reference clicks"
+            sub="Références consultées"
             icon={TrendingUp}
           />
           <MetricCard
-            label="Avg. per read"
+            label="Lookups / lecture"
             value={total > 0 ? `${(lookups / total).toFixed(1)}` : "0"}
-            sub="Lookups per session"
+            sub="Moyenne par session"
             icon={Activity}
           />
         </div>
       </section>
 
-      {/* ── Charts ── */}
+      {/* ── Tendances ── */}
       <section>
-        <SectionHeader title="Trends" sub="Time-series breakdowns" />
+        <SectionHeader title="Tendances" sub="Heure de Paris" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MiniChart title="Hourly (last 24h)" data={hourlyChart} valueKey="views" xKey="hour" />
-          <MiniChart title="Daily (last 7d)" data={dailyChart} valueKey="views" xKey="day" />
+          <MiniChart title="Par heure (24 dernières heures)" data={hourlyChart} valueKey="views" xKey="hour" />
+          <MiniChart title="Par jour (7 derniers jours)" data={dailyChart} valueKey="views" xKey="day" />
         </div>
       </section>
 
       {/* ── Top Articles ── */}
       <section>
-        <SectionHeader title="Top articles (7d)" sub="Most viewed by readers" />
-        <div className="rounded-2xl border border-neutral-100 bg-white overflow-hidden">
+        <SectionHeader title="Top articles (7 j)" sub="Les plus vus par les lecteurs" />
+        <div className="rounded-2xl border border-neutral-100 bg-white overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 border-b border-neutral-100">
               <tr>
                 <th className="text-left px-5 py-3 text-[10px] font-sans font-bold uppercase tracking-widest text-neutral-400">#</th>
-                <th className="text-left px-5 py-3 text-[10px] font-sans font-bold uppercase tracking-widest text-neutral-400">Title</th>
-                <th className="text-right px-5 py-3 text-[10px] font-sans font-bold uppercase tracking-widest text-neutral-400">7d views</th>
+                <th className="text-left px-5 py-3 text-[10px] font-sans font-bold uppercase tracking-widest text-neutral-400">Titre</th>
+                <th className="text-right px-5 py-3 text-[10px] font-sans font-bold uppercase tracking-widest text-neutral-400">Vues 7 j</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-50">
               {topArticlesWithCounts.length === 0 ? (
-                <tr><td colSpan={3} className="px-5 py-8 text-center text-xs text-neutral-300 font-sans">No data</td></tr>
+                <tr><td colSpan={3} className="px-5 py-8 text-center text-xs text-neutral-300 font-sans">Aucune donnée</td></tr>
               ) : topArticlesWithCounts.map((article, i) => (
                 <tr key={article.id} className="hover:bg-neutral-50 transition-colors duration-150">
                   <td className="px-5 py-3 font-mono text-xs text-neutral-300">{i + 1}</td>
@@ -349,14 +401,14 @@ export default async function AnalyticsPage() {
         </div>
       </section>
 
-      {/* ── Device & Referrer ── */}
+      {/* ── Appareils & Sources ── */}
       <section>
-        <SectionHeader title="Sources & Devices" sub="Traffic breakdown" />
+        <SectionHeader title="Sources & appareils" sub="Répartition du trafic (7 j)" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           {/* Device breakdown */}
           <div className="rounded-2xl border border-neutral-100 bg-white p-5 space-y-4">
-            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-neutral-400">Device breakdown</p>
+            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-neutral-400">Appareils</p>
             <div className="space-y-3">
               {[
                 { key: "desktop", label: "Desktop", color: "#2233f0" },
@@ -386,10 +438,10 @@ export default async function AnalyticsPage() {
 
           {/* Referrer breakdown */}
           <div className="rounded-2xl border border-neutral-100 bg-white p-5 space-y-4">
-            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-neutral-400">Top referrers</p>
+            <p className="text-xs font-sans font-semibold uppercase tracking-widest text-neutral-400">Principales sources</p>
             <div className="space-y-3">
               {topReferrers.length === 0 ? (
-                <p className="text-xs text-neutral-300 font-sans">No referrer data</p>
+                <p className="text-xs text-neutral-300 font-sans">Aucune donnée de provenance</p>
               ) : topReferrers.map(([ref, count]) => {
                 const total = Object.values(referrerCounts).reduce((a, b) => a + b, 0);
                 const p = pct(count, total);
