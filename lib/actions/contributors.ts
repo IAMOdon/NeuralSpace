@@ -1,16 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { ensureAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
-
-async function ensureAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié.");
-  return user;
-}
 
 async function uniqueContributorSlug(base: string): Promise<string> {
   let slug = base;

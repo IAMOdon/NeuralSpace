@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/auth";
 
 // Builds a safe tsquery with prefix matching for each token.
 // "trous noirs" → "trous:* & noirs:*"
@@ -21,10 +21,8 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (q.length < 2) return NextResponse.json([]);
 
-  // Check if request comes from an authenticated admin
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const isAdmin = !!user;
+  // Seul l'admin voit les brouillons dans les résultats
+  const isAdmin = !!(await getAdminUser());
 
   const tsQuery = buildTsQuery(q);
 

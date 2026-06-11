@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { getAdminUser } from "@/lib/auth";
 import type { Json } from "@/types/supabase";
 
 type SaveHeroInput = {
@@ -13,9 +13,8 @@ type SaveHeroInput = {
 export async function saveHeroConfig(
   input: SaveHeroInput
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Non authentifié." };
+  const user = await getAdminUser();
+  if (!user) return { ok: false, error: "Accès réservé à l'administrateur." };
 
   const { error } = await adminClient
     .from("hero_config")
