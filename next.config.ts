@@ -43,6 +43,15 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      {
+        // Polices auto-hébergées pour les e-mails : les clients mail (et l'iframe
+        // de prévisualisation sandboxée) chargent en cross-origin — CORS requis.
+        source: "/fonts/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
     ];
   },
 };
