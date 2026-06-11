@@ -57,7 +57,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-neutral-100 bg-white overflow-hidden">
+      <div className="rounded-2xl border border-neutral-100 bg-white overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-neutral-50 border-b border-neutral-100">
             <tr>
@@ -124,7 +124,8 @@ export default async function ArticlesPage({ searchParams }: Props) {
                     <span className="text-xs text-neutral-400 font-sans">{updatedAt}</span>
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                    {/* Toujours visible au doigt — le hover n'existe pas sur tactile */}
+                    <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150">
                       <Link
                         href={`/dashboard/articles/${article.id}/edit`}
                         className="p-1.5 rounded-lg text-neutral-400 hover:text-ns-blue hover:bg-ns-blue/5 transition-colors duration-150"

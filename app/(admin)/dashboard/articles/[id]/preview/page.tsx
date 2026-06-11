@@ -51,8 +51,8 @@ export default async function PreviewPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Preview banner */}
-      <div className="sticky top-0 z-50 flex items-center justify-between bg-ns-black px-6 py-3">
+      {/* Preview banner — mode immersif : seule barre à l'écran sur mobile */}
+      <div className="sticky top-0 z-30 flex items-center justify-between gap-3 flex-wrap bg-ns-black px-4 md:px-6 py-3">
         <div className="flex items-center gap-3">
           <span className="text-xs font-sans font-semibold text-white/90">Prévisualisation</span>
           <span
