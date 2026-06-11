@@ -80,7 +80,13 @@ export function WaitlistForm({ variant = "light" }: { variant?: "light" | "dark"
         <p className="mt-2.5 text-sm font-sans text-red-500">{message}</p>
       )}
       <p className={`mt-3 text-xs font-sans ${dark ? "text-white/40" : "text-neutral-400"}`}>
-        Accès anticipé. Pas de spam, désinscription en un clic.
+        Accès anticipé. Pas de spam, désinscription en un clic.{" "}
+        <a
+          href="/legal/confidentialite"
+          className={`underline underline-offset-2 transition-colors ${dark ? "hover:text-white/70" : "hover:text-neutral-600"}`}
+        >
+          Confidentialité
+        </a>
       </p>
     </div>
   );
