@@ -179,12 +179,57 @@ export type Database = {
           },
         ]
       }
+      article_reports: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          message: string
+          quote: string | null
+          reporter_email: string | null
+          resolved_at: string | null
+          source_url: string | null
+          status: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          message: string
+          quote?: string | null
+          reporter_email?: string | null
+          resolved_at?: string | null
+          source_url?: string | null
+          status?: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          quote?: string | null
+          reporter_email?: string | null
+          resolved_at?: string | null
+          source_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_reports_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           category_id: string | null
           content: Json
           content_simplified: Json | null
           content_scientific: Json | null
+          corrections: Json
           has_dual_content: boolean
           is_sponsored: boolean
           cover_image_alt: string | null
@@ -217,6 +262,7 @@ export type Database = {
           content?: Json
           content_simplified?: Json | null
           content_scientific?: Json | null
+          corrections?: Json
           has_dual_content?: boolean
           cover_image_alt?: string | null
           cover_image_url?: string | null
@@ -249,6 +295,7 @@ export type Database = {
           content?: Json
           content_simplified?: Json | null
           content_scientific?: Json | null
+          corrections?: Json
           has_dual_content?: boolean
           cover_image_alt?: string | null
           cover_image_url?: string | null
@@ -401,6 +448,105 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      coherence_waitlist: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      email_campaigns: {
+        Row: {
+          audience: string
+          blocks: Json
+          created_at: string
+          id: string
+          preheader: string
+          recipient_count: number | null
+          sent_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          blocks?: Json
+          created_at?: string
+          id?: string
+          preheader?: string
+          recipient_count?: number | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          blocks?: Json
+          created_at?: string
+          id?: string
+          preheader?: string
+          recipient_count?: number | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       hero_config: {
         Row: {

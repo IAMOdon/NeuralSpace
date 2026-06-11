@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
     "unknown";
-  const allowed = await checkRateLimit(`waitlist:${ip}`, 10, 60);
+  const allowed = await checkRateLimit(`newsletter:${ip}`, 10, 60);
   if (!allowed) {
     return NextResponse.json({ error: "Trop de tentatives. Réessayez dans une minute." }, { status: 429 });
   }
@@ -35,15 +35,15 @@ export async function POST(request: NextRequest) {
   const country = request.headers.get("x-vercel-ip-country") ?? null;
 
   const { error } = await adminClient
-    .from("coherence_waitlist")
-    .insert({ email, source: "coherence_page", user_agent: userAgent, country });
+    .from("newsletter_subscribers")
+    .insert({ email, source: "footer", user_agent: userAgent, country });
 
   if (error) {
-    // Unique violation — already signed up. Treat as success (idempotent).
+    // Unique violation — already subscribed. Treat as success (idempotent).
     if (error.code === "23505") {
       return NextResponse.json({ ok: true, already: true });
     }
-    console.error("Coherence waitlist insert error:", error);
+    console.error("Newsletter insert error:", error);
     return NextResponse.json({ error: "Une erreur est survenue. Réessayez." }, { status: 500 });
   }
 
