@@ -1,11 +1,113 @@
 import {
   GraduationCap, Microscope, Code2, Globe, Scale, Lightbulb, Hand, Eye,
   KeyRound, RefreshCw, ShieldCheck, Apple, Check, ArrowRight,
+  Sparkles, MessagesSquare, AudioLines, Layers, PanelTop, NotebookPen,
 } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "./Reveal";
 
-// All copy is drawn directly from coherence_guidelines/PRODUCT.md. The product
+// ── Ce qui fonctionne déjà — capacités réelles du build, avec leurs raccourcis.
+// Source : Coherence/README.md « What works today ». Ancre la promesse « Bientôt »
+// dans un produit concret, pas du vaporware — l'honnêteté est la marque.
+
+const SHIPPED = [
+  {
+    icon: Sparkles,
+    title: "L'orbe vivant",
+    body: "Présence flottante au cœur fluide, toujours là. Clic pour parler, survol pour le menu, glisser pour le déplacer. Il prend la couleur du profil actif.",
+    keys: null,
+  },
+  {
+    icon: Layers,
+    title: "Cinq profils auto-détectés",
+    body: "Général, Code, Recherche, Apprentissage, Pro — détectés depuis l'app active et l'URL du navigateur, épinglables à la main.",
+    keys: null,
+  },
+  {
+    icon: Eye,
+    title: "Conscience de l'écran",
+    body: "Capture de la fenêtre active, texte exact via l'Accessibilité, OCR de secours et URL — les sources sont choisies selon le profil.",
+    keys: null,
+  },
+  {
+    icon: MessagesSquare,
+    title: "Chat ancré dans l'écran",
+    body: "Réponses en streaming, rendu markdown avec blocs de code, puces de contexte montrant exactement ce que l'IA voit — retirables.",
+    keys: "⌘⇧1",
+  },
+  {
+    icon: AudioLines,
+    title: "Conversation vocale",
+    body: "Reconnaissance vocale en direct, tours rythmés par les silences, réponses parlées conscientes de l'écran, mémoire glissante.",
+    keys: "Talk",
+  },
+  {
+    icon: Lightbulb,
+    title: "Suggestions en direct",
+    body: "Cartes déclenchées par la sélection, prompts adaptés au profil, correctifs de code incrémentaux. Le déclencheur presse-papier reste désactivé par défaut.",
+    keys: "⌘⇧O",
+  },
+  {
+    icon: PanelTop,
+    title: "Barre réunion",
+    body: "Une barre supérieure avec l'orbe vivant, le sélecteur de profil, un panneau de questions conscient de l'écran, notes et assistance au code.",
+    keys: "⌘⇧⌥Espace",
+  },
+  {
+    icon: NotebookPen,
+    title: "Capture & notes",
+    body: "Capture rapide d'une idée, stockage local SQLite avec recherche plein-texte instantanée sur toutes vos notes.",
+    keys: "⌘⇧2",
+  },
+];
+
+export function WorksTodaySection() {
+  return (
+    <section className="w-full bg-white border-t border-neutral-100">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-28">
+        <Reveal>
+          <div className="max-w-2xl mb-14">
+            <p className="text-[11px] font-sans font-bold text-ns-blue uppercase tracking-widest">
+              Ce qui fonctionne déjà
+            </p>
+            <h2 className="mt-3 font-heading font-black text-3xl md:text-4xl text-ns-black tracking-tight leading-tight">
+              Pas une promesse. Un produit.
+            </h2>
+            <p className="mt-4 text-base md:text-lg text-neutral-500 font-sans leading-relaxed">
+              Coherence n'est pas en attente d'être inventé : l'app tourne déjà sur macOS. Voici
+              ce qu'elle fait aujourd'hui — la liste d'attente ouvre l'accès, elle n'attend pas
+              le code.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-100 rounded-3xl overflow-hidden border border-neutral-100">
+          {SHIPPED.map(({ icon: Icon, title, body, keys }, i) => (
+            <Reveal key={title} delay={i * 70} className="h-full">
+              <div className="group bg-white h-full p-6 md:p-7 space-y-3 hover:bg-neutral-50 transition-colors duration-200">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-ns-blue/10 text-ns-blue transition-transform duration-300 group-hover:scale-110 motion-reduce:transform-none">
+                    <Icon className="w-5 h-5" strokeWidth={1.75} />
+                  </span>
+                  {keys && (
+                    <kbd className="text-[10px] font-sans font-bold text-neutral-500 bg-neutral-100 border border-neutral-200 px-2 py-1 rounded-md tracking-wider">
+                      {keys}
+                    </kbd>
+                  )}
+                </div>
+                <h3 className="font-heading font-bold text-[15px] text-ns-black leading-snug">{title}</h3>
+                <p className="text-[13px] text-neutral-500 font-sans leading-relaxed">{body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// All copy is drawn directly from Coherence/docs/PRODUCT.md (the app repo,
+// gitignored here — source of truth for the product). The product
 // is pre-launch ("Bientôt"), so download/pricing CTAs route to the waitlist
 // rather than a dead DMG link — honest by design, which is the product's brand.
 
