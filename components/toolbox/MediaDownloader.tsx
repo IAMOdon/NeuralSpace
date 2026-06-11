@@ -88,7 +88,7 @@ export function MediaDownloader() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 p-8 space-y-6">
+    <div className="bg-white rounded-2xl border border-neutral-200 p-5 md:p-8 space-y-6">
       {/* Input section */}
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-ns-black">
