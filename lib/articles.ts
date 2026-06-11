@@ -1,10 +1,10 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
-import { ContentSchema, ArticleSourcesSchema } from "@/lib/content/validators";
+import { ContentSchema, ArticleSourcesSchema, ArticleCorrectionsSchema } from "@/lib/content/validators";
 import { tiptapToContentBlocks } from "@/lib/content/tiptapConverter";
 import type { ContentBlock } from "@/types/content";
-import type { ArticleSource, Category } from "@/types/article";
+import type { ArticleCorrection, ArticleSource, Category } from "@/types/article";
 import type { ArticleCard, ArticleWithRelations, Series } from "@/types/article";
 
 type RawSeriesJoin = { order: number; series: Series } | null;
@@ -39,6 +39,11 @@ function parseContent(raw: unknown): ContentBlock[] {
 
 function parseSources(raw: unknown): ArticleSource[] {
   const result = ArticleSourcesSchema.safeParse(raw);
+  return result.success ? result.data : [];
+}
+
+function parseCorrections(raw: unknown): ArticleCorrection[] {
+  const result = ArticleCorrectionsSchema.safeParse(raw);
   return result.success ? result.data : [];
 }
 
@@ -166,6 +171,7 @@ export const getArticleBySlug = cache(async function getArticleBySlug(
     contentScientific: data.content_scientific ? parseContent(data.content_scientific) : undefined,
     hasDualContent: data.has_dual_content ?? false,
     sources: parseSources(data.sources),
+    corrections: parseCorrections(data.corrections),
     layoutPreset: data.layout_preset ?? undefined,
     wordCount: data.word_count,
     readingTimeMin: data.reading_time_min,

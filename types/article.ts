@@ -10,6 +10,12 @@ export type ArticleSource = {
   doi?: string;
 };
 
+// Correction éditoriale datée, affichée publiquement sous l'article.
+export type ArticleCorrection = {
+  date: string; // ISO
+  note: string;
+};
+
 export type Category = {
   id: string;
   slug: string;
@@ -51,6 +57,7 @@ export type Article = {
   contentScientific?: ContentBlock[];
   hasDualContent: boolean;
   sources: ArticleSource[];
+  corrections: ArticleCorrection[];
   layoutPreset?: string;
   wordCount: number;
   readingTimeMin: number;

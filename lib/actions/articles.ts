@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { ensureAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import type { Json } from "@/types/supabase";
 
@@ -43,13 +43,6 @@ function countWords(content: Json): number {
 
 function readingTime(wordCount: number): number {
   return Math.max(1, Math.round(wordCount / 230));
-}
-
-async function ensureAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié.");
-  return user;
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
@@ -178,6 +171,9 @@ export async function publishArticle(
 
   revalidatePath("/");
   revalidatePath("/dashboard/articles");
+  // L'article apparaît immédiatement dans le flux RSS et le sitemap
+  revalidatePath("/feed.xml");
+  revalidatePath("/sitemap.xml");
   return { ok: true, slug: data.slug };
 }
 
@@ -195,6 +191,8 @@ export async function unpublishArticle(
 
   revalidatePath("/");
   revalidatePath("/dashboard/articles");
+  revalidatePath("/feed.xml");
+  revalidatePath("/sitemap.xml");
   return { ok: true };
 }
 
@@ -209,4 +207,64 @@ export async function deleteArticle(
 
   revalidatePath("/dashboard/articles");
   redirect("/dashboard/articles");
+}
+
+// ── Corrections éditoriales (datées, affichées publiquement) ─────────────────
+
+export async function addCorrection(
+  articleId: string,
+  note: string
+): Promise<{ ok: boolean; error?: string }> {
+  await ensureAdmin();
+
+  const trimmed = note.trim();
+  if (!trimmed) return { ok: false, error: "La note de correction est vide." };
+
+  const { data, error: readError } = await adminClient
+    .from("articles")
+    .select("corrections, slug")
+    .eq("id", articleId)
+    .single();
+  if (readError || !data) return { ok: false, error: "Article introuvable." };
+
+  const existing = Array.isArray(data.corrections) ? data.corrections : [];
+  const corrections = [...existing, { date: new Date().toISOString(), note: trimmed }];
+
+  const { error } = await adminClient
+    .from("articles")
+    .update({ corrections, updated_at: new Date().toISOString() })
+    .eq("id", articleId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/${data.slug}`);
+  return { ok: true };
+}
+
+export async function deleteCorrection(
+  articleId: string,
+  index: number
+): Promise<{ ok: boolean; error?: string }> {
+  await ensureAdmin();
+
+  const { data, error: readError } = await adminClient
+    .from("articles")
+    .select("corrections, slug")
+    .eq("id", articleId)
+    .single();
+  if (readError || !data) return { ok: false, error: "Article introuvable." };
+
+  const existing = Array.isArray(data.corrections) ? data.corrections : [];
+  if (index < 0 || index >= existing.length) {
+    return { ok: false, error: "Correction introuvable." };
+  }
+  const corrections = existing.filter((_, i) => i !== index);
+
+  const { error } = await adminClient
+    .from("articles")
+    .update({ corrections, updated_at: new Date().toISOString() })
+    .eq("id", articleId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/${data.slug}`);
+  return { ok: true };
 }

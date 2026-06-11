@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { BlockEditor, countBlockWords } from "./BlockEditor";
 import { ContributorPicker } from "./ContributorPicker";
+import { CorrectionsPanel } from "./CorrectionsPanel";
 import type { ContributorRef } from "./ContributorPicker";
 import { parseBlocks } from "@/lib/content/parseBlocks";
 import { convertGrokulToBlocks, isGrokulFormat, type GrokulJSON } from "@/lib/grok-json-converter";
@@ -38,6 +39,7 @@ type ArticleData = {
   seoDescription: string | null;
   sources: { label: string; url?: string }[];
   isSponsored?: boolean;
+  corrections?: { date: string; note: string }[];
 };
 
 type Props = {
@@ -357,8 +359,9 @@ export function ArticleEditor({ article: initial, categories, initialContributor
   return (
     <div className="flex flex-col bg-neutral-50">
 
-      {/* ── Top bar ── */}
-      <div className="sticky top-0 z-20 h-14 bg-white border-b border-neutral-100 px-4 flex items-center justify-between gap-4">
+      {/* ── Top bar ── (mode immersif : seule barre à l'écran sur mobile,
+          min-h + wrap pour que chaque bouton reste accessible au doigt) */}
+      <div className="sticky top-0 z-20 min-h-14 bg-white border-b border-neutral-100 px-3 md:px-4 py-2 md:py-0 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -366,7 +369,7 @@ export function ArticleEditor({ article: initial, categories, initialContributor
             className="flex items-center gap-1.5 text-sm font-sans text-neutral-400 hover:text-ns-black transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
-            Articles
+            <span className="hidden sm:inline">Articles</span>
           </button>
 
           {/* Status badge */}
@@ -387,7 +390,7 @@ export function ArticleEditor({ article: initial, categories, initialContributor
 
         <div className="flex items-center gap-2">
           {saveMsg && (
-            <span className={`flex items-center gap-1 text-xs font-sans hidden sm:flex ${saveMsg.startsWith("Erreur") ? "text-red-500" : "text-green-600"}`}>
+            <span className={`flex items-center gap-1 text-xs font-sans ${saveMsg.startsWith("Erreur") ? "text-red-500" : "text-green-600"}`}>
               {!saveMsg.startsWith("Erreur") && <Check className="w-3.5 h-3.5" />}
               {saveMsg.replace(" ✓", "")}
             </span>
@@ -397,10 +400,11 @@ export function ArticleEditor({ article: initial, categories, initialContributor
               href={`/dashboard/articles/${id}/preview`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-sans font-semibold text-neutral-500 hover:text-ns-black border border-neutral-200 hover:border-neutral-300 transition-colors duration-200"
+              aria-label="Prévisualiser"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-sans font-semibold text-neutral-500 hover:text-ns-black border border-neutral-200 hover:border-neutral-300 transition-colors duration-200"
             >
               <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Prévisualiser
+              <span className="hidden sm:inline">Prévisualiser</span>
             </a>
           )}
           {isPublished && (
@@ -408,10 +412,11 @@ export function ArticleEditor({ article: initial, categories, initialContributor
               href={`/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-sans font-semibold text-ns-blue hover:opacity-80 border border-ns-blue/30 transition-colors duration-200"
+              aria-label="Voir live"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-sans font-semibold text-ns-blue hover:opacity-80 border border-ns-blue/30 transition-colors duration-200"
             >
               <Eye className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Voir live
+              <span className="hidden sm:inline">Voir live</span>
             </a>
           )}
           <button
@@ -444,8 +449,8 @@ export function ArticleEditor({ article: initial, categories, initialContributor
         </div>
       </div>
 
-      {/* ── Main content ── */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* ── Main content ── (colonne unique sur mobile, méta en dessous) */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
         {/* ── Left panel — content editor ── */}
         <div className="flex-1 overflow-y-auto">
@@ -627,8 +632,8 @@ export function ArticleEditor({ article: initial, categories, initialContributor
           </div>
         </div>
 
-        {/* ── Right panel — metadata ── */}
-        <aside className="w-64 shrink-0 border-l border-neutral-100 bg-white sticky top-14 self-start px-4 py-6 space-y-5 hidden lg:block overflow-y-auto">
+        {/* ── Right panel — metadata (sous l'éditeur sur mobile, jamais caché) ── */}
+        <aside className="w-full lg:w-64 shrink-0 border-t lg:border-t-0 lg:border-l border-neutral-100 bg-white lg:sticky top-14 self-start px-4 py-6 space-y-5 overflow-y-auto">
 
           {/* Catégorie */}
           <div>
@@ -749,6 +754,16 @@ export function ArticleEditor({ article: initial, categories, initialContributor
           </div>
 
           <div className="border-t border-neutral-100" />
+
+          {/* Corrections publiques (article existant uniquement) */}
+          {id && (
+            <div>
+              <SideLabel>Corrections publiées</SideLabel>
+              <CorrectionsPanel articleId={id} initial={initial.corrections ?? []} />
+            </div>
+          )}
+
+          {id && <div className="border-t border-neutral-100" />}
 
           {/* Danger zone */}
           {id && (

@@ -16,7 +16,7 @@ export default async function EditArticlePage({ params }: Props) {
   const [{ data: article }, categories] = await Promise.all([
     adminClient
       .from("articles")
-      .select("id, title, summary, content, content_simplified, content_scientific, has_dual_content, type, status, slug, category_id, cover_image_url, cover_image_alt, seo_title, seo_description, sources, is_sponsored, article_authors(order, authors(id, name, slug, avatar_url, role, institution))")
+      .select("id, title, summary, content, content_simplified, content_scientific, has_dual_content, type, status, slug, category_id, cover_image_url, cover_image_alt, seo_title, seo_description, sources, is_sponsored, corrections, article_authors(order, authors(id, name, slug, avatar_url, role, institution))")
       .eq("id", id)
       .single(),
     getCategories(),
@@ -78,6 +78,9 @@ export default async function EditArticlePage({ params }: Props) {
         seoDescription:    article.seo_description,
         sources,
         isSponsored:       article.is_sponsored ?? false,
+        corrections:       Array.isArray(article.corrections)
+          ? (article.corrections as { date: string; note: string }[])
+          : [],
       }}
     />
   );

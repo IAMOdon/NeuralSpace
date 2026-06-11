@@ -6,6 +6,9 @@ import { ArticleHeader } from "@/components/article/ArticleHeader";
 import { ContentVersionTabs } from "@/components/article/ContentVersionTabs";
 import { ContributorSidebar } from "@/components/article/ContributorSidebar";
 import { ArticleTracker } from "@/components/article/ArticleTracker";
+import { CorrectionsBlock } from "@/components/article/CorrectionsBlock";
+import { ReportError } from "@/components/article/ReportError";
+import { CiteThisArticle } from "@/components/article/CiteThisArticle";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -91,6 +94,13 @@ function ArticleJsonLd({ article }: { article: ArticleType }) {
     },
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
     about: { "@type": "Thing", name: article.category.name },
+    ...(article.corrections.length > 0 && {
+      correction: article.corrections.map((c) => ({
+        "@type": "CorrectionComment",
+        datePublished: c.date,
+        text: c.note,
+      })),
+    }),
   };
 
   const breadcrumbSchema = {
@@ -144,6 +154,16 @@ export default async function ArticlePage({ params }: Props) {
             contentSimplified={article.contentSimplified || article.content}
             contentScientific={article.contentScientific}
           />
+          <CorrectionsBlock corrections={article.corrections} />
+          <div className="mt-8 pt-5 border-t border-neutral-100 flex items-center justify-between gap-4 flex-wrap">
+            <ReportError articleId={article.id} />
+            <CiteThisArticle
+              title={article.title}
+              authors={article.authors.map((a) => a.name)}
+              publishedAt={article.publishedAt ?? null}
+              url={`${SITE_URL}/${article.slug}`}
+            />
+          </div>
         </article>
         <aside className="w-full lg:w-64 shrink-0 border-t border-neutral-100 pt-6 lg:border-0 lg:pt-2">
           <ContributorSidebar
