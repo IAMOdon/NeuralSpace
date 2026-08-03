@@ -145,7 +145,7 @@ export function MediaDownloader() {
           {/* Preview */}
           {mediaInfo.preview && (
             <div className="relative bg-neutral-100 rounded-xl overflow-hidden">
-              {mediaInfo.type === "video" && mediaInfo.directUrl ? (
+              {mediaInfo.type === "video" && mediaInfo.directUrl && mediaInfo.platform !== "youtube" ? (
                 <video
                   src={mediaInfo.directUrl}
                   poster={mediaInfo.preview}

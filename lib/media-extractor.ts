@@ -1,5 +1,11 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import path from "path";
+
+const execFileAsync = promisify(execFile);
+const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 
 export interface ExtractedMedia {
   url: string;
@@ -199,8 +205,15 @@ async function extractRedditMedia(url: string): Promise<ExtractedMedia> {
   throw new Error("No media found in this Reddit post");
 }
 
+interface YtInfo {
+  title: string;
+  thumbnail: string;
+  progressive: Array<{ itag: number; resolution: string; filesize: number | null }>;
+  adaptive_video: Array<{ itag: number; resolution: string; filesize: number | null }>;
+  best_audio_itag: number | null;
+}
+
 async function extractYouTubeMedia(url: string): Promise<ExtractedMedia> {
-  // Handle watch, youtu.be, and Shorts URLs
   const videoId =
     url.match(/[?&]v=([^&\n?#]+)/)?.[1] ??
     url.match(/youtu\.be\/([^?&\n#]+)/)?.[1] ??
@@ -208,50 +221,49 @@ async function extractYouTubeMedia(url: string): Promise<ExtractedMedia> {
 
   if (!videoId) throw new Error("URL YouTube invalide");
 
-  // Piped API — open-source YouTube proxy, no key, no cost
-  const pipedInstances = [
-    "https://pipedapi.kavin.rocks",
-    "https://piped-api.garudalinux.org",
-    "https://api.piped.projectsegfau.lt",
-  ];
+  let info: YtInfo;
+  try {
+    const { stdout } = await execFileAsync(
+      "python3",
+      [path.join(SCRIPTS_DIR, "yt_info.py"), url],
+      { timeout: 30000, maxBuffer: 5 * 1024 * 1024 }
+    );
+    info = JSON.parse(stdout) as YtInfo;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message.slice(0, 120) : "erreur inconnue";
+    throw new Error(`Impossible d'analyser cette vidéo YouTube (${msg})`);
+  }
 
-  let data: any = null;
-  for (const instance of pipedInstances) {
-    try {
-      const res = await axios.get(`${instance}/streams/${videoId}`, { timeout: 8000 });
-      data = res.data;
-      break;
-    } catch {
-      continue;
+  // Build quality list: progressive first (360p combined), then adaptive by resolution
+  const qualities: Array<{ label: string; value: string; url: string }> = [];
+
+  // Adaptive qualities (144p → 4K) — value = itag, download route handles muxing
+  for (const v of info.adaptive_video) {
+    qualities.push({
+      label: v.resolution,
+      value: String(v.itag),
+      url, // original YouTube URL; download route resolves fresh stream at download time
+    });
+  }
+
+  // Progressive 360p — appended last to avoid hiding it
+  for (const p of info.progressive) {
+    const exists = qualities.some((q) => q.label === p.resolution);
+    if (!exists) {
+      qualities.push({
+        label: `${p.resolution} (rapide)`,
+        value: `progressive_${p.itag}`,
+        url,
+      });
     }
   }
 
-  if (!data) throw new Error("Impossible d'accéder aux métadonnées YouTube (Piped API indisponible)");
-
-  // Filter MP4 video+audio streams (not DASH-only)
-  const streams: { url: string; quality: string; format: string; videoOnly?: boolean }[] =
-    data.videoStreams ?? [];
-
-  const mp4Streams = streams
-    .filter((s) => s.format === "MPEG_4" && !s.videoOnly)
-    .sort((a, b) => {
-      const q = (s: string) => parseInt(s) || 0;
-      return q(b.quality) - q(a.quality);
-    });
-
-  if (!mp4Streams.length) throw new Error("Aucun flux MP4 disponible pour cette vidéo");
-
-  const best = mp4Streams[0]!;
   return {
-    url: best.url,
+    url,
     type: "video",
-    preview: data.thumbnailUrl,
+    preview: info.thumbnail,
     filename: `youtube_${videoId}.mp4`,
-    qualities: mp4Streams.map((s) => ({
-      label: s.quality,
-      value: s.quality,
-      url: s.url,
-    })),
+    qualities,
   };
 }
 

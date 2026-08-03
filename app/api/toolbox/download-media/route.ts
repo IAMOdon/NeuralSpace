@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { spawn } from "child_process";
+import { Readable } from "stream";
+import path from "path";
+
+const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 
 interface DownloadRequest {
   url: string;
@@ -18,12 +23,37 @@ function refererFor(platform: string): string {
   }
 }
 
+function downloadYouTube(url: string, quality: string): ReadableStream<Uint8Array> {
+  // quality is either an adaptive itag (e.g. "398" for 720p) or "progressive_18"
+  const resolvedQuality = quality && quality !== "best" ? quality : "best";
+  const child = spawn(
+    "python3",
+    [path.join(SCRIPTS_DIR, "yt_download.py"), url, resolvedQuality],
+    { stdio: ["ignore", "pipe", "pipe"] }
+  );
+  child.stderr.on("data", (chunk: Buffer) => console.error("[yt_download]", chunk.toString()));
+  return Readable.toWeb(child.stdout) as ReadableStream<Uint8Array>;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { url, platform, quality } = (await request.json()) as DownloadRequest;
 
     if (!url || !platform) {
       return NextResponse.json({ error: "URL ou plateforme manquante" }, { status: 400 });
+    }
+
+    // YouTube: mux via pytubefix + ffmpeg (supports 144p–4K)
+    if (platform === "youtube") {
+      const videoId = url.match(/[?&]v=([^&\n?#]+)/)?.[1] ?? url.match(/\/shorts\/([^?&\n#]+)/)?.[1] ?? "video";
+      const stream = downloadYouTube(url, quality);
+      return new NextResponse(stream, {
+        headers: {
+          "Content-Type": "video/mp4",
+          "Content-Disposition": `attachment; filename="youtube_${videoId}.mp4"`,
+          "Cache-Control": "no-cache",
+        },
+      });
     }
 
     let parsed: URL;
@@ -55,7 +85,7 @@ export async function POST(request: NextRequest) {
     let extension = (parsed.pathname.split(".").pop() ?? "bin").split("?")[0];
 
     if (!remoteType) {
-      if (url.includes(".mp4") || platform === "youtube" || platform === "tiktok") {
+      if (url.includes(".mp4") || platform === "tiktok") {
         contentType = "video/mp4"; extension = "mp4";
       } else if (url.includes(".webm")) {
         contentType = "video/webm"; extension = "webm";
