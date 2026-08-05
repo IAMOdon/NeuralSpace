@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getArticleBySlug, getArticleSlugs } from "@/lib/articles";
 import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/config";
+import { serializeJsonLd } from "@/lib/seo/jsonLd";
 import { ArticleHeader } from "@/components/article/ArticleHeader";
 import { ContentVersionTabs } from "@/components/article/ContentVersionTabs";
 import { ContributorSidebar } from "@/components/article/ContributorSidebar";
@@ -115,8 +116,8 @@ function ArticleJsonLd({ article }: { article: ArticleType }) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema) }} />
     </>
   );
 }
