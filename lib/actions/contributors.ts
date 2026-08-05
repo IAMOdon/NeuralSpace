@@ -1,15 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/auth/admin";
 import { slugify } from "@/lib/slug";
 
+// Authorization, not just authentication: these actions write through the
+// service-role client, which bypasses RLS, so the check here is the only one.
 async function ensureAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié.");
-  return user;
+  return requireAdmin();
 }
 
 async function uniqueContributorSlug(base: string): Promise<string> {

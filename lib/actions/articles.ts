@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/auth/admin";
 import { slugify } from "@/lib/slug";
 import type { Json } from "@/types/supabase";
 
@@ -45,11 +45,10 @@ function readingTime(wordCount: number): number {
   return Math.max(1, Math.round(wordCount / 230));
 }
 
+// Authorization, not just authentication: these actions write through the
+// service-role client, which bypasses RLS, so the check here is the only one.
 async function ensureAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Non authentifié.");
-  return user;
+  return requireAdmin();
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/auth/admin";
 import { uploadImage } from "@/lib/cloudinary";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -16,9 +16,11 @@ function isAllowedImage(buf: Buffer): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  // Uploads land in the shared Cloudinary account, so a session is not enough:
+  // signup is self-service, and only admins author content.
+  if (!(await getAdminUser())) {
+    return NextResponse.json({ error: "Accès refusé." }, { status: 401 });
+  }
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;

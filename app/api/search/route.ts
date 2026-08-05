@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin as checkAdmin } from "@/lib/auth/admin";
 
 // Builds a safe tsquery with prefix matching for each token.
 // "trous noirs" → "trous:* & noirs:*"
@@ -21,10 +22,12 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim() ?? "";
   if (q.length < 2) return NextResponse.json([]);
 
-  // Check if request comes from an authenticated admin
+  // Drafts are only for real admins — a session alone is not one, since signup
+  // is self-service. Results are read with the service-role client, so this
+  // flag is the only thing keeping unpublished work out of the response.
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const isAdmin = !!user;
+  const isAdmin = user ? await checkAdmin(supabase, user.id) : false;
 
   const tsQuery = buildTsQuery(q);
 

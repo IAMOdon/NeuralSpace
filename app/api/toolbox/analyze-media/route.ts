@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractMediaUrl } from "@/lib/media-extractor";
+import { getAdminUser } from "@/lib/auth/admin";
 import type { MediaInfo } from "@/types/media";
 
 // Platform detection patterns
@@ -22,6 +23,13 @@ function detectPlatform(url: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // This route makes the server fetch a caller-supplied URL, so it is
+    // admin-only. The proxy matcher guards it too; this check is here because
+    // middleware must never be the sole boundary.
+    if (!(await getAdminUser())) {
+      return NextResponse.json({ error: "Accès refusé." }, { status: 401 });
+    }
+
     const { url } = await request.json();
 
     if (!url || typeof url !== "string") {
@@ -57,10 +65,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ media });
   } catch (err) {
+    // The raw message leaked transport detail ("connect ECONNREFUSED
+    // 127.0.0.1:8080", "getaddrinfo ENOTFOUND ..."), which turned this route
+    // into a network-probing oracle. Details stay in the logs.
     console.error("Media analysis error:", err);
-    const message = err instanceof Error ? err.message : "Erreur lors de l'analyse du média";
     return NextResponse.json(
-      { error: message },
+      { error: "Erreur lors de l'analyse du média" },
       { status: 500 }
     );
   }

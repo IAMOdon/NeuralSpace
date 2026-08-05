@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/auth/admin";
 import { Sidebar } from "@/components/admin/Sidebar";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // A session is not admin rights: signup is self-service, so membership in
+  // public.admins is what gates every page below this layout.
+  const user = await getAdminUser();
   if (!user) redirect("/login");
 
   return (

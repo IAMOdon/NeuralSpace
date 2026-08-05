@@ -3,6 +3,12 @@ import * as cheerio from "cheerio";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import path from "path";
+import {
+  BlockedUrlError,
+  assertFetchableScheme,
+  hostnameOf,
+  resolvePublicAddresses,
+} from "@/lib/net/publicUrl";
 
 const execFileAsync = promisify(execFile);
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
@@ -16,9 +22,28 @@ export interface ExtractedMedia {
 }
 
 /**
- * Extract direct download URLs from various social media platforms
+ * Every extractor below issues a server-side request to `pageUrl`, so the
+ * address it resolves to is checked once here, at the single entry point,
+ * rather than in each branch. Without this, `extractGenericMedia` turned an
+ * arbitrary caller URL into an internal port scanner, and `detectPlatform`'s
+ * substring matching let `http://10.0.0.5/?x=reddit.com` reach the Reddit
+ * branch, which appends `.json` and fetches it.
+ *
+ * Note this validates the URL the caller supplied. A redirect chain is followed
+ * by axios itself and its hops are not revalidated here, so this is a
+ * defence-in-depth layer on top of the route's admin-only gate, not a
+ * standalone boundary the way the download route's per-hop check is.
  */
 export async function extractMediaUrl(pageUrl: string, platform: string): Promise<ExtractedMedia> {
+  let parsed: URL;
+  try {
+    parsed = new URL(pageUrl);
+  } catch {
+    throw new BlockedUrlError("Format d'URL invalide");
+  }
+  assertFetchableScheme(parsed);
+  await resolvePublicAddresses(hostnameOf(parsed));
+
   switch (platform.toLowerCase()) {
     case "x":
     case "twitter":
