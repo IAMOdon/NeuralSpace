@@ -1,169 +1,145 @@
-# Neural Space
+# NeuralSpace
 
-Média scientifique grand public — la science rendue accessible.
+A production science-media platform — public feed, full editorial back-office, and an
+LLM translation pipeline that ships articles into other languages without a human in the loop.
 
-**Stack :** Next.js 15 App Router · TypeScript strict · Supabase (RLS) · Cloudinary · Tailwind CSS · Lucide · Shiki · KaTeX
+**Live:** https://neural-space-hftk.vercel.app · **Stack:** Next.js 16 · React 19 · TypeScript (strict) · Supabase · Vercel
 
----
-
-## Routes
-
-### Public `app/(public)/`
-
-| Route | Page | Statut |
-|---|---|---|
-| `/` | Feed — articles récents, filtre catégories, HeroBlock, "Parce que vous avez lu" | ✅ Live |
-| `/[slug]` | Article — rich text, word lookup, ArticleTracker | ✅ Live |
-| `/audio` | Épisodes audio / podcasts | 🔜 Coming soon |
-| `/live` | Sessions en direct avec LivePlayer + chat | 🔜 Coming soon |
-| `/legal/cgu` | Conditions générales | ✅ Live |
-| `/legal/confidentialite` | Politique de confidentialité | ✅ Live |
-| `/legal/cookies` | Politique de cookies (RGPD complète) | ✅ Live |
-| `/legal/mentions-legales` | Mentions légales | ✅ Live |
-
-### Admin `app/(admin)/`
-
-| Route | Page | Statut |
-|---|---|---|
-| `/dashboard` | Dashboard — stats placeholder | ✅ Live |
-| `/dashboard/articles` | Liste des articles (tous statuts, vues, dates) | ✅ Live |
-| `/dashboard/articles/new` | Créer un article | ✅ Live |
-| `/dashboard/articles/[id]/edit` | Éditeur article (blocks, cover, sources, contributeurs) | ✅ Live |
-| `/dashboard/articles/[id]/preview` | Prévisualisation article avant publication | ✅ Live |
-| `/dashboard/hero` | Configuration du bloc hero du feed | ✅ Live |
-| `/login` | Authentification Supabase — avec redirectTo post-login | ✅ Live |
-
-### API `app/api/`
-
-| Route | Rôle | Auth |
-|---|---|---|
-| `/api/track` | Events `view` et `watch` depuis ArticleTracker | Aucune |
-| `/api/similar` | Articles similaires par catégorie (BecauseYouRead) | Aucune |
-| `/api/dictionary` | Lookup Wiktionnaire / Wikipedia (word lookup) | Aucune |
-| `/api/search` | Recherche full-text articles (titre + résumé) | Requiert session admin |
-| `/api/upload` | Upload image vers Cloudinary (10 Mo max, magic bytes) | Requiert session admin |
-| `/api/contributors` | Recherche contributeurs par nom | Requiert session admin |
+> **If you have thirty seconds:** read [`lib/i18n/gemini.ts`](lib/i18n/gemini.ts). It is 264 lines
+> of schema-constrained LLM plumbing that runs in production, and it is the most interesting thing
+> in this repository.
 
 ---
 
-## Features implémentées
+## What it is
 
-### Contenu & Feed
-- Feed avec filtre par catégorie (URL-based), tri Récents / Populaire
-- `ArticleCard` : cover 3:2 landscape, catégorie colorée, tags, temps de lecture
-- Article complet : heading, paragraph, quote, bullet-list, key-takeaways, callout, LaTeX (KaTeX), code (Shiki), image (Cloudinary), vidéo (YouTube/Vimeo), divider
-- `HeroBlock` : configurable depuis l'admin (none / live / news / player) sans redeploy — table `hero_config` singleton en Supabase
-- JSON-LD `Article` + `BreadcrumbList` sur chaque article
-- `generateMetadata()` dynamique (title, description, OG, Twitter Cards)
-- Sitemap XML + robots.txt auto-générés
+NeuralSpace is a French-language popular-science publication I built and run end to end.
+It is not a demo: it is deployed, it serves real articles, and the editorial workflow behind
+it is the one actually used to publish them.
 
-### Admin — Éditeur
-- `ArticleEditor` : titre, résumé, type, catégorie, tags, cover Cloudinary, sources (label + url + doi), SEO title/description, contenu sponsorisé, word count live
-- `BlockEditor` : système de blocs natif (heading, subheading, paragraph rich text, quote, bullet-list, key-takeaways, callout, equation, code, image, video, divider)
-- `ContributorPicker` : recherche + création à la volée, upload avatar Cloudinary
-- Publish / Unpublish / Delete depuis l'éditeur
-- Prévisualisation `/preview` avant publication
-- Slug auto-généré avec déduplication DB (ex: `titre-1`, `titre-2`)
-- Word count et reading time calculés et sauvegardés côté serveur
-- `GROK_ARTICLE_PROMPT.md` : prompt détaillé pour générer du contenu structuré avec Grok / GPT
+Three parts:
 
-### Admin — Sécurité
-- `middleware.ts` : guard Supabase sur `/dashboard/**`, redirige vers `/login?redirectTo=<path>` avec restauration de la destination après connexion
-- `adminClient` protégé par `import "server-only"` — crash build si importé côté client
-- `/api/upload` : limite 10 Mo, validation magic bytes (JPEG/PNG/GIF/WebP/AVIF), whitelist de 5 dossiers Cloudinary
-- CSP (`Content-Security-Policy`) dans `next.config.ts`
-- Cookies `ns_session` : 365 jours, flag `Secure` sur HTTPS
+- **Public site** — article feed with category filtering, long-form reader with syntax
+  highlighting (Shiki) and math rendering (KaTeX), inline dictionary lookup on text
+  selection, full-text search in French, RSS, sitemap, JSON-LD structured data.
+- **Admin back-office** — Tiptap block editor, Cloudinary uploads, contributor management,
+  email campaign builder with Resend, audience analytics dashboard, GDPR consent and
+  disclosure flows.
+- **Translation pipeline** — a schema-constrained LLM pipeline that translates published
+  articles, drained by a Vercel cron every 5 minutes. This is the part worth reading.
 
-### Word Lookup
-- Sélection d'un mot → tooltip (Wiktionnaire ou extrait Wikipedia)
-- AbortController par requête, cache module-level, listener scroll passive
+## The problem the translation pipeline solves
 
-### Analytics & Personnalisation (RGPD)
-- **Sans consentement** : `article_views` (device, pays, heure, source — sans session_id)
-- **Avec consentement** : `watch_events` (watch time actif, scroll depth, word lookups, source clicks)
-- `session_interests` : scores par catégorie en Supabase
-- `session_profiles` : portrait de lecture anonyme (articles lus, complétion, expertise signal)
-- `ns_interests` + `ns_history` localStorage
-- `BecauseYouRead` : recommandations personnalisées via `/api/similar`
+Machine-translating a *structured document* is not machine-translating text. An article is a
+tree of blocks — headings, paragraphs with inline marks, captions, pull quotes, SEO metadata,
+slugs. Hand the whole tree to a model and it will happily reshape it, drop a caption, or
+invent a block. Publishing that silently is worse than not translating at all.
 
-### Cookies RGPD
-- Banner avec détail expandable (2 colonnes : avec / sans cookies)
-- `ns_consent` (1 an), `ns_session` (365 jours + Secure), localStorage
-- `clearAllConsentData()` au refus ET à la révocation
-- "Gérer mes cookies" dans le footer (reset complet + reload)
-- Page légale exhaustive
+`lib/i18n/` (4 files, ~910 lines) is the answer:
 
-### Live & Audio (Coming Soon)
-- `LivePlayer` : badge LIVE animé / Rediffusion, play/pause, volume, fullscreen API, chat, responsive
-- `AudioCard` : lecture simulée avec barre de progression
-- Pages `/live` et `/audio` : design complet avec overlay "Bientôt disponible"
+**`extract.ts`** flattens the block tree into a flat map of `id → translatable string`, so the
+model never sees structure and cannot damage it. Handles Unicode-safe slug generation.
 
----
+**`gemini.ts`** is the model client, and it is where the engineering is:
 
-## À faire
+- **Schema-constrained I/O with a deliberate shape.** The model receives and must return
+  `[{id, text}]` — an array of fixed-shape records — because a dynamic-key object cannot be
+  pinned by a `responseSchema`. The reasoning is written into the file header, not inferred.
+- **Integrity check by id-set equality.** The set of ids that comes back is compared exactly
+  against the set that went out. A dropped or hallucinated entry is a hard error, not a
+  half-translated article that goes live unnoticed.
+- **Round-robin API key pool with cooldown.** Keys are drawn in rotation; a key that returns
+  429 or 5xx is benched for 60s. When every key is cooling down, the call fails *retryably*
+  and the row stays queued.
+- **Retryable vs. fatal error classification.** `unknown locale` is fatal and stops the row.
+  A truncated response or a safety block is retryable and is re-attempted on a different key.
+- **Chunking on two axes** — 40 items and 6,000 characters, whichever hits first. Small
+  chunks keep a retry cheap and keep output clear of any truncation ceiling.
+- **Measured reasoning budget.** `thinkingLevel: "low"`, chosen after comparing output on real
+  article text: identical results at roughly a third of the tokens and a third of the latency.
 
-### Court terme
-- [ ] **Newsletter** : brancher `NewsletterForm` sur Resend ou Brevo
-- [ ] **Réseaux sociaux** : remplir les handles dans `Footer.tsx` (Instagram, TikTok, YouTube, LinkedIn, Twitch, Facebook)
-- [ ] **Cookies Live/Audio** : tracker les events dans `LivePlayer`, `AudioCard`, `LiveHero`
-- [ ] **Rate limiting** `/api/track` : Vercel KV ou middleware Upstash
+**`queue.ts`** decouples the work from the request. Publishing enqueues; a cron drains. A
+failed row stays `pending` and the next tick retries it. No job is lost to a timeout.
 
-### Moyen terme
-- [ ] **Section Audio** : table `episodes` Supabase, page `/audio` live avec `AudioCard` dans le feed
-- [ ] **Section Live** : table `live_events`, `LiveHero` conditionnel, `LivePlayer` avec vraie vidéo (YouTube Live ou Mux)
-- [ ] **Pages auteurs publiques** : sidebar article — photo, bio, institution, articles liés
-- [ ] **Séries** : regroupement d'articles multi-parties
-- [ ] **Admin analytics** : vues/semaine, top articles, répartition pays/device
-- [ ] **`content_analytics`** : job hebdo qui agrège `watch_events` → stats par article
+**`locales.ts`** is the locale registry.
 
-### Long terme
-- [ ] **pgvector** : recommandations par embedding plutôt que filtre catégorie
-- [ ] **Compte utilisateur** : migration profil anonyme → connecté, historique cross-device
-- [ ] **Audio** : enregistrements, transcriptions, chapitres liés aux articles
-- [ ] **Live** : intégration Twitch/YouTube Live, replay automatique post-stream
-- [ ] **Notifications** : email/push pour nouveaux articles et lives à venir
+Also worth a look: **`lib/grok-validator.ts`** (~285 lines) — per-field error/warning validation
+of LLM-generated article JSON, which blocks structurally invalid content from ever reaching the
+editor — and **`lib/prompts/`**, ~1,600 lines of production prompts versioned and documented as
+code: tone checklist, strict validation rules, worked examples, design rationale.
 
----
-
-## Structure
+## Architecture
 
 ```
 app/
-  (public)/              — Layout nav publique
-    page.tsx             — Feed
-    [slug]/page.tsx      — Article
-    audio/page.tsx       — Coming soon
-    live/page.tsx        — Coming soon
-    legal/               — 4 pages légales
-  (admin)/               — Layout protégé (Sidebar)
-    dashboard/
-      page.tsx           — Dashboard placeholder
-      articles/          — CRUD articles
-      hero/              — Config HeroBlock
-  api/                   — Route Handlers (track, similar, dictionary, search, upload, contributors)
-  login/page.tsx         — Authentification avec redirectTo
-  layout.tsx             — Root layout + CSP
-  sitemap.ts / robots.ts
-components/
-  admin/                 — Sidebar, SearchBar, HeroConfigForm, editor/
-  article/               — ArticleRenderer, ArticleTracker, WordLookup, TextRunRenderer
-  feed/                  — ArticleCard, HeroBlock, CategoryFilter, BecauseYouRead, AudioCover
-  live/                  — LivePlayer
-  ui/                    — Nav, Footer, CookieBanner, ManageCookiesButton, NewsletterForm
+  (public)/      feed, article, search, legal, RSS, sitemap
+  (admin)/       dashboard, editor, contributors, campaigns, analytics
+  api/           14 routes — i18n cron, newsletter, search, tracking, upload, …
 lib/
-  actions/               — Server Actions : articles, contributors, hero
-  content/               — parseBlocks, validators (Zod), shiki
-  supabase/              — server / browser / admin clients
-  cloudinary/            — uploadImage helper
-  articles.ts            — Requêtes Supabase read-only
-  cookies.ts             — Consent, session, history, interests
-  slug.ts                — slugify partagé
-  config.ts              — SITE_NAME, BASE_URL, etc.
-  dictionary.ts          — Wiktionnaire / Wikipedia lookup
-  seo/                   — Helpers JSON-LD
-middleware.ts            — Auth guard Supabase sur /dashboard/**
-next.config.ts           — CSP, image domains
-docs/                    — Best practices internes (sécurité, SEO, perf)
-supabase/migrations/     — Schéma versionné
-types/                   — article.ts, content.ts, events.d.ts, supabase.ts (généré)
+  actions/       server actions
+  content/       block parsing and conversion
+  i18n/          translation pipeline (extract · gemini · queue · locales)
+  seo/           metadata and JSON-LD
+  email/         Resend templates and sending
+  supabase/      client / server / admin clients, kept separate on purpose
+  prompts/       versioned production prompts
+supabase/
+  migrations/    14 timestamped SQL migrations, RLS from the first one
 ```
+
+Sensitive modules are marked `import "server-only"`. The three Supabase clients are separate
+files because the admin client bypasses RLS and that should never be one import away from a
+component.
+
+## Stack
+
+Next.js 16.3 (App Router) · React 19.2 · TypeScript strict · Supabase (PostgreSQL, RLS,
+French full-text search) · Redis · Cloudinary · Tiptap 3 · Zod 4 · Tailwind 4 · Shiki · KaTeX ·
+Resend · deployed on Vercel with a 5-minute cron.
+
+~18,800 lines of TypeScript across 139 files. 14 API routes. 14 SQL migrations.
+
+## Security
+
+Handled as part of the work, and visible in the history rather than claimed here:
+
+- Unauthenticated debug routes that exposed article data were found and removed (`549c0d8`).
+- Real admin role checks replaced a placeholder (`e9797fd`).
+- JSON-LD is escaped before injection into inline `<script>` tags (`b40ae5e`).
+- Full Content Security Policy with a comment justifying each directive, plus `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy`, `poweredByHeader: false`.
+- RLS enabled in the initial migration, not bolted on later.
+- No secret has ever been committed — `.env*` is ignored and the history is clean.
+
+## What this repository does not have
+
+Stated plainly, because you would find out in thirty seconds anyway:
+
+- **No test suite.** The three `scripts/verify-i18n-*.ts` are manual verification scripts I run
+  by hand against the real pipeline; they are not automated tests. On ~18,800 lines with a
+  database, a queue and a model in the loop, this is the real gap. Adding Vitest coverage over
+  the pure logic — `grok-validator`, `extract`, the chunking and id-set check in `gemini` — is
+  the next thing I intend to do here.
+- **No CI.** Nothing runs automatically before a deploy.
+- **No ESLint configuration.**
+- The `embedding vector(1536)` column and its ivfflat index exist in the schema but are
+  **never populated**. There is no semantic search and no RAG in this project. `/api/similar`
+  is a category filter ordered by popularity, and nothing more.
+
+## Running it
+
+```bash
+npm install
+cp .env.example .env.local   # fill in the values
+npm run dev
+```
+
+Required environment variables are listed in `.env.example`. Database: apply
+`supabase/migrations/` in order.
+
+## Author
+
+Built and maintained solo, in Luxembourg. Open to applied AI and agent engineering roles,
+remote or relocation.
+
+[LinkedIn](https://www.linkedin.com/in/armand-wegnez/) · [armand.wegnez@gmail.com](mailto:armand.wegnez@gmail.com)
