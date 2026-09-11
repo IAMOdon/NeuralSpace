@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
 import { ensureAdmin } from "@/lib/auth";
+import { enqueueTranslations } from "@/lib/i18n/queue";
 import { slugify } from "@/lib/slug";
 import type { Json } from "@/types/supabase";
 
@@ -168,6 +169,16 @@ export async function publishArticle(
     .single();
 
   if (error) return { ok: false, error: error.message };
+
+  // Met les traductions en file. Volontairement non bloquant : traduire dix
+  // locales dépasse largement le budget d'une fonction, et une erreur de
+  // traduction ne doit jamais empêcher une publication. Le cron
+  // (/api/i18n/translate) vide la file ensuite.
+  try {
+    await enqueueTranslations(id);
+  } catch (e) {
+    console.error("[i18n] enqueue on publish failed:", e);
+  }
 
   revalidatePath("/");
   revalidatePath("/dashboard/articles");
