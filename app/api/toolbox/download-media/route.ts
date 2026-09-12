@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
 
     // Spawn yt-dlp (via media_download.py) and stream its stdout straight to the client.
     const child = spawn(
+      /*turbopackIgnore: true*/
       PYTHON_BIN,
       [path.join(SCRIPTS_DIR, "media_download.py"), url, format],
       { stdio: ["ignore", "pipe", "pipe"], env: SPAWN_ENV }

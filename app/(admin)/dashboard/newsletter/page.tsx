@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Pencil, Send } from "lucide-react";
 import { listCampaigns } from "@/lib/actions/campaigns";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { NewCampaignButton } from "@/components/admin/email/NewCampaignButton";
 
 export const metadata: Metadata = { title: "Newsletter — Admin" };
@@ -20,7 +20,7 @@ function formatDate(iso: string): string {
 export default async function NewsletterPage() {
   const [campaigns, { count: subscriberCount }] = await Promise.all([
     listCampaigns(),
-    adminClient
+    getAdminClient()
       .from("newsletter_subscribers")
       .select("id", { count: "exact", head: true })
       .is("unsubscribed_at", null),

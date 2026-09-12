@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { ensureAdmin } from "@/lib/auth";
 import { enqueueTranslations } from "@/lib/i18n/queue";
 import { slugify } from "@/lib/slug";
@@ -70,7 +70,7 @@ async function uniqueSlug(base: string): Promise<string> {
   let slug = base;
   let i = 0;
   while (true) {
-    const { count } = await adminClient
+    const { count } = await getAdminClient()
       .from("articles")
       .select("id", { count: "exact", head: true })
       .eq("slug", slug);
@@ -87,7 +87,7 @@ export async function createArticle(
   const slug = await uniqueSlug(input.slug?.trim() || slugify(input.title));
   const words = countWords(input.content);
 
-  const { data, error } = await adminClient
+  const { data, error } = await getAdminClient()
     .from("articles")
     .insert({
       title:              input.title,
@@ -125,7 +125,7 @@ export async function updateArticle(
 
   const words = input.content ? countWords(input.content) : undefined;
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("articles")
     .update({
       ...(input.title             !== undefined && { title: input.title }),
@@ -161,7 +161,7 @@ export async function publishArticle(
 ): Promise<{ ok: boolean; slug?: string; error?: string }> {
   await ensureAdmin();
 
-  const { data, error } = await adminClient
+  const { data, error } = await getAdminClient()
     .from("articles")
     .update({ status: "published", published_at: new Date().toISOString() })
     .eq("id", id)
@@ -193,7 +193,7 @@ export async function unpublishArticle(
 ): Promise<{ ok: boolean; error?: string }> {
   await ensureAdmin();
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("articles")
     .update({ status: "draft", published_at: null })
     .eq("id", id);
@@ -212,7 +212,7 @@ export async function deleteArticle(
 ): Promise<{ ok: boolean; error?: string }> {
   await ensureAdmin();
 
-  const { error } = await adminClient.from("articles").delete().eq("id", id);
+  const { error } = await getAdminClient().from("articles").delete().eq("id", id);
 
   if (error) return { ok: false, error: error.message };
 
@@ -231,7 +231,7 @@ export async function addCorrection(
   const trimmed = note.trim();
   if (!trimmed) return { ok: false, error: "La note de correction est vide." };
 
-  const { data, error: readError } = await adminClient
+  const { data, error: readError } = await getAdminClient()
     .from("articles")
     .select("corrections, slug")
     .eq("id", articleId)
@@ -241,7 +241,7 @@ export async function addCorrection(
   const existing = Array.isArray(data.corrections) ? data.corrections : [];
   const corrections = [...existing, { date: new Date().toISOString(), note: trimmed }];
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("articles")
     .update({ corrections, updated_at: new Date().toISOString() })
     .eq("id", articleId);
@@ -257,7 +257,7 @@ export async function deleteCorrection(
 ): Promise<{ ok: boolean; error?: string }> {
   await ensureAdmin();
 
-  const { data, error: readError } = await adminClient
+  const { data, error: readError } = await getAdminClient()
     .from("articles")
     .select("corrections, slug")
     .eq("id", articleId)
@@ -270,7 +270,7 @@ export async function deleteCorrection(
   }
   const corrections = existing.filter((_, i) => i !== index);
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("articles")
     .update({ corrections, updated_at: new Date().toISOString() })
     .eq("id", articleId);

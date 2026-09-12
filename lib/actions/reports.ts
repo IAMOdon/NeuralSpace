@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { ensureAdmin } from "@/lib/auth";
 
 export type ReportStatus = "new" | "accepted" | "rejected";
@@ -23,7 +23,7 @@ export type ArticleReport = {
 export async function listReports(status?: ReportStatus): Promise<ArticleReport[]> {
   await ensureAdmin();
 
-  let query = adminClient
+  let query = getAdminClient()
     .from("article_reports")
     .select("id, article_id, quote, message, source_url, reporter_email, status, created_at, resolved_at, articles(title, slug)")
     .order("created_at", { ascending: false })
@@ -55,7 +55,7 @@ export async function setReportStatus(
 ): Promise<{ ok: boolean; error?: string }> {
   await ensureAdmin();
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("article_reports")
     .update({ status, resolved_at: new Date().toISOString() })
     .eq("id", id);
@@ -67,7 +67,7 @@ export async function setReportStatus(
 
 export async function countNewReports(): Promise<number> {
   await ensureAdmin();
-  const { count } = await adminClient
+  const { count } = await getAdminClient()
     .from("article_reports")
     .select("id", { count: "exact", head: true })
     .eq("status", "new");

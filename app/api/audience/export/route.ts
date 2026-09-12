@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getAdminUser } from "@/lib/auth";
 
 // Export CSV complet d'une liste (admin uniquement).
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   const rows: string[] = [];
   if (list === "newsletter") {
-    const { data } = await adminClient
+    const { data } = await getAdminClient()
       .from("newsletter_subscribers")
       .select("email, source, country, created_at, unsubscribed_at")
       .order("created_at", { ascending: false });
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       rows.push([r.email, r.source, r.country, r.created_at, r.unsubscribed_at].map(csvField).join(","));
     }
   } else {
-    const { data } = await adminClient
+    const { data } = await getAdminClient()
       .from("coherence_waitlist")
       .select("email, source, country, created_at")
       .order("created_at", { ascending: false });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/redis";
 import { z } from "zod";
 
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   const referrerSource = getReferrerSource(referer);
 
   if (event.type === "view") {
-    await adminClient.from("article_views").insert({
+    await getAdminClient().from("article_views").insert({
       article_id: event.articleId,
       referrer_source: referrerSource,
       device,
@@ -93,11 +93,11 @@ export async function POST(req: NextRequest) {
     });
 
     // Always increment view count
-    await adminClient.rpc("increment_view_count", { p_article_id: event.articleId });
+    await getAdminClient().rpc("increment_view_count", { p_article_id: event.articleId });
   }
 
   if (event.type === "watch") {
-    await adminClient.from("watch_events").insert({
+    await getAdminClient().from("watch_events").insert({
       article_id: event.articleId,
       session_id: event.sessionId,
       duration_sec: event.durationSec,
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Update session profile
-    await adminClient.rpc("upsert_session_profile", {
+    await getAdminClient().rpc("upsert_session_profile", {
       p_session_id: event.sessionId,
       p_duration_sec: event.durationSec,
       p_read_completed: event.readCompleted,
@@ -127,12 +127,12 @@ export async function POST(req: NextRequest) {
     // Update interest scores per category/tag
     if (event.categoryId) {
       const score = event.readCompleted ? 2 : 1;
-      await adminClient.rpc("increment_category_interest", {
+      await getAdminClient().rpc("increment_category_interest", {
         p_session_id: event.sessionId,
         p_category_id: event.categoryId,
         p_score: score,
       });
-      await adminClient.rpc("refresh_top_category", { p_session_id: event.sessionId });
+      await getAdminClient().rpc("refresh_top_category", { p_session_id: event.sessionId });
     }
   }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getCategories } from "@/lib/articles";
 import { ArticleEditor } from "@/components/admin/editor/ArticleEditor";
 import { ContentSchema } from "@/lib/content/validators";
@@ -14,7 +14,7 @@ export default async function EditArticlePage({ params }: Props) {
   const { id } = await params;
 
   const [{ data: article }, categories] = await Promise.all([
-    adminClient
+    getAdminClient()
       .from("articles")
       .select("id, title, summary, content, content_simplified, content_scientific, has_dual_content, type, status, slug, category_id, cover_image_url, cover_image_alt, seo_title, seo_description, sources, is_sponsored, corrections, article_authors(order, authors(id, name, slug, avatar_url, role, institution))")
       .eq("id", id)

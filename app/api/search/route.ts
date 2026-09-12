@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getAdminUser } from "@/lib/auth";
 
 // Builds a safe tsquery with prefix matching for each token.
@@ -26,13 +26,13 @@ export async function GET(req: NextRequest) {
 
   const tsQuery = buildTsQuery(q);
 
-  const { data, error } = await adminClient.rpc("search_articles", {
+  const { data, error } = await getAdminClient().rpc("search_articles", {
     query: tsQuery || q,
     max_results: 10,
   });
 
   if (error) {
-    const fallbackQuery = adminClient
+    const fallbackQuery = getAdminClient()
       .from("articles")
       .select("id, title, slug, status, published_at, view_count, summary")
       .or(`title.ilike.%${q}%,summary.ilike.%${q}%`)

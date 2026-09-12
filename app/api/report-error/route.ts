@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/redis";
 
 // Signalement d'erreur par les lecteurs — privé, relu par la rédaction.
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   const { articleId, message, quote, sourceUrl, email } = parsed.data;
 
-  const { error } = await adminClient.from("article_reports").insert({
+  const { error } = await getAdminClient().from("article_reports").insert({
     article_id: articleId,
     message: message.trim(),
     quote: quote?.trim() || null,

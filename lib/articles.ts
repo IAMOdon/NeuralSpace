@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { ContentSchema, ArticleSourcesSchema, ArticleCorrectionsSchema } from "@/lib/content/validators";
 import { tiptapToContentBlocks } from "@/lib/content/tiptapConverter";
 import type { ContentBlock } from "@/types/content";
@@ -261,9 +261,9 @@ export async function searchContributors(q: string) {
   }));
 }
 
-// adminClient — no cookies, safe for generateStaticParams at build time.
+// getAdminClient() — no cookies, safe for generateStaticParams at build time.
 export async function getArticleSlugs(): Promise<string[]> {
-  const { data } = await adminClient
+  const { data } = await getAdminClient()
     .from("articles")
     .select("slug")
     .eq("status", "published");

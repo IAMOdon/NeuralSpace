@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import {
   Eye, Users, BookOpen, Clock, TrendingUp, Globe, Monitor,
   Smartphone, Tablet, FileText, Mail, Radio, ExternalLink,
@@ -150,18 +150,18 @@ export default async function DashboardPage() {
     articlesRows,
     recentArticles,
   ] = await Promise.all([
-    adminClient.from("article_views").select("id", { count: "exact", head: true }),
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("device"),
-    adminClient.from("article_views").select("country_code"),
-    adminClient.from("article_views").select("referrer_source"),
-    adminClient.from("article_views").select("created_at"),
-    adminClient.from("session_profiles").select("id", { count: "exact", head: true }),
-    adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    adminClient.from("watch_events").select("duration_sec, read_completed, word_lookups, source_clicks"),
-    adminClient.from("session_profiles").select("preferred_format, expertise_signal, quality_reads, articles_read, total_duration_sec"),
-    adminClient.from("articles").select("id, title, slug, view_count").eq("status", "published").order("view_count", { ascending: false }).limit(8),
-    adminClient.from("articles").select("id, title, slug, status, published_at, view_count, categories(name)").order("published_at", { ascending: false }).limit(10),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("device"),
+    getAdminClient().from("article_views").select("country_code"),
+    getAdminClient().from("article_views").select("referrer_source"),
+    getAdminClient().from("article_views").select("created_at"),
+    getAdminClient().from("session_profiles").select("id", { count: "exact", head: true }),
+    getAdminClient().from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    getAdminClient().from("watch_events").select("duration_sec, read_completed, word_lookups, source_clicks"),
+    getAdminClient().from("session_profiles").select("preferred_format, expertise_signal, quality_reads, articles_read, total_duration_sec"),
+    getAdminClient().from("articles").select("id, title, slug, view_count").eq("status", "published").order("view_count", { ascending: false }).limit(8),
+    getAdminClient().from("articles").select("id, title, slug, status, published_at, view_count, categories(name)").order("published_at", { ascending: false }).limit(10),
   ]);
 
   // --- KPIs ---

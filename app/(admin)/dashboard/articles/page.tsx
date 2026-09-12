@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { Plus, ExternalLink, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Articles — Admin" };
@@ -21,12 +21,12 @@ export default async function ArticlesPage({ searchParams }: Props) {
   const offset = (page - 1) * PER_PAGE;
 
   const [{ data: articles }, { count }] = await Promise.all([
-    adminClient
+    getAdminClient()
       .from("articles")
       .select("id, title, slug, status, type, published_at, updated_at, view_count, reading_time_min, categories(name, color_hex)")
       .order("updated_at", { ascending: false })
       .range(offset, offset + PER_PAGE - 1),
-    adminClient
+    getAdminClient()
       .from("articles")
       .select("id", { count: "exact", head: true }),
   ]);

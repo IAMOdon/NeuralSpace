@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/config";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import type { Category } from "@/types/article";
 import { ManageCookiesButton } from "./ManageCookiesButton";
 import { NewsletterForm } from "./NewsletterForm";
 
 const getFooterCategories = unstable_cache(
   async (): Promise<Category[]> => {
-    const { data } = await adminClient
+    const { data } = await getAdminClient()
       .from("categories")
       .select("id, slug, name, color_hex")
       .order("name");
