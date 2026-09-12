@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/i18n/translate",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

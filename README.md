@@ -26,7 +26,7 @@ Three parts:
   email campaign builder with Resend, audience analytics dashboard, GDPR consent and
   disclosure flows.
 - **Translation pipeline** — a schema-constrained LLM pipeline that translates published
-  articles, drained by a Vercel cron every 5 minutes. This is the part worth reading.
+  articles, drained by a nightly Vercel cron. This is the part worth reading.
 
 ## The problem the translation pipeline solves
 

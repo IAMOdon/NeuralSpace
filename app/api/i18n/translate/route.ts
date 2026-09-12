@@ -5,6 +5,9 @@ import { drainQueue } from "@/lib/i18n/queue";
 /**
  * Drains the translation queue. Called by the Vercel cron in vercel.json.
  *
+ * The cron runs nightly: the Hobby plan allows one scheduled run per day.
+ * Publishing an article still enqueues its translations immediately.
+ *
  * Not reachable anonymously: it spends Gemini tokens, so an open endpoint would
  * be someone else's budget to burn. Vercel sends `Authorization: Bearer
  * $CRON_SECRET` on scheduled invocations.
