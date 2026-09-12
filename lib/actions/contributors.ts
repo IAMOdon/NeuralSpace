@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { ensureAdmin } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 
@@ -9,7 +9,7 @@ async function uniqueContributorSlug(base: string): Promise<string> {
   let slug = base;
   let i = 0;
   while (true) {
-    const { count } = await adminClient
+    const { count } = await getAdminClient()
       .from("authors")
       .select("id", { count: "exact", head: true })
       .eq("slug", slug);
@@ -41,7 +41,7 @@ export async function createContributor(
 
   const slug = await uniqueContributorSlug(slugify(input.name));
 
-  const { data, error } = await adminClient
+  const { data, error } = await getAdminClient()
     .from("authors")
     .insert({
       name: input.name,
@@ -75,7 +75,7 @@ export async function updateArticleContributors(
   await ensureAdmin();
 
   // Replace all — delete then insert
-  const { error: delError } = await adminClient
+  const { error: delError } = await getAdminClient()
     .from("article_authors")
     .delete()
     .eq("article_id", articleId);
@@ -93,7 +93,7 @@ export async function updateArticleContributors(
     order: i,
   }));
 
-  const { error: insError } = await adminClient
+  const { error: insError } = await getAdminClient()
     .from("article_authors")
     .insert(rows);
 

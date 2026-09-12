@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { HeroConfigForm } from "@/components/admin/HeroConfigForm";
 
 export const metadata: Metadata = { title: "Hero Config — Admin" };
 
 export default async function HeroConfigPage() {
-  const { data } = await adminClient
+  const { data } = await getAdminClient()
     .from("hero_config")
     .select("type, config, updated_at, updated_by")
     .eq("id", "singleton")

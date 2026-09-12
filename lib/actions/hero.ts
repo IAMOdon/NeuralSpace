@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getAdminUser } from "@/lib/auth";
 import type { Json } from "@/types/supabase";
 
@@ -16,7 +16,7 @@ export async function saveHeroConfig(
   const user = await getAdminUser();
   if (!user) return { ok: false, error: "Accès réservé à l'administrateur." };
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("hero_config")
     .update({
       type: input.type,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { fontFaceCss } from "@/lib/email/render";
 import { SITE_NAME, SITE_URL } from "@/lib/config";
 
@@ -40,7 +40,7 @@ async function unsubscribe(token: string | null): Promise<NextResponse> {
     return page("Lien invalide", "Ce lien de désinscription est invalide ou expiré.");
   }
 
-  const { data, error } = await adminClient
+  const { data, error } = await getAdminClient()
     .from("newsletter_subscribers")
     .update({ unsubscribed_at: new Date().toISOString() })
     .eq("unsubscribe_token", parsed.data)

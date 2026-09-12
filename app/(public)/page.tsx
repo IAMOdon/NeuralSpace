@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getArticles, getCategories, getArticleHeroMeta } from "@/lib/articles";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_LOCALE } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -33,7 +33,7 @@ export default async function FeedPage({ searchParams }: Props) {
   const [articles, categories, heroRow] = await Promise.all([
     getArticles({ categorySlug: category, searchQuery: q, sort: "recent", limit: 20 }),
     getCategories(),
-    adminClient.from("hero_config").select("type, config").eq("id", "singleton").single(),
+    getAdminClient().from("hero_config").select("type, config").eq("id", "singleton").single(),
   ]);
 
   const hero = category ? articles : articles.slice(0, 3);

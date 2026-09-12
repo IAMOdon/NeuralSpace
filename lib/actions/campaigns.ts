@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { ensureAdmin } from "@/lib/auth";
 import { renderEmailHtml, renderEmailText } from "@/lib/email/render";
 import { sendOne, sendBatch, isEmailConfigured, type OutgoingEmail } from "@/lib/email/send";
@@ -82,7 +82,7 @@ function mapCampaign(row: {
 
 export async function listCampaigns(): Promise<Campaign[]> {
   await ensureAdmin();
-  const { data } = await adminClient
+  const { data } = await getAdminClient()
     .from("email_campaigns")
     .select("*")
     .order("updated_at", { ascending: false });
@@ -91,7 +91,7 @@ export async function listCampaigns(): Promise<Campaign[]> {
 
 export async function getCampaign(id: string): Promise<Campaign | null> {
   await ensureAdmin();
-  const { data } = await adminClient
+  const { data } = await getAdminClient()
     .from("email_campaigns")
     .select("*")
     .eq("id", id)
@@ -111,7 +111,7 @@ export async function createCampaign(
   const articles = needsArticles ? await searchArticlesForEmail("") : [];
   const { subject, preheader, blocks } = buildTemplate(template, articles, SITE_URL);
 
-  const { data, error } = await adminClient
+  const { data, error } = await getAdminClient()
     .from("email_campaigns")
     .insert({ subject, preheader, blocks: blocks as unknown as Json })
     .select("id")
@@ -130,7 +130,7 @@ export async function updateCampaign(
   const blocks = BlocksSchema.safeParse(input.blocks);
   if (!blocks.success) return { ok: false, error: "Blocs invalides." };
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("email_campaigns")
     .update({
       subject: input.subject,
@@ -148,7 +148,7 @@ export async function updateCampaign(
 
 export async function deleteCampaign(id: string): Promise<{ ok: boolean; error?: string }> {
   await ensureAdmin();
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("email_campaigns")
     .delete()
     .eq("id", id)
@@ -174,7 +174,7 @@ export type ArticlePick = {
 
 export async function searchArticlesForEmail(q: string): Promise<ArticlePick[]> {
   await ensureAdmin();
-  let query = adminClient
+  let query = getAdminClient()
     .from("articles")
     .select("id, slug, title, summary, cover_image_url, cover_image_alt, reading_time_min, categories(name, color_hex)")
     .eq("status", "published")
@@ -263,7 +263,7 @@ export async function sendCampaign(
   if (!campaign.subject.trim()) return { ok: false, error: "L'objet est obligatoire." };
   if (campaign.blocks.length === 0) return { ok: false, error: "La campagne est vide." };
 
-  const { data: subscribers, error: subError } = await adminClient
+  const { data: subscribers, error: subError } = await getAdminClient()
     .from("newsletter_subscribers")
     .select("email, unsubscribe_token")
     .is("unsubscribed_at", null);
@@ -277,7 +277,7 @@ export async function sendCampaign(
     const emails = subscribers.map((s) => buildEmail(campaign, s.email, s.unsubscribe_token));
     const sent = await sendBatch(emails);
 
-    await adminClient
+    await getAdminClient()
       .from("email_campaigns")
       .update({
         status: "sent",

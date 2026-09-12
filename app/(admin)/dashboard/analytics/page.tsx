@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import {
   TrendingUp, Activity, BarChart3, PieChart, LineChart, Calendar,
   ArrowUpRight, ArrowDownRight, Zap, Users, Eye, Clock, FileText,
@@ -165,26 +165,26 @@ export default async function AnalyticsPage() {
     deviceBreakdown,
     referrerBreakdown,
   ] = await Promise.all([
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", oneHourAgo),
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", twoHoursAgo).lt("created_at", oneHourAgo),
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", oneDayAgo),
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", twoDaysAgo).lt("created_at", oneDayAgo),
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("id", { count: "exact", head: true }).gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
-    adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", oneDayAgo),
-    adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", twoDaysAgo).lt("created_at", oneDayAgo),
-    adminClient.from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    adminClient.from("watch_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo).eq("read_completed", true),
-    adminClient.from("watch_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    adminClient.from("watch_events").select("duration_sec").gte("created_at", sevenDaysAgo),
-    adminClient.from("watch_events").select("duration_sec").gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
-    adminClient.from("watch_events").select("word_lookups").gte("created_at", sevenDaysAgo),
-    adminClient.from("watch_events").select("source_clicks").gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("article_id").gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("created_at").gte("created_at", oneDayAgo),
-    adminClient.from("article_views").select("created_at").gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("device").gte("created_at", sevenDaysAgo),
-    adminClient.from("article_views").select("referrer_source").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", oneHourAgo),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", twoHoursAgo).lt("created_at", oneHourAgo),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", oneDayAgo),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", twoDaysAgo).lt("created_at", oneDayAgo),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("id", { count: "exact", head: true }).gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
+    getAdminClient().from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", oneDayAgo),
+    getAdminClient().from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", twoDaysAgo).lt("created_at", oneDayAgo),
+    getAdminClient().from("session_profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    getAdminClient().from("watch_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo).eq("read_completed", true),
+    getAdminClient().from("watch_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+    getAdminClient().from("watch_events").select("duration_sec").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("watch_events").select("duration_sec").gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
+    getAdminClient().from("watch_events").select("word_lookups").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("watch_events").select("source_clicks").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("article_id").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("created_at").gte("created_at", oneDayAgo),
+    getAdminClient().from("article_views").select("created_at").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("device").gte("created_at", sevenDaysAgo),
+    getAdminClient().from("article_views").select("referrer_source").gte("created_at", sevenDaysAgo),
   ]);
 
   const v1h = views1h.count ?? 0;
@@ -228,7 +228,7 @@ export default async function AnalyticsPage() {
     .map(([id]) => id);
 
   const topArticlesData = topArticleIds.length > 0
-    ? await adminClient.from("articles").select("id, title, slug").in("id", topArticleIds)
+    ? await getAdminClient().from("articles").select("id, title, slug").in("id", topArticleIds)
     : { data: [] };
 
   const topArticlesWithCounts = (topArticlesData.data ?? []).map(a => ({

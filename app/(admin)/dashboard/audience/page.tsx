@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Download, Mail, Sparkles } from "lucide-react";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = { title: "Audience — Admin" };
 
@@ -32,17 +32,17 @@ export default async function AudiencePage({ searchParams }: Props) {
 
   const [newsletterCount, waitlistCount, recent7d, unsubCount, { data: rows }] =
     await Promise.all([
-      adminClient.from("newsletter_subscribers").select("id", { count: "exact", head: true }).is("unsubscribed_at", null),
-      adminClient.from("coherence_waitlist").select("id", { count: "exact", head: true }),
-      adminClient.from(LISTS[list].table).select("id", { count: "exact", head: true }).gte("created_at", since7d),
-      adminClient.from("newsletter_subscribers").select("id", { count: "exact", head: true }).not("unsubscribed_at", "is", null),
+      getAdminClient().from("newsletter_subscribers").select("id", { count: "exact", head: true }).is("unsubscribed_at", null),
+      getAdminClient().from("coherence_waitlist").select("id", { count: "exact", head: true }),
+      getAdminClient().from(LISTS[list].table).select("id", { count: "exact", head: true }).gte("created_at", since7d),
+      getAdminClient().from("newsletter_subscribers").select("id", { count: "exact", head: true }).not("unsubscribed_at", "is", null),
       list === "newsletter"
-        ? adminClient
+        ? getAdminClient()
             .from("newsletter_subscribers")
             .select("email, source, country, created_at, unsubscribed_at")
             .order("created_at", { ascending: false })
             .limit(200)
-        : adminClient
+        : getAdminClient()
             .from("coherence_waitlist")
             .select("email, source, country, created_at")
             .order("created_at", { ascending: false })

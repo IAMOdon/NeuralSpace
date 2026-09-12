@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/redis";
 import { z } from "zod";
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   const userAgent = request.headers.get("user-agent")?.slice(0, 300) ?? null;
   const country = request.headers.get("x-vercel-ip-country") ?? null;
 
-  const { error } = await adminClient
+  const { error } = await getAdminClient()
     .from("coherence_waitlist")
     .insert({ email, source: "coherence_page", user_agent: userAgent, country });
 

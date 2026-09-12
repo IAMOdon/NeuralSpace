@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { ContentSchema } from "@/lib/content/validators";
 import { slugifyLocalized } from "@/lib/slug";
 import { targetLocales, SOURCE_LOCALE } from "./locales.ts";
@@ -65,7 +65,7 @@ export function sourceHash(a: Pick<SourceArticle,
  * queued.
  */
 export async function enqueueTranslations(articleId: string): Promise<number> {
-  const { data: article, error } = await adminClient
+  const { data: article, error } = await getAdminClient()
     .from("articles")
     .select(ARTICLE_COLUMNS)
     .eq("id", articleId)
@@ -78,7 +78,7 @@ export async function enqueueTranslations(articleId: string): Promise<number> {
   const locales = targetLocales().map((l) => l.code);
   if (locales.length === 0) return 0;
 
-  const { data: existing } = await adminClient
+  const { data: existing } = await getAdminClient()
     .from("article_translations")
     .select("locale,status,source_hash")
     .eq("article_id", articleId);
@@ -108,7 +108,7 @@ export async function enqueueTranslations(articleId: string): Promise<number> {
 
   if (rows.length === 0) return 0;
 
-  const { error: upsertError } = await adminClient
+  const { error: upsertError } = await getAdminClient()
     .from("article_translations")
     .upsert(rows, { onConflict: "article_id,locale" });
 
@@ -139,7 +139,7 @@ async function uniqueLocalizedSlug(title: string, locale: string, articleId: str
   let candidate = base;
 
   for (let i = 2; i < 50; i++) {
-    const { data } = await adminClient
+    const { data } = await getAdminClient()
       .from("article_translations")
       .select("article_id")
       .eq("locale", locale)
@@ -180,7 +180,7 @@ async function translateContent(
 
 /** Translates one queued row. Throws on failure; the caller records it. */
 async function translateRow(articleId: string, locale: string): Promise<void> {
-  const { data: article, error } = await adminClient
+  const { data: article, error } = await getAdminClient()
     .from("articles")
     .select(ARTICLE_COLUMNS)
     .eq("id", articleId)
@@ -215,7 +215,7 @@ async function translateRow(articleId: string, locale: string): Promise<void> {
 
   const slug = await uniqueLocalizedSlug(meta.title, locale, articleId);
 
-  const { error: writeError } = await adminClient
+  const { error: writeError } = await getAdminClient()
     .from("article_translations")
     .update({
       slug,
@@ -254,7 +254,7 @@ export type DrainResult = {
 export async function drainQueue(limit: number = DEFAULT_BATCH): Promise<DrainResult> {
   const result: DrainResult = { claimed: 0, ready: 0, failed: 0, details: [] };
 
-  const { data: pending } = await adminClient
+  const { data: pending } = await getAdminClient()
     .from("article_translations")
     .select("article_id,locale,attempts")
     .eq("status", "pending")
@@ -263,7 +263,7 @@ export async function drainQueue(limit: number = DEFAULT_BATCH): Promise<DrainRe
     .limit(limit);
 
   for (const row of pending ?? []) {
-    const { data: claimed } = await adminClient
+    const { data: claimed } = await getAdminClient()
       .from("article_translations")
       .update({ status: "running", attempts: (row.attempts ?? 0) + 1 })
       .eq("article_id", row.article_id)
@@ -284,7 +284,7 @@ export async function drainQueue(limit: number = DEFAULT_BATCH): Promise<DrainRe
       const attempts = (row.attempts ?? 0) + 1;
       // Back to pending while retries remain, so a transient rate limit is not
       // a permanent failure.
-      await adminClient
+      await getAdminClient()
         .from("article_translations")
         .update({ status: attempts >= MAX_ATTEMPTS ? "failed" : "pending", error: message })
         .eq("article_id", row.article_id)

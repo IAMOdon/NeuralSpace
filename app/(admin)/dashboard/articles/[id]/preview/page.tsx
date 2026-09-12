@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { parseBlocks } from "@/lib/content/parseBlocks";
 import { ArticleSourcesSchema } from "@/lib/content/validators";
 import { ArticleRenderer } from "@/components/article/ArticleRenderer";
@@ -20,7 +20,7 @@ function parseSources(raw: unknown): ArticleSource[] {
 export default async function PreviewPage({ params }: Props) {
   const { id } = await params;
 
-  const { data } = await adminClient
+  const { data } = await getAdminClient()
     .from("articles")
     .select(
       `*, categories(id, slug, name, color_hex),

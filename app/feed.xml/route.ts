@@ -1,4 +1,4 @@
-import { adminClient } from "@/lib/supabase/admin";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/config";
 
 // Flux RSS 2.0 — les chercheurs, agrégateurs et services de veille des
@@ -16,7 +16,7 @@ function escapeXml(s: string): string {
 }
 
 export async function GET() {
-  const { data } = await adminClient
+  const { data } = await getAdminClient()
     .from("articles")
     .select("slug, title, summary, published_at, updated_at, categories(name)")
     .eq("status", "published")
